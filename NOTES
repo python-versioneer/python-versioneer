@@ -1,0 +1,75 @@
+# -*- org -*-
+
+* github tarballs
+** when downloaded from the "tags" page, look like:
+     warner-python-ed25519-0.4-0-gdeb78a0.tar.gz
+** and unpack into:
+     warner-python-ed25519-deb78a0/
+** That's a bummer, I was hoping they'd be like "python-ed25519-0.4.tar.gz"
+   and unpack into python-ed25519-0.4/ .
+
+* git attributes --help:
+ add .gitattributes, with "_version.py export-subst"
+ then put $Format:XXX$ in the file, with XXX from git-log's --pretty=format:
+  $Format:%H$ -> commit hash
+   %h -> abbreviated commit hash
+   %d -> ref names, like git log --decorate
+ also "filename export-ignore": won't be added to an archive
+
+ might be possible to get github's 'git archive' to put the tag name into a
+ _version.py file
+
+* first attempt at a plan:
+** in the source tree
+   - commit a _version.py with a s="$Format:%d$" and some massaging code
+   - need to parse, strip boring refs, return highest non-boring one
+** when using archive from github
+   - __init__.py pulls massaged string from _version.py
+** when building from checkout for testing
+   - 'setup.py build' does git-describe and replaces _version.py with a
+     one-line variable set
+   - trouble: modifying a committed file, VCS will complain
+     - avoid by subclassing 'build', only modify build/lib../../_version.py
+** when building sdist from checkout
+   - 'setup.py sdist' does git-describe and replaces _version.py
+   - less trouble with modifying a committed file, if we always do sdist from
+     a clean checkout (which is probably a good idea anyways)
+** when running from source from checkout
+   - ?? need to do git-describe from _version.py, eww
+
+** problems:
+*** modifying _version.py during 'setup.py build' (for testing), leaves tree
+    in modified state, and you don't want to accidentally replace that
+    _version.py
+*** really we want to modify a file in build/, not in the source tree
+    - might be possible for 'setup.py build', since we can get control after
+      the superclass method has run
+      - 'setup.py build' uses distutils.command.build_py
+        build_py.build_module to copy things into the build directory, can
+        use to figure out the _version.py to modify. Check for hardlinks. Hm,
+        looks like build doesn't use hardlinks, although sdist does.
+    - probably not so possible for 'setup.py sdist'. But maybe that's ok.
+      - actually, cmd.sub_commands=[] is a list of (name,runp) that are
+        invoked after self.filelist is created (but not populated), could be
+        used to invoke extra commands
+      - self.make_release_tree() is what creates the tree that will be
+        archived.. could override that, modify _version.py on the way out
+        - good to know: make_release_tree() creates hardlinks if possible. If
+          'setup.py build' does this too, that would explain why it's not
+          always necessary to rebuild when source files are changed.
+        - need to delink _version.py before changing it
+        - make_release_tree(base_dir, files) creates os.path.join(base_dir,f)
+          for f in files
+**** let's investigate this:
+     - 'setup.py build' runs superclass, looks for .git, if present:
+       - use git-describe
+       - locate build/STUFF/../_version.py
+       - replace it with one-line string variable set
+     - if no .git, assume the version number is already good, leave it alone
+     - 'setup.py sdist' looks for .git first, modifies _version.py in source
+       tree, then runs superclass
+
+*** could modify a different file, one which is in .gitignore
+    - _version.py will need to import that
+*** setup.py build 
+
