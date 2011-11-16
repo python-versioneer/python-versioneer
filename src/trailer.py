@@ -33,6 +33,20 @@ def write_to_version_file(filename, ver):
     f.close()
     print "set %s to '%s'" % (filename, ver)
 
+def get_expanded_variable(versionfile_source):
+    # the code embedded in _version.py can just fetch the value of this
+    # variable. We don't want to import _version.py, so we do it with a
+    # regexp instead
+    try:
+        for line in open(versionfile_source,"r").readlines():
+            if line.strip().startswith("verstr ="):
+                mo = re.search(r'=\s*"(.*)"', line)
+                if mo:
+                    return mo.group(1)
+    except EnvironmentError:
+        pass
+    return None
+
 def get_best_version(versionfile, tag_prefix, parentdir_prefix,
                      default=None, verbose=False):
     # extract version from first of: 'git describe', _version.py, parentdir.
@@ -44,6 +58,13 @@ def get_best_version(versionfile, tag_prefix, parentdir_prefix,
     if ver is not None:
         if verbose: print "got version from git"
         return ver
+
+    verstr = get_expanded_variable(versionfile_source)
+    if verstr:
+        ver = version_from_expanded_variable(verstr, tag_prefix)
+        if ver is not None:
+            if verbose: print "got version from expanded variable"
+            return ver
 
     ver = version_from_file(versionfile)
     if ver is not None:

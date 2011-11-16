@@ -15,3 +15,4 @@ def version_from_vcs(tag_prefix, verbose=False):
                   (stdout, tag_prefix)
         return None
     return stdout[len(tag_prefix):]
+

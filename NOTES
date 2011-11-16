@@ -73,3 +73,7 @@
     - _version.py will need to import that
 *** setup.py build 
 
+* current problems
+** DONE running 'setup.py build' from a git-archive tree
+   - need version_from_expanded_variable() in versioneer.py too, not just
+     _version.py
