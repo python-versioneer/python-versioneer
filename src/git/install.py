@@ -1,5 +1,5 @@
 
-def do_vcs_setup(versionfile_source, ipy):
+def do_vcs_install(versionfile_source, ipy):
     run_command(["git", "add", "versioneer.py"])
     run_command(["git", "add", versionfile_source])
     run_command(["git", "add", ipy])

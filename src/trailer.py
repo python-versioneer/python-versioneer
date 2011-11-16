@@ -166,7 +166,7 @@ class cmd_update_files(Command):
             f.close()
         else:
             print " %s unmodified" % ipy
-        do_vcs_setup(versionfile_source, ipy)
+        do_vcs_install(versionfile_source, ipy)
 
 def get_cmdclass():
     return {'version': cmd_version,

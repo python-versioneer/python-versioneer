@@ -11,7 +11,7 @@ def create_script():
     f.write(get("src/header.py"))
     f.write('VCS = "%s"\n' % vcs)
     f.write(get("src/subprocess-helper.py"))
-    for line in open("src/%s/parse.py" % vcs, "r").readlines():
+    for line in open("src/%s/long-version.py" % vcs, "r").readlines():
         if line.startswith("#### START"):
             f.write("LONG_VERSION_PY = '''\n")
         elif line.startswith("#### SUBPROCESS_HELPER"):
@@ -26,7 +26,7 @@ def create_script():
             f.write(line)
     f.write(get("src/%s/from-checkout.py" % vcs))
     f.write(get("src/%s/from-variable.py" % vcs))
-    f.write(get("src/%s/setup.py" % vcs))
+    f.write(get("src/%s/install.py" % vcs))
     f.write(get("src/trailer.py"))
     f.close()
 
