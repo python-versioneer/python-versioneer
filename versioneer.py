@@ -100,9 +100,9 @@ VCS = "git"
 
 import subprocess
 
-def run_command(args, verbose=False):
+def run_command(args, cwd=None, verbose=False):
     try:
-        p = subprocess.Popen(list(args), stdout=subprocess.PIPE)
+        p = subprocess.Popen(list(args), stdout=subprocess.PIPE, cwd=cwd)
     except EnvironmentError, e:
         if verbose:
             print "unable to run %s" % args[0]
@@ -128,9 +128,9 @@ verstr = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
 
 import subprocess
 
-def run_command(args, verbose=False):
+def run_command(args, cwd=None, verbose=False):
     try:
-        p = subprocess.Popen(list(args), stdout=subprocess.PIPE)
+        p = subprocess.Popen(list(args), stdout=subprocess.PIPE, cwd=cwd)
     except EnvironmentError, e:
         if verbose:
             print "unable to run %%s" %% args[0]
@@ -145,13 +145,27 @@ def run_command(args, verbose=False):
 
 import os.path
 
-def version_from_vcs(tag_prefix, verbose=False):
-    if not os.path.isdir(".git"):
+def version_from_vcs(tag_prefix, source_root=None, verbose=False):
+    # this looks for a .git directory inside the source tree, either because
+    # someone ran some project-specific entry point (and this code is in
+    # _version.py), or because someone ran a setup.py command (and this code
+    # is in versioneer.py).
+
+    # For now, we require that somebody tell us how to get to the source
+    # tree's root directory, both to find the one .git directory, and to
+    # quickly rule out the case where we're running from an extracted
+    # .git-less tarball. For the first purpose, in the future, for git (and
+    # probably everything except SVN), it's enough to find *any* directory in
+    # the source tree.
+
+    if not source_root:
+        source_root = os.getcwd()
+    if not os.path.isdir(os.path.join(source_root, ".git")):
         if verbose:
             print "This does not appear to be a Git repository."
         return None
     stdout = run_command(["git", "describe",
-                          "--tags", "--dirty", "--always"])
+                          "--tags", "--dirty", "--always"], cwd=source_root)
     if stdout is None:
         return None
     if not stdout.startswith(tag_prefix):
@@ -164,27 +178,48 @@ def version_from_vcs(tag_prefix, verbose=False):
 def version_from_expanded_variable(s, tag_prefix):
     s = s.strip()
     if "$Format" in s: # unexpanded
-        return version_from_vcs(tag_prefix)
+        return None
     refs = set([r.strip() for r in s.strip("()").split(",")])
     refs.discard("HEAD") ; refs.discard("master")
     for r in reversed(sorted(refs)):
         if r.startswith(tag_prefix):
             return r[len(tag_prefix):]
-    return "unknown"
+    return None
 
 tag_prefix = "%(TAG_PREFIX)s"
-__version__ = version_from_expanded_variable(verstr.strip(), tag_prefix)
+def get_version(source_root=None):
+    ver = version_from_expanded_variable(verstr.strip(), tag_prefix)
+    if not ver:
+        ver = version_from_vcs(tag_prefix, source_root)
+    if not ver:
+        ver = "unknown"
+    return ver
+
 '''
 
 import os.path
 
-def version_from_vcs(tag_prefix, verbose=False):
-    if not os.path.isdir(".git"):
+def version_from_vcs(tag_prefix, source_root=None, verbose=False):
+    # this looks for a .git directory inside the source tree, either because
+    # someone ran some project-specific entry point (and this code is in
+    # _version.py), or because someone ran a setup.py command (and this code
+    # is in versioneer.py).
+
+    # For now, we require that somebody tell us how to get to the source
+    # tree's root directory, both to find the one .git directory, and to
+    # quickly rule out the case where we're running from an extracted
+    # .git-less tarball. For the first purpose, in the future, for git (and
+    # probably everything except SVN), it's enough to find *any* directory in
+    # the source tree.
+
+    if not source_root:
+        source_root = os.getcwd()
+    if not os.path.isdir(os.path.join(source_root, ".git")):
         if verbose:
             print "This does not appear to be a Git repository."
         return None
     stdout = run_command(["git", "describe",
-                          "--tags", "--dirty", "--always"])
+                          "--tags", "--dirty", "--always"], cwd=source_root)
     if stdout is None:
         return None
     if not stdout.startswith(tag_prefix):
@@ -197,13 +232,13 @@ def version_from_vcs(tag_prefix, verbose=False):
 def version_from_expanded_variable(s, tag_prefix):
     s = s.strip()
     if "$Format" in s: # unexpanded
-        return version_from_vcs(tag_prefix)
+        return None
     refs = set([r.strip() for r in s.strip("()").split(",")])
     refs.discard("HEAD") ; refs.discard("master")
     for r in reversed(sorted(refs)):
         if r.startswith(tag_prefix):
             return r[len(tag_prefix):]
-    return "unknown"
+    return None
 
 
 def do_vcs_install(versionfile_source, ipy):
@@ -241,7 +276,11 @@ def version_from_file(filename):
 
 def version_from_parentdir(tag_prefix, parentdir_prefix, verbose):
     # try a couple different things to handle py2exe, bbfreeze, and
-    # non-CPython implementations
+    # non-CPython implementations. Since this code lives in versioneer.py, we
+    # either expect __file__ to be versioneer.py (kept in the root of the
+    # source tree), or for sys.argv[0] to be setup.py (also in the root),
+    # such that its parent is the root of the unpacked tarball, which
+    # conventionally includes both a project name and a version string.
     try:
         me = __file__
     except NameError:
@@ -276,7 +315,7 @@ def get_expanded_variable(versionfile_source):
     return None
 
 def get_best_version(versionfile, tag_prefix, parentdir_prefix,
-                     default=None, verbose=False):
+                     source_root=None, default=None, verbose=False):
     # extract version from first of: 'git describe', _version.py, parentdir.
     # This is meant to work for developers, for users of a tarball created by
     # 'setup.py sdist', and for users of a tarball/zipball created by 'git
@@ -364,8 +403,9 @@ class cmd_sdist(_sdist):
         f.close()
 
 INIT_PY_SNIPPET = """
-from ._version import __version__
-__version__ # hush pyflakes
+from ._version import get_version
+__version__ = get_version()
+del get_version
 
 """
 

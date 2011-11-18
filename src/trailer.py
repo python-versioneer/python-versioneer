@@ -13,7 +13,11 @@ def version_from_file(filename):
 
 def version_from_parentdir(tag_prefix, parentdir_prefix, verbose):
     # try a couple different things to handle py2exe, bbfreeze, and
-    # non-CPython implementations
+    # non-CPython implementations. Since this code lives in versioneer.py, we
+    # either expect __file__ to be versioneer.py (kept in the root of the
+    # source tree), or for sys.argv[0] to be setup.py (also in the root),
+    # such that its parent is the root of the unpacked tarball, which
+    # conventionally includes both a project name and a version string.
     try:
         me = __file__
     except NameError:
@@ -48,7 +52,7 @@ def get_expanded_variable(versionfile_source):
     return None
 
 def get_best_version(versionfile, tag_prefix, parentdir_prefix,
-                     default=None, verbose=False):
+                     source_root=None, default=None, verbose=False):
     # extract version from first of: 'git describe', _version.py, parentdir.
     # This is meant to work for developers, for users of a tarball created by
     # 'setup.py sdist', and for users of a tarball/zipball created by 'git
@@ -136,8 +140,9 @@ class cmd_sdist(_sdist):
         f.close()
 
 INIT_PY_SNIPPET = """
-from ._version import __version__
-__version__ # hush pyflakes
+from ._version import get_version
+__version__ = get_version()
+del get_version
 
 """
 

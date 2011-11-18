@@ -12,6 +12,13 @@ verstr = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
 #### VERSION_FROM_CHECKOUT
 #### VERSION_FROM_VARIABLE
 tag_prefix = "%(TAG_PREFIX)s"
-__version__ = version_from_expanded_variable(verstr.strip(), tag_prefix)
+def get_version(source_root=None):
+    ver = version_from_expanded_variable(verstr.strip(), tag_prefix)
+    if not ver:
+        ver = version_from_vcs(tag_prefix, source_root)
+    if not ver:
+        ver = "unknown"
+    return ver
+
 #### END
 

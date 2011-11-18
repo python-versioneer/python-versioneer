@@ -1,9 +1,9 @@
 
 import subprocess
 
-def run_command(args, verbose=False):
+def run_command(args, cwd=None, verbose=False):
     try:
-        p = subprocess.Popen(list(args), stdout=subprocess.PIPE)
+        p = subprocess.Popen(list(args), stdout=subprocess.PIPE, cwd=cwd)
     except EnvironmentError, e:
         if verbose:
             print "unable to run %s" % args[0]
