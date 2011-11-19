@@ -5,19 +5,21 @@
 # directories (produced by setup.py build) will contain a much shorter file
 # that just contains the computed version number.
 
-# this string will be replaced by git during git-archive
-verstr = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
+# these strings will be replaced by git during git-archive
+git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
+git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
 #### SUBPROCESS_HELPER
-#### VERSION_FROM_CHECKOUT
-#### VERSION_FROM_VARIABLE
+#### MIDDLE
+
 tag_prefix = "%(TAG_PREFIX)s"
-def get_version(source_root=None):
-    ver = version_from_expanded_variable(verstr.strip(), tag_prefix)
+def get_versions():
+    variables = { "refnames": git_refnames, "full": git_full }
+    ver = versions_from_expanded_variables(variables, tag_prefix)
     if not ver:
-        ver = version_from_vcs(tag_prefix, source_root)
+        ver = versions_from_vcs(tag_prefix)
     if not ver:
-        ver = "unknown"
+        ver = {"version": "unknown", "full": ""}
     return ver
 
 #### END

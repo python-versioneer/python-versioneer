@@ -1,4 +1,38 @@
+
+import re
 import os.path
+
+def get_expanded_variables(versionfile_source):
+    # the code embedded in _version.py can just fetch the value of these
+    # variables. When used from setup.py, we don't want to import
+    # _version.py, so we do it with a regexp instead. This function is not
+    # used from _version.py.
+    variables = {}
+    try:
+        for line in open(versionfile_source,"r").readlines():
+            if line.strip().startswith("git_refnames ="):
+                mo = re.search(r'=\s*"(.*)"', line)
+                if mo:
+                    variables["refnames"] = mo.group(1)
+            if line.strip().startswith("git_full ="):
+                mo = re.search(r'=\s*"(.*)"', line)
+                if mo:
+                    variables["full"] = mo.group(1)
+    except EnvironmentError:
+        pass
+    return variables
+
+def versions_from_expanded_variables(variables, tag_prefix):
+    refnames = variables["refnames"].strip()
+    if refnames.startswith("$Format"):
+        return {} # unexpanded, so not in an unpacked git-archive tarball
+    refs = set([r.strip() for r in refnames.strip("()").split(",")])
+    refs.discard("HEAD") ; refs.discard("master")
+    for r in reversed(sorted(refs)):
+        if r.startswith(tag_prefix):
+            return { "version": r[len(tag_prefix):],
+                     "full": variables["full"].strip() }
+    return {}
 
 def versions_from_vcs(tag_prefix, verbose=False):
     # this runs 'git' from the directory that contains this file. That either
