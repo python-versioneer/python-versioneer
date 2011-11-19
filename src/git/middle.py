@@ -28,11 +28,20 @@ def versions_from_expanded_variables(variables, tag_prefix):
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     refs.discard("HEAD") ; refs.discard("master")
-    for r in reversed(sorted(refs)):
-        if r.startswith(tag_prefix):
-            return { "version": r[len(tag_prefix):],
-                     "full": variables["full"].strip() }
-    return {}
+    for ref in reversed(sorted(refs)):
+        if ref.startswith(tag_prefix):
+            r = ref[len(tag_prefix):]
+            if re.search(r'\d', r):
+                # git's %d expansion behaves like git log --decorate=short
+                # and strips out the refs/heads/ and refs/tags/ prefixes that
+                # would let us distinguish between branches and tags. By
+                # ignoring refnames without digits, we filter out many common
+                # branch names like "release" and "stabilization".
+                return { "version": r,
+                         "full": variables["full"].strip() }
+    # no suitable tags, so we use the full revision id
+    return { "version": variables["full"].strip(),
+             "full": variables["full"].strip() }
 
 def versions_from_vcs(tag_prefix, verbose=False):
     # this runs 'git' from the directory that contains this file. That either

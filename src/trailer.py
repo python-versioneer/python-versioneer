@@ -52,8 +52,8 @@ def versions_from_parentdir(tag_prefix, parentdir_prefix, verbose):
         return None
     return {"version": dirname[len(parentdir_prefix):], "full": ""}
 
-def get_best_version(versionfile, tag_prefix, parentdir_prefix,
-                     default={}, verbose=False):
+def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
+                      default={}, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     #
     # extract version from first of _version.py, 'git describe', parentdir.
@@ -65,38 +65,40 @@ def get_best_version(versionfile, tag_prefix, parentdir_prefix,
     variables = get_expanded_variables(versionfile_source)
     if variables:
         ver = versions_from_expanded_variables(variables, tag_prefix)
-        if ver is not None:
-            if verbose: print "got version from expanded variable"
+        if ver:
+            if verbose: print "got version from expanded variable", ver
             return ver
 
     ver = versions_from_file(versionfile)
-    if ver is not None:
-        if verbose: print "got version from file %s" % versionfile
+    if ver:
+        if verbose: print "got version from file %s" % versionfile, ver
         return ver
 
     ver = versions_from_vcs(tag_prefix, verbose)
-    if ver is not None:
-        if verbose: print "got version from git"
+    if ver:
+        if verbose: print "got version from git", ver
         return ver
 
     ver = versions_from_parentdir(tag_prefix, parentdir_prefix, verbose)
-    if ver is not None:
-        if verbose: print "got version from parentdir"
+    if ver:
+        if verbose: print "got version from parentdir", ver
         return ver
 
     ver = default
-    if ver is not None:
-        if verbose: print "got version from default"
+    if ver:
+        if verbose: print "got version from default", ver
         return ver
 
     raise NoVersionError("Unable to compute version at all")
 
-def get_version(verbose=False):
+def get_versions(verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
-    return get_best_version(versionfile_source, tag_prefix, parentdir_prefix,
-                            verbose=verbose)
+    return get_best_versions(versionfile_source, tag_prefix, parentdir_prefix,
+                             verbose=verbose)
+def get_version(verbose=False):
+    return get_versions(verbose).get("version", "unknown")
 
 class cmd_version(Command):
     description = "report generated version string"
@@ -107,13 +109,13 @@ class cmd_version(Command):
     def finalize_options(self):
         pass
     def run(self):
-        ver = get_version(verbose=True)["version"]
+        ver = get_version(verbose=True)
         print "Version is currently:", ver
 
 
 class cmd_build(_build):
     def run(self):
-        ver = get_version(verbose=True)["version"]
+        versions = get_versions(verbose=True)
         _build.run(self)
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
@@ -121,15 +123,15 @@ class cmd_build(_build):
         print "UPDATING", target_versionfile
         os.unlink(target_versionfile)
         f = open(target_versionfile, "w")
-        f.write(SHORT_VERSION_PY % ver)
+        f.write(SHORT_VERSION_PY % versions)
         f.close()
 
 class cmd_sdist(_sdist):
     def run(self):
-        ver = get_version(verbose=True)["version"]
-        self._versioneer_generated_version = ver
+        versions = get_versions(verbose=True)
+        self._versioneer_generated_versions = versions
         # unless we update this, the command will keep using the old version
-        self.distribution.metadata.version = ver
+        self.distribution.metadata.version = versions["version"]
         return _sdist.run(self)
 
     def make_release_tree(self, base_dir, files):
@@ -140,7 +142,7 @@ class cmd_sdist(_sdist):
         print "UPDATING", target_versionfile
         os.unlink(target_versionfile)
         f = open(target_versionfile, "w")
-        f.write(SHORT_VERSION_PY % self._versioneer_generated_version)
+        f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
         f.close()
 
 INIT_PY_SNIPPET = """
