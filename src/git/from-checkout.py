@@ -1,32 +1,36 @@
 import os.path
 
-def version_from_vcs(tag_prefix, source_root=None, verbose=False):
-    # this looks for a .git directory inside the source tree, either because
-    # someone ran some project-specific entry point (and this code is in
-    # _version.py), or because someone ran a setup.py command (and this code
-    # is in versioneer.py).
+def versions_from_vcs(tag_prefix, verbose=False):
+    # this runs 'git' from the directory that contains this file. That either
+    # means someone ran a setup.py command (and this code is in
+    # versioneer.py, thus the containing directory is the root of the source
+    # tree), or someone ran a project-specific entry point (and this code is
+    # in _version.py, thus the containing directory is somewhere deeper in
+    # the source tree). This only gets called if the git-archive 'subst'
+    # variables were *not* expanded, and _version.py hasn't already been
+    # rewritten with a short version string, meaning we're inside a checked
+    # out source tree.
 
-    # For now, we require that somebody tell us how to get to the source
-    # tree's root directory, both to find the one .git directory, and to
-    # quickly rule out the case where we're running from an extracted
-    # .git-less tarball. For the first purpose, in the future, for git (and
-    # probably everything except SVN), it's enough to find *any* directory in
-    # the source tree.
-
-    if not source_root:
-        source_root = os.getcwd()
-    if not os.path.isdir(os.path.join(source_root, ".git")):
-        if verbose:
-            print "This does not appear to be a Git repository."
-        return None
+    try:
+        source_dir = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        # some py2exe/bbfreeze/non-CPython implementations don't do __file__
+        return {} # not always correct
     stdout = run_command(["git", "describe",
-                          "--tags", "--dirty", "--always"], cwd=source_root)
+                          "--tags", "--dirty", "--always"], cwd=source_dir)
     if stdout is None:
-        return None
+        return {}
     if not stdout.startswith(tag_prefix):
         if verbose:
             print "tag '%s' doesn't start with prefix '%s'" % \
                   (stdout, tag_prefix)
-        return None
-    return stdout[len(tag_prefix):]
+        return {}
+    tag = stdout[len(tag_prefix):]
+    stdout = run_command(["git", "rev-parse", "HEAD"], cwd=source_dir)
+    if stdout is None:
+        return {}
+    full = stdout.strip()
+    if tag.endswith("-dirty"):
+        full += "-dirty"
+    return {"version": tag, "full": full}
 
