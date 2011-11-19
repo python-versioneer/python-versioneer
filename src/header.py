@@ -4,6 +4,10 @@
 
 (like a rocketeer, but for versions)
 
+* https://github.com/warner/python-versioneer
+* Brian Warner
+* License: Public Domain
+
 This file helps distutils-based projects manage their version number by just
 creating version-control tags.
 

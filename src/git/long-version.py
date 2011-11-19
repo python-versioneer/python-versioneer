@@ -5,6 +5,8 @@
 # directories (produced by setup.py build) will contain a much shorter file
 # that just contains the computed version number.
 
+# This file is released into the public domain.
+
 # these strings will be replaced by git during git-archive
 git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
 git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"

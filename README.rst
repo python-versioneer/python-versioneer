@@ -1,6 +1,10 @@
 The Versioneer
 ==============
 
+* https://github.com/warner/python-versioneer
+* Brian Warner
+* License: Public Domain
+
 This is a tool for managing a recorded version number in distutils-based
 python projects. The goal is to remove the tedious and error-prone "update
 the embedded version string" step from your release process. Making a new
@@ -92,7 +96,9 @@ installation by editing setup.py . Alternatively, it might go the other
 direction and include code from all supported VCS systems, reducing the
 number of intermediate scripts.
 
-Project Home
-------------
 
-https://github.com/warner/python-versioneer
+License
+-------
+
+To make Versioneer easier to embed, all its code is hereby released into the
+public domain. The _version.py that it creates is also in the public domain.

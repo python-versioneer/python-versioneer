@@ -4,6 +4,10 @@
 
 (like a rocketeer, but for versions)
 
+* https://github.com/warner/python-versioneer
+* Brian Warner
+* License: Public Domain
+
 This file helps distutils-based projects manage their version number by just
 creating version-control tags.
 
@@ -95,6 +99,8 @@ LONG_VERSION_PY = '''
 # feature). Distribution tarballs (build by setup.py sdist) and build
 # directories (produced by setup.py build) will contain a much shorter file
 # that just contains the computed version number.
+
+# This file is released into the public domain.
 
 # these strings will be replaced by git during git-archive
 git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
