@@ -149,7 +149,6 @@ INIT_PY_SNIPPET = """
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
-
 """
 
 class cmd_update_files(Command):
