@@ -1,4 +1,5 @@
 
+import sys
 import re
 import os.path
 
@@ -59,17 +60,19 @@ def versions_from_vcs(tag_prefix, verbose=False):
     except NameError:
         # some py2exe/bbfreeze/non-CPython implementations don't do __file__
         return {} # not always correct
-    stdout = run_command(["git", "describe",
-                          "--tags", "--dirty", "--always"], cwd=source_dir)
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
+    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
+                         cwd=source_dir)
     if stdout is None:
         return {}
     if not stdout.startswith(tag_prefix):
         if verbose:
-            print "tag '%s' doesn't start with prefix '%s'" % \
-                  (stdout, tag_prefix)
+            print "tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix)
         return {}
     tag = stdout[len(tag_prefix):]
-    stdout = run_command(["git", "rev-parse", "HEAD"], cwd=source_dir)
+    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=source_dir)
     if stdout is None:
         return {}
     full = stdout.strip()

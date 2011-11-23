@@ -1,8 +1,13 @@
 
+import sys
+
 def do_vcs_install(versionfile_source, ipy):
-    run_command(["git", "add", "versioneer.py"])
-    run_command(["git", "add", versionfile_source])
-    run_command(["git", "add", ipy])
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
+    run_command([GIT, "add", "versioneer.py"])
+    run_command([GIT, "add", versionfile_source])
+    run_command([GIT, "add", ipy])
     present = False
     try:
         f = open(".gitattributes", "r")
@@ -17,5 +22,5 @@ def do_vcs_install(versionfile_source, ipy):
         f = open(".gitattributes", "a+")
         f.write("%s export-subst\n" % versionfile_source)
         f.close()
-        run_command(["git", "add", ".gitattributes"])
+        run_command([GIT, "add", ".gitattributes"])
     
