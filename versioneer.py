@@ -157,18 +157,21 @@ def versions_from_expanded_variables(variables, tag_prefix):
     if refnames.startswith("$Format"):
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
-    refs.discard("HEAD") ; refs.discard("master")
-    for ref in reversed(sorted(refs)):
+    for ref in list(refs):
+        if not re.search(r'\d', ref):
+            refs.discard(ref)
+            # Assume all version tags have a digit. git's %%d expansion
+            # behaves like git log --decorate=short and strips out the
+            # refs/heads/ and refs/tags/ prefixes that would let us
+            # distinguish between branches and tags. By ignoring refnames
+            # without digits, we filter out many common branch names like
+            # "release" and "stabilization", as well as "HEAD" and "master".
+    for ref in sorted(refs):
+        # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
-            if re.search(r'\d', r):
-                # git's %%d expansion behaves like git log --decorate=short
-                # and strips out the refs/heads/ and refs/tags/ prefixes that
-                # would let us distinguish between branches and tags. By
-                # ignoring refnames without digits, we filter out many common
-                # branch names like "release" and "stabilization".
-                return { "version": r,
-                         "full": variables["full"].strip() }
+            return { "version": r,
+                     "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
@@ -271,18 +274,21 @@ def versions_from_expanded_variables(variables, tag_prefix):
     if refnames.startswith("$Format"):
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
-    refs.discard("HEAD") ; refs.discard("master")
-    for ref in reversed(sorted(refs)):
+    for ref in list(refs):
+        if not re.search(r'\d', ref):
+            refs.discard(ref)
+            # Assume all version tags have a digit. git's %d expansion
+            # behaves like git log --decorate=short and strips out the
+            # refs/heads/ and refs/tags/ prefixes that would let us
+            # distinguish between branches and tags. By ignoring refnames
+            # without digits, we filter out many common branch names like
+            # "release" and "stabilization", as well as "HEAD" and "master".
+    for ref in sorted(refs):
+        # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
-            if re.search(r'\d', r):
-                # git's %d expansion behaves like git log --decorate=short
-                # and strips out the refs/heads/ and refs/tags/ prefixes that
-                # would let us distinguish between branches and tags. By
-                # ignoring refnames without digits, we filter out many common
-                # branch names like "release" and "stabilization".
-                return { "version": r,
-                         "full": variables["full"].strip() }
+            return { "version": r,
+                     "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
