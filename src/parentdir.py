@@ -7,7 +7,7 @@ def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False)
         # this is used by the runtime. Invert this to find the root from
         # __file__.
         root = here
-        for i in range(len(versionfile_source.split(os.sep))):
+        for i in range(len(versionfile_source.split("/"))):
             root = os.path.dirname(root)
     except NameError:
         # try a couple different things to handle py2exe, bbfreeze, and
