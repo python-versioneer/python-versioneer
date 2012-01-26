@@ -222,7 +222,37 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
     return {"version": tag, "full": full}
 
 
+def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False):
+    try:
+        here = os.path.abspath(__file__)
+        # versionfile_source is the relative path from the top of the source
+        # tree (where the .git directory might live) to _version.py, when
+        # this is used by the runtime. Invert this to find the root from
+        # __file__.
+        root = here
+        for i in range(len(versionfile_source.split(os.sep))):
+            root = os.path.dirname(root)
+    except NameError:
+        # try a couple different things to handle py2exe, bbfreeze, and
+        # non-CPython implementations which don't do __file__. This code
+        # either lives in versioneer.py (used by setup.py) or _version.py
+        # (used by the runtime). In the versioneer.py case, sys.argv[0] will
+        # be setup.py, in the root of the source tree. In the _version.py
+        # case, we have no idea what sys.argv[0] is (some
+        # application-specific runner).
+        root = os.path.dirname(os.path.abspath(sys.argv[0]))
+    # Source tarballs conventionally unpack into a directory that includes
+    # both the project name and a version string.
+    dirname = os.path.basename(root)
+    if not dirname.startswith(parentdir_prefix):
+        if verbose:
+            print "dirname '%%s' doesn't start with prefix '%%s'" %% \
+                  (dirname, parentdir_prefix)
+        return None
+    return {"version": dirname[len(parentdir_prefix):], "full": ""}
+
 tag_prefix = "%(TAG_PREFIX)s"
+parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
 
 def get_versions():
@@ -230,6 +260,8 @@ def get_versions():
     ver = versions_from_expanded_variables(variables, tag_prefix)
     if not ver:
         ver = versions_from_vcs(tag_prefix, versionfile_source)
+    if not ver:
+        ver = versions_from_parentdir(parentdir_prefix, versionfile_source)
     if not ver:
         ver = {"version": "unknown", "full": ""}
     return ver
@@ -350,6 +382,35 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
     return {"version": tag, "full": full}
 
 
+def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False):
+    try:
+        here = os.path.abspath(__file__)
+        # versionfile_source is the relative path from the top of the source
+        # tree (where the .git directory might live) to _version.py, when
+        # this is used by the runtime. Invert this to find the root from
+        # __file__.
+        root = here
+        for i in range(len(versionfile_source.split(os.sep))):
+            root = os.path.dirname(root)
+    except NameError:
+        # try a couple different things to handle py2exe, bbfreeze, and
+        # non-CPython implementations which don't do __file__. This code
+        # either lives in versioneer.py (used by setup.py) or _version.py
+        # (used by the runtime). In the versioneer.py case, sys.argv[0] will
+        # be setup.py, in the root of the source tree. In the _version.py
+        # case, we have no idea what sys.argv[0] is (some
+        # application-specific runner).
+        root = os.path.dirname(os.path.abspath(sys.argv[0]))
+    # Source tarballs conventionally unpack into a directory that includes
+    # both the project name and a version string.
+    dirname = os.path.basename(root)
+    if not dirname.startswith(parentdir_prefix):
+        if verbose:
+            print "dirname '%s' doesn't start with prefix '%s'" % \
+                  (dirname, parentdir_prefix)
+        return None
+    return {"version": dirname[len(parentdir_prefix):], "full": ""}
+
 import sys
 
 def do_vcs_install(versionfile_source, ipy):
@@ -409,25 +470,6 @@ def write_to_version_file(filename, versions):
     f.close()
     print "set %s to '%s'" % (filename, versions["version"])
 
-def versions_from_parentdir(tag_prefix, parentdir_prefix, verbose):
-    # try a couple different things to handle py2exe, bbfreeze, and
-    # non-CPython implementations. Since this code lives in versioneer.py, we
-    # either expect __file__ to be versioneer.py (kept in the root of the
-    # source tree), or for sys.argv[0] to be setup.py (also in the root),
-    # such that its parent is the root of the unpacked tarball, which
-    # conventionally includes both a project name and a version string.
-    try:
-        me = __file__
-    except NameError:
-        me = sys.argv[0]
-    me = os.path.abspath(me)
-    dirname = os.path.basename(os.path.dirname(me))
-    if not dirname.startswith(parentdir_prefix):
-        if verbose:
-            print "dirname '%s' doesn't start with prefix '%s'" % \
-                  (dirname, parentdir_prefix)
-        return None
-    return {"version": dirname[len(parentdir_prefix):], "full": ""}
 
 def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
                       default={}, verbose=False):
@@ -456,7 +498,7 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
         if verbose: print "got version from git", ver
         return ver
 
-    ver = versions_from_parentdir(tag_prefix, parentdir_prefix, verbose)
+    ver = versions_from_parentdir(parentdir_prefix, versionfile_source, verbose)
     if ver:
         if verbose: print "got version from parentdir", ver
         return ver
@@ -542,6 +584,7 @@ class cmd_update_files(Command):
         f = open(versionfile_source, "w")
         f.write(LONG_VERSION_PY % {"DOLLAR": "$",
                                    "TAG_PREFIX": tag_prefix,
+                                   "PARENTDIR_PREFIX": parentdir_prefix,
                                    "VERSIONFILE_SOURCE": versionfile_source,
                                    })
         f.close()

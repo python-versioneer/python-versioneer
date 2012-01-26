@@ -14,8 +14,10 @@ git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
 #### SUBPROCESS_HELPER
 #### MIDDLE
+#### PARENTDIR
 
 tag_prefix = "%(TAG_PREFIX)s"
+parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
 
 def get_versions():
@@ -23,6 +25,8 @@ def get_versions():
     ver = versions_from_expanded_variables(variables, tag_prefix)
     if not ver:
         ver = versions_from_vcs(tag_prefix, versionfile_source)
+    if not ver:
+        ver = versions_from_parentdir(parentdir_prefix, versionfile_source)
     if not ver:
         ver = {"version": "unknown", "full": ""}
     return ver

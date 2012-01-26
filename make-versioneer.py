@@ -17,12 +17,15 @@ def create_script():
             f.write(unquote(get("src/subprocess-helper.py")))
         elif line.startswith("#### MIDDLE"):
             f.write(unquote(get("src/%s/middle.py" % vcs)))
+        elif line.startswith("#### PARENTDIR"):
+            f.write(unquote(get("src/parentdir.py")))
         elif line.startswith("#### END"):
             f.write("'''\n")
         else:
             f.write(line)
     f.write(get("src/subprocess-helper.py"))
     f.write(get("src/%s/middle.py" % vcs))
+    f.write(get("src/parentdir.py"))
     f.write(get("src/%s/install.py" % vcs))
     f.write(get("src/trailer.py"))
     f.close()

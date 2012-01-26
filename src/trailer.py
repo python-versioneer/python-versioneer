@@ -32,25 +32,6 @@ def write_to_version_file(filename, versions):
     f.close()
     print "set %s to '%s'" % (filename, versions["version"])
 
-def versions_from_parentdir(tag_prefix, parentdir_prefix, verbose):
-    # try a couple different things to handle py2exe, bbfreeze, and
-    # non-CPython implementations. Since this code lives in versioneer.py, we
-    # either expect __file__ to be versioneer.py (kept in the root of the
-    # source tree), or for sys.argv[0] to be setup.py (also in the root),
-    # such that its parent is the root of the unpacked tarball, which
-    # conventionally includes both a project name and a version string.
-    try:
-        me = __file__
-    except NameError:
-        me = sys.argv[0]
-    me = os.path.abspath(me)
-    dirname = os.path.basename(os.path.dirname(me))
-    if not dirname.startswith(parentdir_prefix):
-        if verbose:
-            print "dirname '%s' doesn't start with prefix '%s'" % \
-                  (dirname, parentdir_prefix)
-        return None
-    return {"version": dirname[len(parentdir_prefix):], "full": ""}
 
 def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
                       default={}, verbose=False):
@@ -79,7 +60,7 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
         if verbose: print "got version from git", ver
         return ver
 
-    ver = versions_from_parentdir(tag_prefix, parentdir_prefix, verbose)
+    ver = versions_from_parentdir(parentdir_prefix, versionfile_source, verbose)
     if ver:
         if verbose: print "got version from parentdir", ver
         return ver
@@ -165,6 +146,7 @@ class cmd_update_files(Command):
         f = open(versionfile_source, "w")
         f.write(LONG_VERSION_PY % {"DOLLAR": "$",
                                    "TAG_PREFIX": tag_prefix,
+                                   "PARENTDIR_PREFIX": parentdir_prefix,
                                    "VERSIONFILE_SOURCE": versionfile_source,
                                    })
         f.close()
