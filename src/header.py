@@ -7,7 +7,7 @@
 * https://github.com/warner/python-versioneer
 * Brian Warner
 * License: Public Domain
-* Version: 0.5
+* Version: 0.6
 
 This file helps distutils-based projects manage their version number by just
 creating version-control tags.
