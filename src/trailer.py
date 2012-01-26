@@ -74,7 +74,7 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
         if verbose: print "got version from file %s" % versionfile, ver
         return ver
 
-    ver = versions_from_vcs(tag_prefix, verbose)
+    ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
     if ver:
         if verbose: print "got version from git", ver
         return ver
@@ -163,7 +163,10 @@ class cmd_update_files(Command):
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
         print " creating %s" % versionfile_source
         f = open(versionfile_source, "w")
-        f.write(LONG_VERSION_PY % {"DOLLAR": "$", "TAG_PREFIX": tag_prefix})
+        f.write(LONG_VERSION_PY % {"DOLLAR": "$",
+                                   "TAG_PREFIX": tag_prefix,
+                                   "VERSIONFILE_SOURCE": versionfile_source,
+                                   })
         f.close()
         try:
             old = open(ipy, "r").read()

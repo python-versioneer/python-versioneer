@@ -176,27 +176,36 @@ def versions_from_expanded_variables(variables, tag_prefix):
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
-def versions_from_vcs(tag_prefix, verbose=False):
-    # this runs 'git' from the directory that contains this file. That either
-    # means someone ran a setup.py command (and this code is in
-    # versioneer.py, thus the containing directory is the root of the source
-    # tree), or someone ran a project-specific entry point (and this code is
-    # in _version.py, thus the containing directory is somewhere deeper in
-    # the source tree). This only gets called if the git-archive 'subst'
-    # variables were *not* expanded, and _version.py hasn't already been
-    # rewritten with a short version string, meaning we're inside a checked
-    # out source tree.
+def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
+    # this runs 'git' from the root of the source tree. That either means
+    # someone ran a setup.py command (and this code is in versioneer.py, thus
+    # the containing directory is the root of the source tree), or someone
+    # ran a project-specific entry point (and this code is in _version.py,
+    # thus the containing directory is somewhere deeper in the source tree).
+    # This only gets called if the git-archive 'subst' variables were *not*
+    # expanded, and _version.py hasn't already been rewritten with a short
+    # version string, meaning we're inside a checked out source tree.
 
     try:
-        source_dir = os.path.dirname(os.path.abspath(__file__))
+        here = os.path.abspath(__file__)
     except NameError:
         # some py2exe/bbfreeze/non-CPython implementations don't do __file__
         return {} # not always correct
+
+    # versionfile_source is the relative path from the top of the source tree
+    # (where the .git directory might live) to this file. Invert this to find
+    # the root from __file__.
+    root = here
+    for i in range(len(versionfile_source.split(os.sep))):
+        root = os.path.dirname(root)
+    if not os.path.exists(os.path.join(root, ".git")):
+        return {}
+
     GIT = "git"
     if sys.platform == "win32":
         GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
-                         cwd=source_dir)
+                         cwd=root)
     if stdout is None:
         return {}
     if not stdout.startswith(tag_prefix):
@@ -204,7 +213,7 @@ def versions_from_vcs(tag_prefix, verbose=False):
             print "tag '%%s' doesn't start with prefix '%%s'" %% (stdout, tag_prefix)
         return {}
     tag = stdout[len(tag_prefix):]
-    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=source_dir)
+    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
@@ -214,11 +223,13 @@ def versions_from_vcs(tag_prefix, verbose=False):
 
 
 tag_prefix = "%(TAG_PREFIX)s"
+versionfile_source = "%(VERSIONFILE_SOURCE)s"
+
 def get_versions():
     variables = { "refnames": git_refnames, "full": git_full }
     ver = versions_from_expanded_variables(variables, tag_prefix)
     if not ver:
-        ver = versions_from_vcs(tag_prefix)
+        ver = versions_from_vcs(tag_prefix, versionfile_source)
     if not ver:
         ver = {"version": "unknown", "full": ""}
     return ver
@@ -293,27 +304,36 @@ def versions_from_expanded_variables(variables, tag_prefix):
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
-def versions_from_vcs(tag_prefix, verbose=False):
-    # this runs 'git' from the directory that contains this file. That either
-    # means someone ran a setup.py command (and this code is in
-    # versioneer.py, thus the containing directory is the root of the source
-    # tree), or someone ran a project-specific entry point (and this code is
-    # in _version.py, thus the containing directory is somewhere deeper in
-    # the source tree). This only gets called if the git-archive 'subst'
-    # variables were *not* expanded, and _version.py hasn't already been
-    # rewritten with a short version string, meaning we're inside a checked
-    # out source tree.
+def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
+    # this runs 'git' from the root of the source tree. That either means
+    # someone ran a setup.py command (and this code is in versioneer.py, thus
+    # the containing directory is the root of the source tree), or someone
+    # ran a project-specific entry point (and this code is in _version.py,
+    # thus the containing directory is somewhere deeper in the source tree).
+    # This only gets called if the git-archive 'subst' variables were *not*
+    # expanded, and _version.py hasn't already been rewritten with a short
+    # version string, meaning we're inside a checked out source tree.
 
     try:
-        source_dir = os.path.dirname(os.path.abspath(__file__))
+        here = os.path.abspath(__file__)
     except NameError:
         # some py2exe/bbfreeze/non-CPython implementations don't do __file__
         return {} # not always correct
+
+    # versionfile_source is the relative path from the top of the source tree
+    # (where the .git directory might live) to this file. Invert this to find
+    # the root from __file__.
+    root = here
+    for i in range(len(versionfile_source.split(os.sep))):
+        root = os.path.dirname(root)
+    if not os.path.exists(os.path.join(root, ".git")):
+        return {}
+
     GIT = "git"
     if sys.platform == "win32":
         GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
-                         cwd=source_dir)
+                         cwd=root)
     if stdout is None:
         return {}
     if not stdout.startswith(tag_prefix):
@@ -321,7 +341,7 @@ def versions_from_vcs(tag_prefix, verbose=False):
             print "tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix)
         return {}
     tag = stdout[len(tag_prefix):]
-    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=source_dir)
+    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
@@ -431,7 +451,7 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
         if verbose: print "got version from file %s" % versionfile, ver
         return ver
 
-    ver = versions_from_vcs(tag_prefix, verbose)
+    ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
     if ver:
         if verbose: print "got version from git", ver
         return ver
@@ -520,7 +540,10 @@ class cmd_update_files(Command):
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
         print " creating %s" % versionfile_source
         f = open(versionfile_source, "w")
-        f.write(LONG_VERSION_PY % {"DOLLAR": "$", "TAG_PREFIX": tag_prefix})
+        f.write(LONG_VERSION_PY % {"DOLLAR": "$",
+                                   "TAG_PREFIX": tag_prefix,
+                                   "VERSIONFILE_SOURCE": versionfile_source,
+                                   })
         f.close()
         try:
             old = open(ipy, "r").read()
