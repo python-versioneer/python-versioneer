@@ -11,6 +11,8 @@ def get_versions(default={}, verbose=False):
 
 """
 
+DEFAULT = {"version": "unknown", "full": "unknown"}
+
 def versions_from_file(filename):
     versions = {}
     try:
@@ -34,7 +36,7 @@ def write_to_version_file(filename, versions):
 
 
 def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
-                      default={}, verbose=False):
+                      default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     #
     # extract version from first of _version.py, 'git describe', parentdir.
@@ -65,21 +67,17 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
         if verbose: print "got version from parentdir", ver
         return ver
 
-    ver = default
-    if ver:
-        if verbose: print "got version from default", ver
-        return ver
+    if verbose: print "got version from default", ver
+    return default
 
-    raise NoVersionError("Unable to compute version at all")
-
-def get_versions(default={}, verbose=False):
+def get_versions(default=DEFAULT, verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
     return get_best_versions(versionfile_source, tag_prefix, parentdir_prefix,
                              default=default, verbose=verbose)
 def get_version(verbose=False):
-    return get_versions({"version":"unknown"}, verbose)["version"]
+    return get_versions(verbose=verbose)["version"]
 
 class cmd_version(Command):
     description = "report generated version string"

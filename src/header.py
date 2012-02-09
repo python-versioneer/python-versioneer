@@ -90,6 +90,3 @@ versionfile_build = None
 tag_prefix = None
 parentdir_prefix = None
 
-class NoVersionError(Exception):
-    pass
-
