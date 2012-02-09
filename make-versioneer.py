@@ -1,6 +1,8 @@
 
 def unquote(s):
     return s.replace("%", "%%")
+def ver(s):
+    return s.replace("@VERSIONEER@", "0.6+")
 
 def create_script():
     vcs = "git"
@@ -8,7 +10,7 @@ def create_script():
         raise ValueError("Unhandled revision-control system '%s'" % vcs)
     f = open("versioneer.py", "w")
     def get(fn): return open(fn, "r").read()
-    f.write(get("src/header.py"))
+    f.write(ver(get("src/header.py")))
     f.write('VCS = "%s"\n' % vcs)
     f.write("IN_LONG_VERSION_PY = False\n")
     f.write("\n\n")
@@ -25,12 +27,12 @@ def create_script():
         elif line.startswith("#### END"):
             f.write("'''\n")
         else:
-            f.write(line)
+            f.write(ver(line))
     f.write(get("src/subprocess_helper.py"))
     f.write(get("src/%s/middle.py" % vcs))
     f.write(get("src/parentdir.py"))
     f.write(get("src/%s/install.py" % vcs))
-    f.write(get("src/trailer.py"))
+    f.write(ver(get("src/trailer.py")))
     f.close()
 
 if __name__ == '__main__':
