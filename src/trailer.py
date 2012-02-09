@@ -6,7 +6,7 @@ SHORT_VERSION_PY = """
 
 version_version = '%(version)s'
 version_full = '%(full)s'
-def get_versions():
+def get_versions(default={}, verbose=False):
     return {'version': version_version, 'full': version_full}
 
 """
@@ -72,14 +72,14 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
 
     raise NoVersionError("Unable to compute version at all")
 
-def get_versions(verbose=False):
+def get_versions(default={}, verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
     return get_best_versions(versionfile_source, tag_prefix, parentdir_prefix,
-                             verbose=verbose)
+                             default=default, verbose=verbose)
 def get_version(verbose=False):
-    return get_versions(verbose).get("version", "unknown")
+    return get_versions({"version":"unknown"}, verbose)["version"]
 
 class cmd_version(Command):
     description = "report generated version string"

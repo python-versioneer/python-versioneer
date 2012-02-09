@@ -156,13 +156,17 @@ def get_expanded_variables(versionfile_source):
         pass
     return variables
 
-def versions_from_expanded_variables(variables, tag_prefix):
+def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     refnames = variables["refnames"].strip()
     if refnames.startswith("$Format"):
+        if verbose:
+            print "variables are unexpanded, not using"
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     for ref in list(refs):
         if not re.search(r'\d', ref):
+            if verbose:
+                print "discarding '%%s', no digits" %% ref
             refs.discard(ref)
             # Assume all version tags have a digit. git's %%d expansion
             # behaves like git log --decorate=short and strips out the
@@ -170,13 +174,19 @@ def versions_from_expanded_variables(variables, tag_prefix):
             # distinguish between branches and tags. By ignoring refnames
             # without digits, we filter out many common branch names like
             # "release" and "stabilization", as well as "HEAD" and "master".
+    if verbose:
+        print "remaining refs:", ",".join(sorted(refs))
     for ref in sorted(refs):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
+            if verbose:
+                print "picking %%s" %% r
             return { "version": r,
                      "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
+    if verbose:
+        print "no suitable tags, using full revision id"
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
@@ -265,15 +275,16 @@ tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
 
-def get_versions():
+def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     variables = { "refnames": git_refnames, "full": git_full }
-    ver = versions_from_expanded_variables(variables, tag_prefix)
+    ver = versions_from_expanded_variables(variables, tag_prefix, verbose)
     if not ver:
-        ver = versions_from_vcs(tag_prefix, versionfile_source)
+        ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
     if not ver:
-        ver = versions_from_parentdir(parentdir_prefix, versionfile_source)
+        ver = versions_from_parentdir(parentdir_prefix, versionfile_source,
+                                      verbose)
     if not ver:
-        ver = {"version": "unknown", "full": ""}
+        ver = default
     return ver
 
 '''
@@ -322,13 +333,17 @@ def get_expanded_variables(versionfile_source):
         pass
     return variables
 
-def versions_from_expanded_variables(variables, tag_prefix):
+def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     refnames = variables["refnames"].strip()
     if refnames.startswith("$Format"):
+        if verbose:
+            print "variables are unexpanded, not using"
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     for ref in list(refs):
         if not re.search(r'\d', ref):
+            if verbose:
+                print "discarding '%s', no digits" % ref
             refs.discard(ref)
             # Assume all version tags have a digit. git's %d expansion
             # behaves like git log --decorate=short and strips out the
@@ -336,13 +351,19 @@ def versions_from_expanded_variables(variables, tag_prefix):
             # distinguish between branches and tags. By ignoring refnames
             # without digits, we filter out many common branch names like
             # "release" and "stabilization", as well as "HEAD" and "master".
+    if verbose:
+        print "remaining refs:", ",".join(sorted(refs))
     for ref in sorted(refs):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
+            if verbose:
+                print "picking %s" % r
             return { "version": r,
                      "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
+    if verbose:
+        print "no suitable tags, using full revision id"
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
@@ -460,7 +481,7 @@ SHORT_VERSION_PY = """
 
 version_version = '%(version)s'
 version_full = '%(full)s'
-def get_versions():
+def get_versions(default={}, verbose=False):
     return {'version': version_version, 'full': version_full}
 
 """
@@ -526,14 +547,14 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
 
     raise NoVersionError("Unable to compute version at all")
 
-def get_versions(verbose=False):
+def get_versions(default={}, verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
     return get_best_versions(versionfile_source, tag_prefix, parentdir_prefix,
-                             verbose=verbose)
+                             default=default, verbose=verbose)
 def get_version(verbose=False):
-    return get_versions(verbose).get("version", "unknown")
+    return get_versions({"version":"unknown"}, verbose)["version"]
 
 class cmd_version(Command):
     description = "report generated version string"

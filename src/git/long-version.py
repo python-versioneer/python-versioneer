@@ -20,15 +20,16 @@ tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
 
-def get_versions():
+def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     variables = { "refnames": git_refnames, "full": git_full }
-    ver = versions_from_expanded_variables(variables, tag_prefix)
+    ver = versions_from_expanded_variables(variables, tag_prefix, verbose)
     if not ver:
-        ver = versions_from_vcs(tag_prefix, versionfile_source)
+        ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
     if not ver:
-        ver = versions_from_parentdir(parentdir_prefix, versionfile_source)
+        ver = versions_from_parentdir(parentdir_prefix, versionfile_source,
+                                      verbose)
     if not ver:
-        ver = {"version": "unknown", "full": ""}
+        ver = default
     return ver
 
 #### END
