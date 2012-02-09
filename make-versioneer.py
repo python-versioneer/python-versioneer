@@ -17,7 +17,7 @@ def create_script():
             f.write("LONG_VERSION_PY = '''\n")
             f.write("IN_LONG_VERSION_PY = True\n")
         elif line.startswith("#### SUBPROCESS_HELPER"):
-            f.write(unquote(get("src/subprocess-helper.py")))
+            f.write(unquote(get("src/subprocess_helper.py")))
         elif line.startswith("#### MIDDLE"):
             f.write(unquote(get("src/%s/middle.py" % vcs)))
         elif line.startswith("#### PARENTDIR"):
@@ -26,7 +26,7 @@ def create_script():
             f.write("'''\n")
         else:
             f.write(line)
-    f.write(get("src/subprocess-helper.py"))
+    f.write(get("src/subprocess_helper.py"))
     f.write(get("src/%s/middle.py" % vcs))
     f.write(get("src/parentdir.py"))
     f.write(get("src/%s/install.py" % vcs))
