@@ -10,9 +10,12 @@ def create_script():
     def get(fn): return open(fn, "r").read()
     f.write(get("src/header.py"))
     f.write('VCS = "%s"\n' % vcs)
+    f.write("IN_LONG_VERSION_PY = False\n")
+    f.write("\n\n")
     for line in open("src/%s/long-version.py" % vcs, "r").readlines():
         if line.startswith("#### START"):
             f.write("LONG_VERSION_PY = '''\n")
+            f.write("IN_LONG_VERSION_PY = True\n")
         elif line.startswith("#### SUBPROCESS_HELPER"):
             f.write(unquote(get("src/subprocess-helper.py")))
         elif line.startswith("#### MIDDLE"):

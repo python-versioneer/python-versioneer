@@ -49,13 +49,14 @@ def versions_from_expanded_variables(variables, tag_prefix):
 
 def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
     # this runs 'git' from the root of the source tree. That either means
-    # someone ran a setup.py command (and this code is in versioneer.py, thus
-    # the containing directory is the root of the source tree), or someone
-    # ran a project-specific entry point (and this code is in _version.py,
-    # thus the containing directory is somewhere deeper in the source tree).
-    # This only gets called if the git-archive 'subst' variables were *not*
-    # expanded, and _version.py hasn't already been rewritten with a short
-    # version string, meaning we're inside a checked out source tree.
+    # someone ran a setup.py command (and this code is in versioneer.py, so
+    # IN_LONG_VERSION_PY=False, thus the containing directory is the root of
+    # the source tree), or someone ran a project-specific entry point (and
+    # this code is in _version.py, so IN_LONG_VERSION_PY=True, thus the
+    # containing directory is somewhere deeper in the source tree). This only
+    # gets called if the git-archive 'subst' variables were *not* expanded,
+    # and _version.py hasn't already been rewritten with a short version
+    # string, meaning we're inside a checked out source tree.
 
     try:
         here = os.path.abspath(__file__)
@@ -67,9 +68,14 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
     # (where the .git directory might live) to this file. Invert this to find
     # the root from __file__.
     root = here
-    for i in range(len(versionfile_source.split("/"))):
-        root = os.path.dirname(root)
+    if IN_LONG_VERSION_PY:
+        for i in range(len(versionfile_source.split("/"))):
+            root = os.path.dirname(root)
+    else:
+        root = os.path.dirname(here)
     if not os.path.exists(os.path.join(root, ".git")):
+        if verbose:
+            print "no .git in", root
         return {}
 
     GIT = "git"
