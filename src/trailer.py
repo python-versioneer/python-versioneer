@@ -33,7 +33,7 @@ def write_to_version_file(filename, versions):
     f = open(filename, "w")
     f.write(SHORT_VERSION_PY % versions)
     f.close()
-    print "set %s to '%s'" % (filename, versions["version"])
+    print("set %s to '%s'" % (filename, versions["version"]))
 
 
 def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
@@ -50,25 +50,25 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
     if variables:
         ver = versions_from_expanded_variables(variables, tag_prefix)
         if ver:
-            if verbose: print "got version from expanded variable", ver
+            if verbose: print("got version from expanded variable", ver)
             return ver
 
     ver = versions_from_file(versionfile)
     if ver:
-        if verbose: print "got version from file %s" % versionfile, ver
+        if verbose: print("got version from file %s" % versionfile, ver)
         return ver
 
     ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
     if ver:
-        if verbose: print "got version from git", ver
+        if verbose: print("got version from git", ver)
         return ver
 
     ver = versions_from_parentdir(parentdir_prefix, versionfile_source, verbose)
     if ver:
-        if verbose: print "got version from parentdir", ver
+        if verbose: print("got version from parentdir", ver)
         return ver
 
-    if verbose: print "got version from default", ver
+    if verbose: print("got version from default", ver)
     return default
 
 def get_versions(default=DEFAULT, verbose=False):
@@ -90,7 +90,7 @@ class cmd_version(Command):
         pass
     def run(self):
         ver = get_version(verbose=True)
-        print "Version is currently:", ver
+        print("Version is currently:", ver)
 
 
 class cmd_build(_build):
@@ -100,7 +100,7 @@ class cmd_build(_build):
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
         target_versionfile = os.path.join(self.build_lib, versionfile_build)
-        print "UPDATING", target_versionfile
+        print("UPDATING", target_versionfile)
         os.unlink(target_versionfile)
         f = open(target_versionfile, "w")
         f.write(SHORT_VERSION_PY % versions)
@@ -119,7 +119,7 @@ class cmd_sdist(_sdist):
         # now locate _version.py in the new base_dir directory (remembering
         # that it may be a hardlink) and replace it with an updated value
         target_versionfile = os.path.join(base_dir, versionfile_source)
-        print "UPDATING", target_versionfile
+        print("UPDATING", target_versionfile)
         os.unlink(target_versionfile)
         f = open(target_versionfile, "w")
         f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
@@ -141,7 +141,7 @@ class cmd_update_files(Command):
         pass
     def run(self):
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
-        print " creating %s" % versionfile_source
+        print(" creating %s" % versionfile_source)
         f = open(versionfile_source, "w")
         f.write(LONG_VERSION_PY % {"DOLLAR": "$",
                                    "TAG_PREFIX": tag_prefix,
@@ -154,12 +154,12 @@ class cmd_update_files(Command):
         except EnvironmentError:
             old = ""
         if INIT_PY_SNIPPET not in old:
-            print " appending to %s" % ipy
+            print(" appending to %s" % ipy)
             f = open(ipy, "a")
             f.write(INIT_PY_SNIPPET)
             f.close()
         else:
-            print " %s unmodified" % ipy
+            print(" %s unmodified" % ipy)
         do_vcs_install(versionfile_source, ipy)
 
 def get_cmdclass():

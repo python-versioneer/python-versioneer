@@ -116,15 +116,15 @@ def run_command(args, cwd=None, verbose=False):
     try:
         # remember shell=False, so use git.cmd on windows, not just git
         p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
-    except EnvironmentError, e:
+    except EnvironmentError as e:
         if verbose:
-            print "unable to run %%s" %% args[0]
-            print e
+            print("unable to run %%s" %% args[0])
+            print(e)
         return None
-    stdout = p.communicate()[0].strip()
+    stdout = p.communicate()[0].strip().decode("UTF-8")
     if p.returncode != 0:
         if verbose:
-            print "unable to run %%s (error)" %% args[0]
+            print("unable to run %%s (error)" %% args[0])
         return None
     return stdout
 
@@ -157,13 +157,13 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     refnames = variables["refnames"].strip()
     if refnames.startswith("$Format"):
         if verbose:
-            print "variables are unexpanded, not using"
+            print("variables are unexpanded, not using")
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     for ref in list(refs):
         if not re.search(r'\d', ref):
             if verbose:
-                print "discarding '%%s', no digits" %% ref
+                print("discarding '%%s', no digits" %% ref)
             refs.discard(ref)
             # Assume all version tags have a digit. git's %%d expansion
             # behaves like git log --decorate=short and strips out the
@@ -172,18 +172,18 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
             # without digits, we filter out many common branch names like
             # "release" and "stabilization", as well as "HEAD" and "master".
     if verbose:
-        print "remaining refs:", ",".join(sorted(refs))
+        print("remaining refs:", ",".join(sorted(refs)))
     for ref in sorted(refs):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
             if verbose:
-                print "picking %%s" %% r
+                print("picking %%s" %% r)
             return { "version": r,
                      "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
     if verbose:
-        print "no suitable tags, using full revision id"
+        print("no suitable tags, using full revision id")
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
@@ -215,7 +215,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         root = os.path.dirname(here)
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
-            print "no .git in", root
+            print("no .git in", root)
         return {}
 
     GIT = "git"
@@ -227,7 +227,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         return {}
     if not stdout.startswith(tag_prefix):
         if verbose:
-            print "tag '%%s' doesn't start with prefix '%%s'" %% (stdout, tag_prefix)
+            print("tag '%%s' doesn't start with prefix '%%s'" %% (stdout, tag_prefix))
         return {}
     tag = stdout[len(tag_prefix):]
     stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
@@ -266,8 +266,8 @@ def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False)
     dirname = os.path.basename(root)
     if not dirname.startswith(parentdir_prefix):
         if verbose:
-            print "guessing rootdir is '%%s', but '%%s' doesn't start with prefix '%%s'" %% \
-                  (root, dirname, parentdir_prefix)
+            print("guessing rootdir is '%%s', but '%%s' doesn't start with prefix '%%s'" %% \
+                  (root, dirname, parentdir_prefix))
         return None
     return {"version": dirname[len(parentdir_prefix):], "full": ""}
 
@@ -296,15 +296,15 @@ def run_command(args, cwd=None, verbose=False):
     try:
         # remember shell=False, so use git.cmd on windows, not just git
         p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
-    except EnvironmentError, e:
+    except EnvironmentError as e:
         if verbose:
-            print "unable to run %s" % args[0]
-            print e
+            print("unable to run %s" % args[0])
+            print(e)
         return None
-    stdout = p.communicate()[0].strip()
+    stdout = p.communicate()[0].strip().decode("UTF-8")
     if p.returncode != 0:
         if verbose:
-            print "unable to run %s (error)" % args[0]
+            print("unable to run %s (error)" % args[0])
         return None
     return stdout
 
@@ -337,13 +337,13 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     refnames = variables["refnames"].strip()
     if refnames.startswith("$Format"):
         if verbose:
-            print "variables are unexpanded, not using"
+            print("variables are unexpanded, not using")
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     for ref in list(refs):
         if not re.search(r'\d', ref):
             if verbose:
-                print "discarding '%s', no digits" % ref
+                print("discarding '%s', no digits" % ref)
             refs.discard(ref)
             # Assume all version tags have a digit. git's %d expansion
             # behaves like git log --decorate=short and strips out the
@@ -352,18 +352,18 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
             # without digits, we filter out many common branch names like
             # "release" and "stabilization", as well as "HEAD" and "master".
     if verbose:
-        print "remaining refs:", ",".join(sorted(refs))
+        print("remaining refs:", ",".join(sorted(refs)))
     for ref in sorted(refs):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
             if verbose:
-                print "picking %s" % r
+                print("picking %s" % r)
             return { "version": r,
                      "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
     if verbose:
-        print "no suitable tags, using full revision id"
+        print("no suitable tags, using full revision id")
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
@@ -395,7 +395,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         root = os.path.dirname(here)
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
-            print "no .git in", root
+            print("no .git in", root)
         return {}
 
     GIT = "git"
@@ -407,7 +407,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         return {}
     if not stdout.startswith(tag_prefix):
         if verbose:
-            print "tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix)
+            print("tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix))
         return {}
     tag = stdout[len(tag_prefix):]
     stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
@@ -446,8 +446,8 @@ def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False)
     dirname = os.path.basename(root)
     if not dirname.startswith(parentdir_prefix):
         if verbose:
-            print "guessing rootdir is '%s', but '%s' doesn't start with prefix '%s'" % \
-                  (root, dirname, parentdir_prefix)
+            print("guessing rootdir is '%s', but '%s' doesn't start with prefix '%s'" % \
+                  (root, dirname, parentdir_prefix))
         return None
     return {"version": dirname[len(parentdir_prefix):], "full": ""}
 
@@ -511,7 +511,7 @@ def write_to_version_file(filename, versions):
     f = open(filename, "w")
     f.write(SHORT_VERSION_PY % versions)
     f.close()
-    print "set %s to '%s'" % (filename, versions["version"])
+    print("set %s to '%s'" % (filename, versions["version"]))
 
 
 def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
@@ -528,25 +528,25 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
     if variables:
         ver = versions_from_expanded_variables(variables, tag_prefix)
         if ver:
-            if verbose: print "got version from expanded variable", ver
+            if verbose: print("got version from expanded variable", ver)
             return ver
 
     ver = versions_from_file(versionfile)
     if ver:
-        if verbose: print "got version from file %s" % versionfile, ver
+        if verbose: print("got version from file %s" % versionfile, ver)
         return ver
 
     ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
     if ver:
-        if verbose: print "got version from git", ver
+        if verbose: print("got version from git", ver)
         return ver
 
     ver = versions_from_parentdir(parentdir_prefix, versionfile_source, verbose)
     if ver:
-        if verbose: print "got version from parentdir", ver
+        if verbose: print("got version from parentdir", ver)
         return ver
 
-    if verbose: print "got version from default", ver
+    if verbose: print("got version from default", ver)
     return default
 
 def get_versions(default=DEFAULT, verbose=False):
@@ -568,7 +568,7 @@ class cmd_version(Command):
         pass
     def run(self):
         ver = get_version(verbose=True)
-        print "Version is currently:", ver
+        print("Version is currently:", ver)
 
 
 class cmd_build(_build):
@@ -578,7 +578,7 @@ class cmd_build(_build):
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
         target_versionfile = os.path.join(self.build_lib, versionfile_build)
-        print "UPDATING", target_versionfile
+        print("UPDATING", target_versionfile)
         os.unlink(target_versionfile)
         f = open(target_versionfile, "w")
         f.write(SHORT_VERSION_PY % versions)
@@ -597,7 +597,7 @@ class cmd_sdist(_sdist):
         # now locate _version.py in the new base_dir directory (remembering
         # that it may be a hardlink) and replace it with an updated value
         target_versionfile = os.path.join(base_dir, versionfile_source)
-        print "UPDATING", target_versionfile
+        print("UPDATING", target_versionfile)
         os.unlink(target_versionfile)
         f = open(target_versionfile, "w")
         f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
@@ -619,7 +619,7 @@ class cmd_update_files(Command):
         pass
     def run(self):
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
-        print " creating %s" % versionfile_source
+        print(" creating %s" % versionfile_source)
         f = open(versionfile_source, "w")
         f.write(LONG_VERSION_PY % {"DOLLAR": "$",
                                    "TAG_PREFIX": tag_prefix,
@@ -632,12 +632,12 @@ class cmd_update_files(Command):
         except EnvironmentError:
             old = ""
         if INIT_PY_SNIPPET not in old:
-            print " appending to %s" % ipy
+            print(" appending to %s" % ipy)
             f = open(ipy, "a")
             f.write(INIT_PY_SNIPPET)
             f.close()
         else:
-            print " %s unmodified" % ipy
+            print(" %s unmodified" % ipy)
         do_vcs_install(versionfile_source, ipy)
 
 def get_cmdclass():

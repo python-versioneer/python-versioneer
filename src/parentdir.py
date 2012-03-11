@@ -26,7 +26,7 @@ def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False)
     dirname = os.path.basename(root)
     if not dirname.startswith(parentdir_prefix):
         if verbose:
-            print "guessing rootdir is '%s', but '%s' doesn't start with prefix '%s'" % \
-                  (root, dirname, parentdir_prefix)
+            print("guessing rootdir is '%s', but '%s' doesn't start with prefix '%s'" % \
+                  (root, dirname, parentdir_prefix))
         return None
     return {"version": dirname[len(parentdir_prefix):], "full": ""}
