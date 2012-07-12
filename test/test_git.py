@@ -16,32 +16,32 @@ class Variables(unittest.TestCase):
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
-        self.failUnlessEqual(v["version"], "2.0")
-        self.failUnlessEqual(v["full"], "full")
+        self.assertEqual(v["version"], "2.0")
+        self.assertEqual(v["full"], "full")
 
     def test_prefer_short(self):
         v = self.parse(" (HEAD, 2.0rc1, 2.0, 2.0rc2) ", " full ")
-        self.failUnlessEqual(v["version"], "2.0")
-        self.failUnlessEqual(v["full"], "full")
+        self.assertEqual(v["version"], "2.0")
+        self.assertEqual(v["full"], "full")
 
     def test_prefix(self):
         v = self.parse(" (HEAD, projectname-2.0) ", " full ", "projectname-")
-        self.failUnlessEqual(v["version"], "2.0")
-        self.failUnlessEqual(v["full"], "full")
+        self.assertEqual(v["version"], "2.0")
+        self.assertEqual(v["full"], "full")
 
     def test_unexpanded(self):
         v = self.parse(" $Format$ ", " full ", "projectname-")
-        self.failUnlessEqual(v, {})
+        self.assertEqual(v, {})
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
-        self.failUnlessEqual(v["version"], "full")
-        self.failUnlessEqual(v["full"], "full")
+        self.assertEqual(v["version"], "full")
+        self.assertEqual(v["full"], "full")
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
-        self.failUnlessEqual(v["version"], "full")
-        self.failUnlessEqual(v["full"], "full")
+        self.assertEqual(v["version"], "full")
+        self.assertEqual(v["full"], "full")
 
 VERBOSE = False
 
@@ -91,19 +91,19 @@ class Repo(unittest.TestCase):
         self.git("commit", "-m", "comment")
 
         v = self.python("setup.py", "--version")
-        self.failUnlessEqual(v, "unknown")
+        self.assertEqual(v, "unknown")
         out = self.python("setup.py", "update_files").splitlines()
-        self.failUnlessEqual(out[0], "running update_files")
-        self.failUnlessEqual(out[1], " creating src/demo/_version.py")
-        self.failUnlessEqual(out[2], " appending to src/demo/__init__.py")
+        self.assertEqual(out[0], "running update_files")
+        self.assertEqual(out[1], " creating src/demo/_version.py")
+        self.assertEqual(out[2], " appending to src/demo/__init__.py")
         out = self.git("status", "--porcelain").splitlines()
-        self.failUnlessEqual(out[0], "A  .gitattributes")
-        self.failUnlessEqual(out[1], "M  src/demo/__init__.py")
-        self.failUnlessEqual(out[2], "A  src/demo/_version.py")
+        self.assertEqual(out[0], "A  .gitattributes")
+        self.assertEqual(out[1], "M  src/demo/__init__.py")
+        self.assertEqual(out[2], "A  src/demo/_version.py")
         i = open("_test/demoapp/src/demo/__init__.py").read().splitlines()
-        self.failUnlessEqual(i[-3], "from ._version import get_versions")
-        self.failUnlessEqual(i[-2], "__version__ = get_versions()['version']")
-        self.failUnlessEqual(i[-1], "del get_versions")
+        self.assertEqual(i[-3], "from ._version import get_versions")
+        self.assertEqual(i[-2], "__version__ = get_versions()['version']")
+        self.assertEqual(i[-1], "del get_versions")
         self.git("commit", "-m", "add _version stuff")
         self.git("tag", "demo-1.0")
         short = "1.0"
@@ -167,20 +167,20 @@ class Repo(unittest.TestCase):
             shutil.rmtree("_test/demoapp/dist")
         self.python("setup.py", "sdist", "--formats=tar")
         files = os.listdir("_test/demoapp/dist")
-        self.failUnless(len(files)==1, files)
+        self.assertTrue(len(files)==1, files)
         distfile = files[0]
-        self.failUnlessEqual(distfile, "demo-%s.tar" % exp_short)
+        self.assertEqual(distfile, "demo-%s.tar" % exp_short)
         fn = os.path.join("_test/demoapp/dist/", distfile)
         os.mkdir("_test/out/TE")
         tarfile.TarFile(fn).extractall(path="_test/out/TE")
         target = "_test/out/TE/demo-%s" % exp_short
-        self.failUnless(os.path.isdir(target))
+        self.assertTrue(os.path.isdir(target))
         self.check_version(target, exp_short, exp_long, False, state, tree="TE")
 
     def compare(self, got, expected, state, tree, runtime):
         where = "/".join([state, tree, runtime])
-        self.failUnlessEqual(got, expected, "%s: got '%s' != expected '%s'"
-                             % (where, got, expected))
+        self.assertEqual(got, expected, "%s: got '%s' != expected '%s'"
+                         % (where, got, expected))
         if VERBOSE: print(" good %s" % where)
 
     def check_version(self, workdir, exp_short, exp_long, dirty, state, tree):
