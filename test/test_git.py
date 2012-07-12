@@ -199,7 +199,8 @@ class Repo(unittest.TestCase):
         # RB: setup.py build; rundemo --version
         if os.path.exists(os.path.join(workdir, "build")):
             shutil.rmtree(os.path.join(workdir, "build"))
-        self.python("setup.py", "build", workdir=workdir)
+        self.python("setup.py", "build", "--build-lib=build/lib",
+                    "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
         # copy bin/rundemo into the build libdir, so we don't have to muck
         # with PYTHONPATH when we execute it
