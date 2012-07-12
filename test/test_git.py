@@ -108,7 +108,7 @@ class Repo(unittest.TestCase):
         self.git("tag", "demo-1.0")
         short = "1.0"
         full = self.git("rev-parse", "HEAD")
-        if VERBOSE: print "FULL", full
+        if VERBOSE: print("FULL %s" % full)
         # SA: the tree is now sitting on the 1.0 tag
         self.do_checks(short, full, dirty=False, state="SA")
 
@@ -181,15 +181,15 @@ class Repo(unittest.TestCase):
         where = "/".join([state, tree, runtime])
         self.failUnlessEqual(got, expected, "%s: got '%s' != expected '%s'"
                              % (where, got, expected))
-        if VERBOSE: print " good", where
+        if VERBOSE: print(" good %s" % where)
 
     def check_version(self, workdir, exp_short, exp_long, dirty, state, tree):
-        if VERBOSE: print "== starting", state, tree
+        if VERBOSE: print("== starting %s %s" % (state, tree))
         # RA: setup.py --version
         if VERBOSE:
             # setup.py version invokes cmd_version, which uses verbose=True
             # and has more boilerplate.
-            print self.python("setup.py", "version", workdir=workdir)
+            print(self.python("setup.py", "version", workdir=workdir))
         # setup.py --version gives us get_version() with verbose=False.
         v = self.python("setup.py", "--version", workdir=workdir)
         self.compare(v, exp_short, state, tree, "RA")
