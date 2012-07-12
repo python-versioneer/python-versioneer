@@ -13,6 +13,8 @@ def run_command(args, cwd=None, verbose=False):
             print(e)
         return None
     stdout = p.communicate()[0].strip()
+    if sys.version >= '3':
+        stdout = stdout.decode()
     if p.returncode != 0:
         if verbose:
             print("unable to run %s (error)" % args[0])
