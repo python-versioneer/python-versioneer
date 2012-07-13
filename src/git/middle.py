@@ -27,13 +27,13 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     refnames = variables["refnames"].strip()
     if refnames.startswith("$Format"):
         if verbose:
-            print "variables are unexpanded, not using"
+            print("variables are unexpanded, not using")
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     for ref in list(refs):
         if not re.search(r'\d', ref):
             if verbose:
-                print "discarding '%s', no digits" % ref
+                print("discarding '%s', no digits" % ref)
             refs.discard(ref)
             # Assume all version tags have a digit. git's %d expansion
             # behaves like git log --decorate=short and strips out the
@@ -42,18 +42,18 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
             # without digits, we filter out many common branch names like
             # "release" and "stabilization", as well as "HEAD" and "master".
     if verbose:
-        print "remaining refs:", ",".join(sorted(refs))
+        print("remaining refs: %s" % ",".join(sorted(refs)))
     for ref in sorted(refs):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix):]
             if verbose:
-                print "picking %s" % r
+                print("picking %s" % r)
             return { "version": r,
                      "full": variables["full"].strip() }
     # no suitable tags, so we use the full revision id
     if verbose:
-        print "no suitable tags, using full revision id"
+        print("no suitable tags, using full revision id")
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
@@ -85,7 +85,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         root = os.path.dirname(here)
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
-            print "no .git in", root
+            print("no .git in %s" % root)
         return {}
 
     GIT = "git"
@@ -97,7 +97,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         return {}
     if not stdout.startswith(tag_prefix):
         if verbose:
-            print "tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix)
+            print("tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix))
         return {}
     tag = stdout[len(tag_prefix):]
     stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
