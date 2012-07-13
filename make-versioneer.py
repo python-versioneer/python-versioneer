@@ -2,7 +2,7 @@
 def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
-    return s.replace("@VERSIONEER@", "0.7")
+    return s.replace("@VERSIONEER@", "0.7+")
 
 def create_script():
     vcs = "git"
