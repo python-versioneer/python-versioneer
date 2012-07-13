@@ -100,7 +100,9 @@ class Repo(unittest.TestCase):
         self.assertEqual(out[0], "A  .gitattributes")
         self.assertEqual(out[1], "M  src/demo/__init__.py")
         self.assertEqual(out[2], "A  src/demo/_version.py")
-        i = open("_test/demoapp/src/demo/__init__.py").read().splitlines()
+        f = open("_test/demoapp/src/demo/__init__.py")
+        i = f.read().splitlines()
+        f.close()
         self.assertEqual(i[-3], "from ._version import get_versions")
         self.assertEqual(i[-2], "__version__ = get_versions()['version']")
         self.assertEqual(i[-1], "del get_versions")
@@ -152,7 +154,9 @@ class Repo(unittest.TestCase):
         self.git("archive", "--format=tar", "--prefix=demoapp-TD/",
                  "--output=../demo.tar", "HEAD")
         os.mkdir("_test/out/TD")
-        tarfile.TarFile("_test/demo.tar").extractall(path="_test/out/TD")
+        t = tarfile.TarFile("_test/demo.tar")
+        t.extractall(path="_test/out/TD")
+        t.close()
         exp_short_TD = exp_short
         if state == "SC":
             # expanded variables only tell us about tags and full
@@ -172,7 +176,9 @@ class Repo(unittest.TestCase):
         self.assertEqual(distfile, "demo-%s.tar" % exp_short)
         fn = os.path.join("_test/demoapp/dist/", distfile)
         os.mkdir("_test/out/TE")
-        tarfile.TarFile(fn).extractall(path="_test/out/TE")
+        t = tarfile.TarFile(fn)
+        t.extractall(path="_test/out/TE")
+        t.close()
         target = "_test/out/TE/demo-%s" % exp_short
         self.assertTrue(os.path.isdir(target))
         self.check_version(target, exp_short, exp_long, False, state, tree="TE")
