@@ -27,6 +27,7 @@ def versions_from_file(filename):
         mo = re.match("version_full = '([^']+)'", line)
         if mo:
             versions["full"] = mo.group(1)
+    f.close()
     return versions
 
 def write_to_version_file(filename, versions):
