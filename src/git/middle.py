@@ -10,7 +10,8 @@ def get_expanded_variables(versionfile_source):
     # used from _version.py.
     variables = {}
     try:
-        for line in open(versionfile_source,"r").readlines():
+        f = open(versionfile_source,"r")
+        for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
@@ -19,6 +20,7 @@ def get_expanded_variables(versionfile_source):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
                     variables["full"] = mo.group(1)
+        f.close()
     except EnvironmentError:
         pass
     return variables
