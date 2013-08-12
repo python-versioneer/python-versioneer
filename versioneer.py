@@ -208,6 +208,10 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         # some py2exe/bbfreeze/non-CPython implementations don't do __file__
         return {} # not always correct
 
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
+
     # versionfile_source is the relative path from the top of the source tree
     # (where the .git directory might live) to this file. Invert this to find
     # the root from __file__.
@@ -216,15 +220,13 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         for i in range(len(versionfile_source.split("/"))):
             root = os.path.dirname(root)
     else:
-        root = os.path.dirname(here)
+        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"])
+        root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %%s" %% root)
         return {}
 
-    GIT = "git"
-    if sys.platform == "win32":
-        GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
@@ -392,6 +394,10 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         # some py2exe/bbfreeze/non-CPython implementations don't do __file__
         return {} # not always correct
 
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
+
     # versionfile_source is the relative path from the top of the source tree
     # (where the .git directory might live) to this file. Invert this to find
     # the root from __file__.
@@ -400,15 +406,13 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         for i in range(len(versionfile_source.split("/"))):
             root = os.path.dirname(root)
     else:
-        root = os.path.dirname(here)
+        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"])
+        root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
         return {}
 
-    GIT = "git"
-    if sys.platform == "win32":
-        GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
