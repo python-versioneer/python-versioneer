@@ -74,8 +74,8 @@ To use it:
      version=versioneer.get_version(),
      cmdclass=versioneer.get_cmdclass(),
  4: run 'setup.py update_files', which will create _version.py, and will
-    append the following to your __init__.py:
-     from _version import __version__
+    modify your __init__.py to define __version__ (by calling a function
+    from _version.py)
  5: modify your MANIFEST.in to include versioneer.py
  6: add both versioneer.py and the generated _version.py to your VCS
 """
