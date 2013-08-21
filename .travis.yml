@@ -6,6 +6,7 @@ python:
   - "3.3"
   - "pypy"
 install:
+  - echo "no dependencies to install"
 before_script:
   - git config --global user.email "foo@example.com"
   - git config --global user.name "foo"
