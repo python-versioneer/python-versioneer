@@ -221,5 +221,5 @@ class Repo(unittest.TestCase):
 
 if __name__ == '__main__':
     ver = run_command(["git", "--version"], ".", True)
-    print "git --version:", ver.strip()
+    print("git --version: %s" % ver.strip())
     unittest.main()
