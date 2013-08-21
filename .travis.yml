@@ -5,5 +5,8 @@ python:
   - "3.2"
   - "3.3"
   - "pypy"
+before_script:
+  - git config --global user.email "foo@example.com"
+  - git config --global user.name "foo"
 script:
   - python test/test_git.py
