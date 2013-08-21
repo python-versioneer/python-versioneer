@@ -6,4 +6,4 @@ python:
   - "3.3"
   - "pypy"
 script:
-  - test/test_git.py
+  - python test/test_git.py
