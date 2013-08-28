@@ -7,9 +7,13 @@ def do_vcs_install(versionfile_source, ipy):
         GIT = "git.cmd"
     files = [versionfile_source, ipy]
     try:
-        files.append(os.path.relpath(__file__))
+        me = __file__
+        if me.endswith(".pyc") or me.endswith(".pyo"):
+            me = os.path.splitext(me)[0] + ".py"
+        versioneer_file = os.path.relpath(me)
     except NameError:
-        files.append("versioneer.py")
+        versioneer_file = "versioneer.py"
+    files.append(versioneer_file)
     present = False
     try:
         f = open(".gitattributes", "r")
