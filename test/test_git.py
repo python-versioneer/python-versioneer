@@ -4,6 +4,7 @@ import os, sys
 import shutil
 import tarfile
 import unittest
+import tempfile
 
 sys.path.insert(0, "src")
 from git.middle import versions_from_expanded_variables
@@ -83,7 +84,7 @@ class Repo(unittest.TestCase):
     # SB for TB/TC/TD/TE, or RB.
 
     def test_full(self):
-        self.testdir = "_test"
+        self.testdir = tempfile.mkdtemp()
         if os.path.exists(self.testdir):
             shutil.rmtree(self.testdir)
         shutil.copytree("test/demoapp", self.subpath("demoapp"))
