@@ -92,7 +92,8 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         for i in range(len(versionfile_source.split("/"))):
             root = os.path.dirname(root)
     else:
-        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"])
+        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"],
+                               hide_stderr=True)
         root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:

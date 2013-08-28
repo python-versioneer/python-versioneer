@@ -113,10 +113,11 @@ git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 import subprocess
 import sys
 
-def run_command(args, cwd=None, verbose=False):
+def run_command(args, cwd=None, verbose=False, hide_stderr=False):
     try:
         # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
+        p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
+                             stderr=(subprocess.PIPE if hide_stderr else None))
     except EnvironmentError:
         e = sys.exc_info()[1]
         if verbose:
@@ -226,7 +227,8 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         for i in range(len(versionfile_source.split("/"))):
             root = os.path.dirname(root)
     else:
-        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"])
+        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"],
+                               hide_stderr=True)
         root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
@@ -305,10 +307,11 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
 import subprocess
 import sys
 
-def run_command(args, cwd=None, verbose=False):
+def run_command(args, cwd=None, verbose=False, hide_stderr=False):
     try:
         # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
+        p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
+                             stderr=(subprocess.PIPE if hide_stderr else None))
     except EnvironmentError:
         e = sys.exc_info()[1]
         if verbose:
@@ -418,7 +421,8 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         for i in range(len(versionfile_source.split("/"))):
             root = os.path.dirname(root)
     else:
-        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"])
+        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"],
+                               hide_stderr=True)
         root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:

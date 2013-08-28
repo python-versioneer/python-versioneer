@@ -2,10 +2,11 @@
 import subprocess
 import sys
 
-def run_command(args, cwd=None, verbose=False):
+def run_command(args, cwd=None, verbose=False, hide_stderr=False):
     try:
         # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
+        p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
+                             stderr=(subprocess.PIPE if hide_stderr else None))
     except EnvironmentError:
         e = sys.exc_info()[1]
         if verbose:
