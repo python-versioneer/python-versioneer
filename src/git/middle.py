@@ -104,6 +104,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
                          cwd=root)
     if stdout is None:
         return {}
+    # e.g. v1.1-23-g072281f , or v1.1-0-g44ee33f if we're on a tag
     if not stdout.startswith(tag_prefix):
         if verbose:
             print("tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix))
@@ -111,6 +112,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
 
     # Pop 'dirty' state (if present)
     git_version = stdout[len(tag_prefix):]
+    # now we have 1.1-23-g072281f or 1.1-0-g44ee33f
     dirty = git_version.endswith('-dirty')
     if dirty:
         git_version = git_version[:git_version.rindex('-dirty')]
@@ -129,6 +131,8 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
 
         # All remaining information is the tag's name itself
         tag = git_version
+
+        # now we have tag="1.1", distance="23", commit="072281f"
 
         # Version = tag + optionally added postrelease info
         version = tag
