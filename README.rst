@@ -85,6 +85,10 @@ tarballs), the process is:
  1: git tag 1.0
  2: git push; git push --tags
 
+Currently, all version strings must be based upon a tag. Versioneer will
+report "unknown" until your tree has at least one tag in its history. This
+restriction will be fixed eventually (see issue #12).
+
 
 Future Directions
 -----------------
