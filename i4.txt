@@ -1,0 +1,39 @@
+2.7.2
+
+build ->
+ build_py (if d.has_pure_modules)
+ build_clib (if d.has_c_libraries)
+ build_ext (if d.has_ext_modules)
+ build_scripts (if d.has_scripts)
+
+install ->
+ build (if not self.skip_build, sys.argv)
+ subcommands:
+  install_lib (if d.has_pure_modules() or has_ext_modules())
+  install_headers if d.has_headers()
+  install_scripts if d.has_scripts()
+  install_data if d.has_data_files()
+  install_egg_info (always)
+
+install_lib ->
+ self.build
+  build_py (if d.has_pure_modules)
+  build_ext (if d.has_ext_modules)
+ self.install
+  copy_tree()
+ maybe byte_compile()
+
+install_scripts ->
+ build_scripts
+ copy_tree()
+
+build_py ->
+ self.build_modules() (if self.py_modules)
+  copy stuff into build/
+ self.build_packages() (if self.packages)
+ self.build_package_data() (if self.packages)
+ self.byte_compile()
+
+build_scripts ->
+ copy stuff into build/bin/
+
