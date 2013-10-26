@@ -492,11 +492,22 @@ def write_to_version_file(filename, versions):
     print("set %s to '%s'" % (filename, versions["version"]))
 
 
-def get_best_versions(root, versionfile_abs,
-                      tag_prefix, parentdir_prefix,
-                      default=DEFAULT, verbose=False):
+def get_versions(default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
-    #
+    assert versionfile_source is not None, "please set versioneer.versionfile_source"
+    assert tag_prefix is not None, "please set versioneer.tag_prefix"
+    assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
+    # I am in versioneer.py, which must live at the top of the source tree,
+    # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
+    # don't have __file__, in which case we fall back to sys.argv[0] (which
+    # ought to be the setup.py script). We prefer __file__ since that's more
+    # robust in cases where setup.py was invoked in some weird way (e.g. pip)
+    try:
+        root = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        root = os.path.dirname(os.path.abspath(sys.argv[0]))
+    versionfile_abs = os.path.join(root, versionfile_source)
+
     # extract version from first of _version.py, 'git describe', parentdir.
     # This is meant to work for developers using a source checkout, for users
     # of a tarball created by 'setup.py sdist', and for users of a
@@ -528,23 +539,6 @@ def get_best_versions(root, versionfile_abs,
     if verbose: print("got version from default %s" % ver)
     return default
 
-def get_versions(default=DEFAULT, verbose=False):
-    assert versionfile_source is not None, "please set versioneer.versionfile_source"
-    assert tag_prefix is not None, "please set versioneer.tag_prefix"
-    assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
-    # I am in versioneer.py, which must live at the top of the source tree,
-    # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
-    # don't have __file__, in which case we fall back to sys.argv[0] (which
-    # ought to be the setup.py script). We prefer __file__ since that's more
-    # robust in cases where setup.py was invoked in some weird way (e.g. pip)
-    try:
-        root = os.path.dirname(os.path.abspath(__file__))
-    except NameError:
-        root = os.path.dirname(os.path.abspath(sys.argv[0]))
-    versionfile_abs = os.path.join(root, versionfile_source)
-    return get_best_versions(root, versionfile_abs,
-                             tag_prefix, parentdir_prefix,
-                             default=default, verbose=verbose)
 def get_version(verbose=False):
     return get_versions(verbose=verbose)["version"]
 
