@@ -86,7 +86,7 @@ class Repo(unittest.TestCase):
 
     def test_full(self):
         self.testdir = tempfile.mkdtemp()
-        if VERBOSE: print "testdir:", self.testdir
+        if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
             shutil.rmtree(self.testdir)
 
