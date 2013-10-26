@@ -76,8 +76,9 @@ class Repo(unittest.TestCase):
     #  TD: git-archive tarball
     #  TE: unpacked sdist tarball
     #
-    # In two runtime situations:
-    #  RA: setup.py --version
+    # In three runtime situations:
+    #  RA1: setup.py --version
+    #  RA2: ...path/to/setup.py --version (from outside the source tree)
     #  RB: setup.py build;  demoapp --version
     #
     # We can only detect dirty files in real git trees, so we don't examine
@@ -85,8 +86,22 @@ class Repo(unittest.TestCase):
 
     def test_full(self):
         self.testdir = tempfile.mkdtemp()
+        if VERBOSE: print "testdir:", self.testdir
         if os.path.exists(self.testdir):
             shutil.rmtree(self.testdir)
+
+        # create an unrelated git tree above the testdir. Some tests will run
+        # from this directory, and they should use the demoapp git
+        # environment instead of the deceptive parent
+        os.mkdir(self.testdir)
+        self.git("init", workdir=self.testdir)
+        f = open(os.path.join(self.testdir, "false-repo"), "w")
+        f.write("don't look at me\n")
+        f.close()
+        self.git("add", "false-repo", workdir=self.testdir)
+        self.git("commit", "-m", "first false commit", workdir=self.testdir)
+        self.git("tag", "demo-4.0", workdir=self.testdir)
+
         shutil.copytree("test/demoapp", self.subpath("demoapp"))
         shutil.copyfile("versioneer.py", self.subpath("demoapp/versioneer.py"))
         self.git("init")
@@ -95,6 +110,10 @@ class Repo(unittest.TestCase):
 
         v = self.python("setup.py", "--version")
         self.assertEqual(v, "unknown")
+        v = self.python(os.path.join(self.subpath("demoapp"), "setup.py"),
+                        "--version", workdir=self.testdir)
+        self.assertEqual(v, "unknown")
+
         out = self.python("setup.py", "update_files").splitlines()
         self.assertEqual(out[0], "running update_files")
         self.assertEqual(out[1], " creating src/demo/_version.py")
@@ -201,7 +220,12 @@ class Repo(unittest.TestCase):
             print(self.python("setup.py", "version", workdir=workdir))
         # setup.py --version gives us get_version() with verbose=False.
         v = self.python("setup.py", "--version", workdir=workdir)
-        self.compare(v, exp_short, state, tree, "RA")
+        self.compare(v, exp_short, state, tree, "RA1")
+        # and test again from outside the tree
+        v = self.python(os.path.join(workdir, "setup.py"), "--version",
+                        workdir=self.testdir)
+        self.compare(v, exp_short, state, tree, "RA2")
+
         if dirty:
             return # cannot detect dirty files in a build
 
