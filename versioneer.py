@@ -138,14 +138,14 @@ import sys
 import re
 import os.path
 
-def get_expanded_variables(versionfile_source):
+def get_expanded_variables(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
     # variables. When used from setup.py, we don't want to import
     # _version.py, so we do it with a regexp instead. This function is not
     # used from _version.py.
     variables = {}
     try:
-        f = open(versionfile_source,"r")
+        f = open(versionfile_abs,"r")
         for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)
@@ -198,43 +198,20 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
-def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
-    # this runs 'git' from the root of the source tree. That either means
-    # someone ran a setup.py command (and this code is in versioneer.py, so
-    # IN_LONG_VERSION_PY=False, thus the containing directory is the root of
-    # the source tree), or someone ran a project-specific entry point (and
-    # this code is in _version.py, so IN_LONG_VERSION_PY=True, thus the
-    # containing directory is somewhere deeper in the source tree). This only
-    # gets called if the git-archive 'subst' variables were *not* expanded,
-    # and _version.py hasn't already been rewritten with a short version
-    # string, meaning we're inside a checked out source tree.
+def versions_from_vcs(tag_prefix, root, verbose=False):
+    # this runs 'git' from the root of the source tree. This only gets called
+    # if the git-archive 'subst' variables were *not* expanded, and
+    # _version.py hasn't already been rewritten with a short version string,
+    # meaning we're inside a checked out source tree.
 
-    try:
-        here = os.path.abspath(__file__)
-    except NameError:
-        # some py2exe/bbfreeze/non-CPython implementations don't do __file__
-        return {} # not always correct
-
-    GIT = "git"
-    if sys.platform == "win32":
-        GIT = "git.cmd"
-
-    # versionfile_source is the relative path from the top of the source tree
-    # (where the .git directory might live) to this file. Invert this to find
-    # the root from __file__.
-    root = here
-    if IN_LONG_VERSION_PY:
-        for i in range(len(versionfile_source.split("/"))):
-            root = os.path.dirname(root)
-    else:
-        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"],
-                               hide_stderr=True)
-        root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %%s" %% root)
         return {}
 
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
@@ -253,28 +230,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
     return {"version": tag, "full": full}
 
 
-def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False):
-    if IN_LONG_VERSION_PY:
-        # We're running from _version.py. If it's from a source tree
-        # (execute-in-place), we can work upwards to find the root of the
-        # tree, and then check the parent directory for a version string. If
-        # it's in an installed application, there's no hope.
-        try:
-            here = os.path.abspath(__file__)
-        except NameError:
-            # py2exe/bbfreeze/non-CPython don't have __file__
-            return {} # without __file__, we have no hope
-        # versionfile_source is the relative path from the top of the source
-        # tree to _version.py. Invert this to find the root from __file__.
-        root = here
-        for i in range(len(versionfile_source.split("/"))):
-            root = os.path.dirname(root)
-    else:
-        # we're running from versioneer.py, which means we're running from
-        # the setup.py in a source tree. sys.argv[0] is setup.py in the root.
-        here = os.path.abspath(sys.argv[0])
-        root = os.path.dirname(here)
-
+def versions_from_parentdir(parentdir_prefix, root, verbose=False):
     # Source tarballs conventionally unpack into a directory that includes
     # both the project name and a version string.
     dirname = os.path.basename(root)
@@ -290,16 +246,29 @@ parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
 
 def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
+    # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
+    # __file__, we can work backwards from there to the root. Some
+    # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which
+    # case we can only use expanded variables.
+
     variables = { "refnames": git_refnames, "full": git_full }
     ver = versions_from_expanded_variables(variables, tag_prefix, verbose)
-    if not ver:
-        ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
-    if not ver:
-        ver = versions_from_parentdir(parentdir_prefix, versionfile_source,
-                                      verbose)
-    if not ver:
-        ver = default
-    return ver
+    if ver:
+        return ver
+
+    try:
+        root = os.path.abspath(__file__)
+        # versionfile_source is the relative path from the top of the source
+        # tree (where the .git directory might live) to this file. Invert
+        # this to find the root from __file__.
+        for i in range(len(versionfile_source.split("/"))):
+            root = os.path.dirname(root)
+    except NameError:
+        return default
+
+    return (versions_from_vcs(tag_prefix, root, verbose)
+            or versions_from_parentdir(parentdir_prefix, root, verbose)
+            or default)
 
 '''
 
@@ -332,14 +301,14 @@ import sys
 import re
 import os.path
 
-def get_expanded_variables(versionfile_source):
+def get_expanded_variables(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
     # variables. When used from setup.py, we don't want to import
     # _version.py, so we do it with a regexp instead. This function is not
     # used from _version.py.
     variables = {}
     try:
-        f = open(versionfile_source,"r")
+        f = open(versionfile_abs,"r")
         for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)
@@ -392,43 +361,20 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
-def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
-    # this runs 'git' from the root of the source tree. That either means
-    # someone ran a setup.py command (and this code is in versioneer.py, so
-    # IN_LONG_VERSION_PY=False, thus the containing directory is the root of
-    # the source tree), or someone ran a project-specific entry point (and
-    # this code is in _version.py, so IN_LONG_VERSION_PY=True, thus the
-    # containing directory is somewhere deeper in the source tree). This only
-    # gets called if the git-archive 'subst' variables were *not* expanded,
-    # and _version.py hasn't already been rewritten with a short version
-    # string, meaning we're inside a checked out source tree.
+def versions_from_vcs(tag_prefix, root, verbose=False):
+    # this runs 'git' from the root of the source tree. This only gets called
+    # if the git-archive 'subst' variables were *not* expanded, and
+    # _version.py hasn't already been rewritten with a short version string,
+    # meaning we're inside a checked out source tree.
 
-    try:
-        here = os.path.abspath(__file__)
-    except NameError:
-        # some py2exe/bbfreeze/non-CPython implementations don't do __file__
-        return {} # not always correct
-
-    GIT = "git"
-    if sys.platform == "win32":
-        GIT = "git.cmd"
-
-    # versionfile_source is the relative path from the top of the source tree
-    # (where the .git directory might live) to this file. Invert this to find
-    # the root from __file__.
-    root = here
-    if IN_LONG_VERSION_PY:
-        for i in range(len(versionfile_source.split("/"))):
-            root = os.path.dirname(root)
-    else:
-        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"],
-                               hide_stderr=True)
-        root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
         return {}
 
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
@@ -447,28 +393,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
     return {"version": tag, "full": full}
 
 
-def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False):
-    if IN_LONG_VERSION_PY:
-        # We're running from _version.py. If it's from a source tree
-        # (execute-in-place), we can work upwards to find the root of the
-        # tree, and then check the parent directory for a version string. If
-        # it's in an installed application, there's no hope.
-        try:
-            here = os.path.abspath(__file__)
-        except NameError:
-            # py2exe/bbfreeze/non-CPython don't have __file__
-            return {} # without __file__, we have no hope
-        # versionfile_source is the relative path from the top of the source
-        # tree to _version.py. Invert this to find the root from __file__.
-        root = here
-        for i in range(len(versionfile_source.split("/"))):
-            root = os.path.dirname(root)
-    else:
-        # we're running from versioneer.py, which means we're running from
-        # the setup.py in a source tree. sys.argv[0] is setup.py in the root.
-        here = os.path.abspath(sys.argv[0])
-        root = os.path.dirname(here)
-
+def versions_from_parentdir(parentdir_prefix, root, verbose=False):
     # Source tarballs conventionally unpack into a directory that includes
     # both the project name and a version string.
     dirname = os.path.basename(root)
@@ -567,7 +492,8 @@ def write_to_version_file(filename, versions):
     print("set %s to '%s'" % (filename, versions["version"]))
 
 
-def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
+def get_best_versions(root, versionfile_abs,
+                      tag_prefix, parentdir_prefix,
                       default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     #
@@ -577,24 +503,24 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    variables = get_expanded_variables(versionfile_source)
+    variables = get_expanded_variables(versionfile_abs)
     if variables:
         ver = versions_from_expanded_variables(variables, tag_prefix)
         if ver:
             if verbose: print("got version from expanded variable %s" % ver)
             return ver
 
-    ver = versions_from_file(versionfile)
+    ver = versions_from_file(versionfile_abs)
     if ver:
-        if verbose: print("got version from file %s %s" % (versionfile, ver))
+        if verbose: print("got version from file %s %s" % (versionfile_abs,ver))
         return ver
 
-    ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
+    ver = versions_from_vcs(tag_prefix, root, verbose)
     if ver:
         if verbose: print("got version from git %s" % ver)
         return ver
 
-    ver = versions_from_parentdir(parentdir_prefix, versionfile_source, verbose)
+    ver = versions_from_parentdir(parentdir_prefix, root, verbose)
     if ver:
         if verbose: print("got version from parentdir %s" % ver)
         return ver
@@ -606,7 +532,18 @@ def get_versions(default=DEFAULT, verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
-    return get_best_versions(versionfile_source, tag_prefix, parentdir_prefix,
+    # I am in versioneer.py, which must live at the top of the source tree,
+    # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
+    # don't have __file__, in which case we fall back to sys.argv[0] (which
+    # ought to be the setup.py script). We prefer __file__ since that's more
+    # robust in cases where setup.py was invoked in some weird way (e.g. pip)
+    try:
+        root = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        root = os.path.dirname(os.path.abspath(sys.argv[0]))
+    versionfile_abs = os.path.join(root, versionfile_source)
+    return get_best_versions(root, versionfile_abs,
+                             tag_prefix, parentdir_prefix,
                              default=default, verbose=verbose)
 def get_version(verbose=False):
     return get_versions(verbose=verbose)["version"]

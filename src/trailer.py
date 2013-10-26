@@ -37,7 +37,8 @@ def write_to_version_file(filename, versions):
     print("set %s to '%s'" % (filename, versions["version"]))
 
 
-def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
+def get_best_versions(root, versionfile_abs,
+                      tag_prefix, parentdir_prefix,
                       default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     #
@@ -47,24 +48,24 @@ def get_best_versions(versionfile, tag_prefix, parentdir_prefix,
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    variables = get_expanded_variables(versionfile_source)
+    variables = get_expanded_variables(versionfile_abs)
     if variables:
         ver = versions_from_expanded_variables(variables, tag_prefix)
         if ver:
             if verbose: print("got version from expanded variable %s" % ver)
             return ver
 
-    ver = versions_from_file(versionfile)
+    ver = versions_from_file(versionfile_abs)
     if ver:
-        if verbose: print("got version from file %s %s" % (versionfile, ver))
+        if verbose: print("got version from file %s %s" % (versionfile_abs,ver))
         return ver
 
-    ver = versions_from_vcs(tag_prefix, versionfile_source, verbose)
+    ver = versions_from_vcs(tag_prefix, root, verbose)
     if ver:
         if verbose: print("got version from git %s" % ver)
         return ver
 
-    ver = versions_from_parentdir(parentdir_prefix, versionfile_source, verbose)
+    ver = versions_from_parentdir(parentdir_prefix, root, verbose)
     if ver:
         if verbose: print("got version from parentdir %s" % ver)
         return ver
@@ -76,7 +77,18 @@ def get_versions(default=DEFAULT, verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
-    return get_best_versions(versionfile_source, tag_prefix, parentdir_prefix,
+    # I am in versioneer.py, which must live at the top of the source tree,
+    # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
+    # don't have __file__, in which case we fall back to sys.argv[0] (which
+    # ought to be the setup.py script). We prefer __file__ since that's more
+    # robust in cases where setup.py was invoked in some weird way (e.g. pip)
+    try:
+        root = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        root = os.path.dirname(os.path.abspath(sys.argv[0]))
+    versionfile_abs = os.path.join(root, versionfile_source)
+    return get_best_versions(root, versionfile_abs,
+                             tag_prefix, parentdir_prefix,
                              default=default, verbose=verbose)
 def get_version(verbose=False):
     return get_versions(verbose=verbose)["version"]

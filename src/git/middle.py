@@ -3,14 +3,14 @@ import sys
 import re
 import os.path
 
-def get_expanded_variables(versionfile_source):
+def get_expanded_variables(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
     # variables. When used from setup.py, we don't want to import
     # _version.py, so we do it with a regexp instead. This function is not
     # used from _version.py.
     variables = {}
     try:
-        f = open(versionfile_source,"r")
+        f = open(versionfile_abs,"r")
         for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)
@@ -63,43 +63,20 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
     return { "version": variables["full"].strip(),
              "full": variables["full"].strip() }
 
-def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
-    # this runs 'git' from the root of the source tree. That either means
-    # someone ran a setup.py command (and this code is in versioneer.py, so
-    # IN_LONG_VERSION_PY=False, thus the containing directory is the root of
-    # the source tree), or someone ran a project-specific entry point (and
-    # this code is in _version.py, so IN_LONG_VERSION_PY=True, thus the
-    # containing directory is somewhere deeper in the source tree). This only
-    # gets called if the git-archive 'subst' variables were *not* expanded,
-    # and _version.py hasn't already been rewritten with a short version
-    # string, meaning we're inside a checked out source tree.
+def versions_from_vcs(tag_prefix, root, verbose=False):
+    # this runs 'git' from the root of the source tree. This only gets called
+    # if the git-archive 'subst' variables were *not* expanded, and
+    # _version.py hasn't already been rewritten with a short version string,
+    # meaning we're inside a checked out source tree.
 
-    try:
-        here = os.path.abspath(__file__)
-    except NameError:
-        # some py2exe/bbfreeze/non-CPython implementations don't do __file__
-        return {} # not always correct
-
-    GIT = "git"
-    if sys.platform == "win32":
-        GIT = "git.cmd"
-
-    # versionfile_source is the relative path from the top of the source tree
-    # (where the .git directory might live) to this file. Invert this to find
-    # the root from __file__.
-    root = here
-    if IN_LONG_VERSION_PY:
-        for i in range(len(versionfile_source.split("/"))):
-            root = os.path.dirname(root)
-    else:
-        toplevel = run_command([GIT, "rev-parse", "--show-toplevel"],
-                               hide_stderr=True)
-        root = (toplevel.strip() if toplevel else os.path.dirname(here))
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
         return {}
 
+    GIT = "git"
+    if sys.platform == "win32":
+        GIT = "git.cmd"
     stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
