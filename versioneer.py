@@ -210,7 +210,7 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
     GIT = "git"
     if sys.platform == "win32":
         GIT = "git.cmd"
-    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
+    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always", "--long"],
                          cwd=root)
     if stdout is None:
         return {}
@@ -218,14 +218,43 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
         if verbose:
             print("tag '%%s' doesn't start with prefix '%%s'" %% (stdout, tag_prefix))
         return {}
-    tag = stdout[len(tag_prefix):]
+
+    # Pop 'dirty' state (if present)
+    git_version = stdout[len(tag_prefix):]
+    dirty = git_version.endswith('-dirty')
+    if dirty:
+        git_version = git_version[:git_version.rindex('-dirty')]
+
+    try:
+        # Pop commit short hash
+        idx = git_version.rindex('-g')
+        commit = git_version[idx+2:]
+        git_version = git_version[:idx]
+
+        # Pop commit-distance from tag, used for PEP-0440 compatibility
+        idx = git_version.rindex('-')
+        if re.match('^\d+$', git_version[idx+1:]):
+            distance = int(git_version[idx+1:])
+            git_version = git_version[:idx]
+
+        # All remaining information is the tag's name itself
+        tag = git_version
+
+        # Version = tag + optionally added postrelease info
+        version = tag
+        if distance:
+            version += '.post0.dev%%u' %% (distance,)
+    except ValueError:
+        commit = git_version
+        version = '0.dev0'
+
     stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
-    if tag.endswith("-dirty"):
+    if dirty:
         full += "-dirty"
-    return {"version": tag, "full": full}
+    return {"version": version, "full": full}
 
 
 def versions_from_parentdir(parentdir_prefix, root, verbose=False):
@@ -373,7 +402,7 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
     GIT = "git"
     if sys.platform == "win32":
         GIT = "git.cmd"
-    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
+    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always", "--long"],
                          cwd=root)
     if stdout is None:
         return {}
@@ -381,14 +410,43 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
         if verbose:
             print("tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix))
         return {}
-    tag = stdout[len(tag_prefix):]
+
+    # Pop 'dirty' state (if present)
+    git_version = stdout[len(tag_prefix):]
+    dirty = git_version.endswith('-dirty')
+    if dirty:
+        git_version = git_version[:git_version.rindex('-dirty')]
+
+    try:
+        # Pop commit short hash
+        idx = git_version.rindex('-g')
+        commit = git_version[idx+2:]
+        git_version = git_version[:idx]
+
+        # Pop commit-distance from tag, used for PEP-0440 compatibility
+        idx = git_version.rindex('-')
+        if re.match('^\d+$', git_version[idx+1:]):
+            distance = int(git_version[idx+1:])
+            git_version = git_version[:idx]
+
+        # All remaining information is the tag's name itself
+        tag = git_version
+
+        # Version = tag + optionally added postrelease info
+        version = tag
+        if distance:
+            version += '.post0.dev%u' % (distance,)
+    except ValueError:
+        commit = git_version
+        version = '0.dev0'
+
     stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
-    if tag.endswith("-dirty"):
+    if dirty:
         full += "-dirty"
-    return {"version": tag, "full": full}
+    return {"version": version, "full": full}
 
 
 def versions_from_parentdir(parentdir_prefix, root, verbose=False):
