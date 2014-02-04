@@ -83,7 +83,7 @@ To use it:
 import os, sys, re
 from distutils.core import Command
 from distutils.command.sdist import sdist as _sdist
-from distutils.command.build import build as _build
+from distutils.command.build_py import build_py as _build_py
 
 versionfile_source = None
 versionfile_build = None
