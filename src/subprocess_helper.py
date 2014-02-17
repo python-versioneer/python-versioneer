@@ -1,17 +1,30 @@
 
 import subprocess
 import sys
+import errno
 
-def run_command(args, cwd=None, verbose=False, hide_stderr=False):
-    try:
-        # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
-                             stderr=(subprocess.PIPE if hide_stderr else None))
-    except EnvironmentError:
-        e = sys.exc_info()[1]
+
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
+    assert isinstance(commands, list)
+    p = None
+    for c in commands:
+        try:
+            # remember shell=False, so use git.cmd on windows, not just git
+            p = subprocess.Popen([c] + args, cwd=cwd, stdout=subprocess.PIPE,
+                                 stderr=(subprocess.PIPE if hide_stderr
+                                         else None))
+            break
+        except EnvironmentError:
+            e = sys.exc_info()[1]
+            if e.errno == errno.ENOENT:
+                continue
+            if verbose:
+                print("unable to run %s" % args[0])
+                print(e)
+            return None
+    else:
         if verbose:
-            print("unable to run %s" % args[0])
-            print(e)
+            print("unable to find command, tried %s" % (commands,))
         return None
     stdout = p.communicate()[0].strip()
     if sys.version >= '3':

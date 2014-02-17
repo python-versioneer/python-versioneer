@@ -10,6 +10,10 @@ sys.path.insert(0, "src")
 from git.middle import versions_from_expanded_variables
 from subprocess_helper import run_command
 
+GITS = ["git"]
+if sys.platform == "win32":
+    GITS = ["git.cmd", "git.exe"]
+
 class Variables(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
         return versions_from_expanded_variables({"refnames": refnames,
@@ -50,14 +54,14 @@ class Repo(unittest.TestCase):
     def git(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.subpath("demoapp"))
         assert not kwargs, kwargs.keys()
-        output = run_command(["git"]+list(args), workdir, True)
+        output = run_command(GITS, list(args), workdir, True)
         if output is None:
             self.fail("problem running git")
         return output
     def python(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.subpath("demoapp"))
         assert not kwargs, kwargs.keys()
-        output = run_command([sys.executable]+list(args), workdir, True)
+        output = run_command([sys.executable], list(args), workdir, True)
         if output is None:
             self.fail("problem running python")
         return output
@@ -247,6 +251,6 @@ class Repo(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    ver = run_command(["git", "--version"], ".", True)
+    ver = run_command(GITS, ["--version"], ".", True)
     print("git --version: %s" % ver.strip())
     unittest.main()
