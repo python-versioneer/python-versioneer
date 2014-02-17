@@ -74,7 +74,7 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
             print("no .git in %s" % root)
         return {}
 
-    GITs = ["git"]
+    GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
     stdout = run_command(GITS, ["describe", "--tags", "--dirty", "--always"],

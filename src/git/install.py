@@ -20,7 +20,7 @@ def os_path_relpath(path, start=os.path.curdir):
     return os.path.join(*rel_list)
 
 def do_vcs_install(versionfile_source, ipy):
-    GITs = ["git"]
+    GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
     files = [versionfile_source, ipy]
