@@ -110,17 +110,30 @@ git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
 import subprocess
 import sys
+import errno
 
-def run_command(args, cwd=None, verbose=False, hide_stderr=False):
-    try:
-        # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
-                             stderr=(subprocess.PIPE if hide_stderr else None))
-    except EnvironmentError:
-        e = sys.exc_info()[1]
+
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
+    assert isinstance(commands, list)
+    p = None
+    for c in commands:
+        try:
+            # remember shell=False, so use git.cmd on windows, not just git
+            p = subprocess.Popen([c] + args, cwd=cwd, stdout=subprocess.PIPE,
+                                 stderr=(subprocess.PIPE if hide_stderr
+                                         else None))
+            break
+        except EnvironmentError:
+            e = sys.exc_info()[1]
+            if e.errno == errno.ENOENT:
+                continue
+            if verbose:
+                print("unable to run %%s" %% args[0])
+                print(e)
+            return None
+    else:
         if verbose:
-            print("unable to run %%s" %% args[0])
-            print(e)
+            print("unable to find command, tried %%s" %% (commands,))
         return None
     stdout = p.communicate()[0].strip()
     if sys.version >= '3':
@@ -207,10 +220,10 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
             print("no .git in %%s" %% root)
         return {}
 
-    GIT = "git"
+    GITs = ["git"]
     if sys.platform == "win32":
-        GIT = "git.cmd"
-    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
+        GITS = ["git.cmd", "git.exe"]
+    stdout = run_command(GITS, ["describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
         return {}
@@ -219,7 +232,7 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
             print("tag '%%s' doesn't start with prefix '%%s'" %% (stdout, tag_prefix))
         return {}
     tag = stdout[len(tag_prefix):]
-    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
+    stdout = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
@@ -273,17 +286,30 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
 
 import subprocess
 import sys
+import errno
 
-def run_command(args, cwd=None, verbose=False, hide_stderr=False):
-    try:
-        # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
-                             stderr=(subprocess.PIPE if hide_stderr else None))
-    except EnvironmentError:
-        e = sys.exc_info()[1]
+
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
+    assert isinstance(commands, list)
+    p = None
+    for c in commands:
+        try:
+            # remember shell=False, so use git.cmd on windows, not just git
+            p = subprocess.Popen([c] + args, cwd=cwd, stdout=subprocess.PIPE,
+                                 stderr=(subprocess.PIPE if hide_stderr
+                                         else None))
+            break
+        except EnvironmentError:
+            e = sys.exc_info()[1]
+            if e.errno == errno.ENOENT:
+                continue
+            if verbose:
+                print("unable to run %s" % args[0])
+                print(e)
+            return None
+    else:
         if verbose:
-            print("unable to run %s" % args[0])
-            print(e)
+            print("unable to find command, tried %s" % (commands,))
         return None
     stdout = p.communicate()[0].strip()
     if sys.version >= '3':
@@ -370,10 +396,10 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
             print("no .git in %s" % root)
         return {}
 
-    GIT = "git"
+    GITs = ["git"]
     if sys.platform == "win32":
-        GIT = "git.cmd"
-    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
+        GITS = ["git.cmd", "git.exe"]
+    stdout = run_command(GITS, ["describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
         return {}
@@ -382,7 +408,7 @@ def versions_from_vcs(tag_prefix, root, verbose=False):
             print("tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix))
         return {}
     tag = stdout[len(tag_prefix):]
-    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
+    stdout = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
@@ -423,9 +449,9 @@ def os_path_relpath(path, start=os.path.curdir):
     return os.path.join(*rel_list)
 
 def do_vcs_install(versionfile_source, ipy):
-    GIT = "git"
+    GITs = ["git"]
     if sys.platform == "win32":
-        GIT = "git.cmd"
+        GITS = ["git.cmd", "git.exe"]
     files = [versionfile_source, ipy]
     try:
         me = __file__
@@ -450,7 +476,7 @@ def do_vcs_install(versionfile_source, ipy):
         f.write("%s export-subst\n" % versionfile_source)
         f.close()
         files.append(".gitattributes")
-    run_command([GIT, "add", "--"] + files)
+    run_command(GITS, ["add", "--"] + files)
 
 SHORT_VERSION_PY = """
 # This file was generated by 'versioneer.py' (0.8+) from
