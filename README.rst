@@ -4,7 +4,7 @@ The Versioneer
 * https://github.com/warner/python-versioneer
 * Brian Warner
 * License: Public Domain
-* Compatible With: python2.5, 2.6, 2.7, and 3.2, 3.3
+* Compatible With: python2.6, 2.7, and 3.2, 3.3
 
 .. image:: https://travis-ci.org/warner/python-versioneer.png?branch=master
    :target: https://travis-ci.org/warner/python-versioneer
