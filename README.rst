@@ -16,6 +16,13 @@ release should be as easy as recording a new tag in your version-control
 system, and maybe making new tarballs.
 
 
+Quick Install
+-------------
+
+* download https://github.com/warner/python-versioneer/raw/master/versioneer.py
+* copy versioneer.py into the top of your source tree
+* follow the instructions in its docstring
+
 Version Identifiers
 -------------------
 
