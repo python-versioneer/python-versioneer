@@ -6,8 +6,7 @@ The Versioneer
 * License: Public Domain
 * Compatible With: python2.6, 2.7, and 3.2, 3.3
 
-.. image:: https://travis-ci.org/warner/python-versioneer.png?branch=master
-   :target: https://travis-ci.org/warner/python-versioneer
+[![Build Status](https://travis-ci.org/warner/python-versioneer.png?branch=master)](https://travis-ci.org/warner/python-versioneer)
 
 This is a tool for managing a recorded version number in distutils-based
 python projects. The goal is to remove the tedious and error-prone "update
@@ -16,15 +15,13 @@ release should be as easy as recording a new tag in your version-control
 system, and maybe making new tarballs.
 
 
-Quick Install
--------------
+## Quick Install
 
 * download https://github.com/warner/python-versioneer/raw/master/versioneer.py
 * copy versioneer.py into the top of your source tree
 * follow the instructions in its docstring
 
-Version Identifiers
--------------------
+## Version Identifiers
 
 Source trees come from a variety of places:
 
@@ -43,7 +40,7 @@ this tool is format-agnostic) can come from a variety of places:
   about recent "tags" and an absolute revision-id
 * the name of the directory into which the tarball was unpacked
 * an expanded VCS variable ($Id$, etc)
-* a _version.py created by some earlier build step
+* a `_version.py` created by some earlier build step
 
 For released software, the version identifier is closely related to a VCS
 tag. Some projects use tag names that include more than just the version
@@ -64,16 +61,15 @@ The version identifier is used for multiple purposes:
 * to choose a name and prefix for a 'setup.py sdist' tarball
 
 
-Theory Of Operation
--------------------
+## Theory Of Operation
 
 This tool currently provides one script, named "versioneer.py". To
 versioneer-enable your project, copy it into the top of your source tree,
 then follow the instructions in its docstring. This includes adding several
-lines to your setup.py (to teach the tool where your _version.py will live,
+lines to your setup.py (to teach the tool where your `_version.py` will live,
 what tags look like, and to intercept the 'build' and 'sdist' commands), and
 running the 'setup.py update_files' command (to create the initial
-_version.py, modify your __init__.py to use it, and help get all the new
+`_version.py`, modify your `__init__.py` to use it, and help get all the new
 files into revision control).
 
 Once established, all uses of your tree from a VCS checkout should get the
@@ -97,8 +93,7 @@ report "unknown" until your tree has at least one tag in its history. This
 restriction will be fixed eventually (see issue #12).
 
 
-Future Directions
------------------
+## Future Directions
 
 This tool is designed to make it easily extended to other version-control
 systems: all VCS-specific components are in separate directories like
@@ -112,8 +107,7 @@ direction and include code from all supported VCS systems, reducing the
 number of intermediate scripts.
 
 
-License
--------
+## License
 
 To make Versioneer easier to embed, all its code is hereby released into the
-public domain. The _version.py that it creates is also in the public domain.
+public domain. The `_version.py` that it creates is also in the public domain.
