@@ -116,10 +116,10 @@ This tool provides one script, named `versioneer.py`.
 
 To versioneer-enable your project:
 
-1: copy `versioneer.py` into the top of your source tree
+* 1: copy `versioneer.py` into the top of your source tree
 
-2: add the following lines to the top of your `setup.py`, with suitable
-   values for each configuration setting:
+* 2: add the following lines to the top of your `setup.py`, with suitable
+     values for each configuration setting:
 
     import versioneer
     versioneer.versionfile_source = 'src/myproject/_version.py'
@@ -127,19 +127,19 @@ To versioneer-enable your project:
     versioneer.tag_prefix = '' # tags are like 1.2.0
     versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
 
-3: add the following arguments to the setup() call in your setup.py:
+* 3: add the following arguments to the setup() call in your setup.py:
 
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
 
-4: run `setup.py update_files`, which will create `_version.py`, and will
-   modify your `__init__.py` to define `__version__` (by calling a function
-   from `_version.py`)
+* 4: run `setup.py update_files`, which will create `_version.py`, and will
+     modify your `__init__.py` to define `__version__` (by calling a function
+     from `_version.py`)
 
-5: modify your MANIFEST.in to include `versioneer.py` in sdist tarballs
+* 5: modify your MANIFEST.in to include `versioneer.py` in sdist tarballs
 
-6: commit these changes to your VCS. `update_files` will mark both
-`versioneer.py` and the generated `_version.py` for addition.
+* 6: commit these changes to your VCS. `update_files` will mark both
+     `versioneer.py` and the generated `_version.py` for addition.
 
 ## Post-Installation Usage
 
@@ -150,14 +150,14 @@ version string (so users who unpack them will not need a VCS tool installed).
 If you distribute your project through PyPI, then the release process should
 boil down to two steps:
 
- 1: git tag 1.0
- 2: python setup.py register sdist upload
+* 1: git tag 1.0
+* 2: python setup.py register sdist upload
 
 If you distribute it through github (i.e. users use github to generate
 tarballs with `git archive`), the process is:
 
- 1: git tag 1.0
- 2: git push; git push --tags
+* 1: git tag 1.0
+* 2: git push; git push --tags
 
 Currently, all version strings must be based upon a tag. Versioneer will
 report "unknown" until your tree has at least one tag in its history. This
