@@ -22,8 +22,8 @@ system, and maybe making new tarballs.
 
 ## Quick Install
 
-* download https://github.com/warner/python-versioneer/raw/master/versioneer.py
-* copy `versioneer.py` into the top of your source tree
+* `pip install versioneer` somewhere to your $PATH
+* run `versioneerer` in your source tree: installs `versioneer.py`
 * follow the instructions below
 
 ## Version Identifiers
