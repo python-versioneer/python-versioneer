@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 """versioneer.py
 
 (like a rocketeer, but for versions)
