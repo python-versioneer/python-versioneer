@@ -18,7 +18,7 @@ system, and maybe making new tarballs.
 ## Quick Install
 
 * download https://github.com/warner/python-versioneer/raw/master/versioneer.py
-* copy versioneer.py into the top of your source tree
+* copy `versioneer.py` into the top of your source tree
 * follow the instructions in its docstring
 
 ## Version Identifiers
@@ -57,13 +57,13 @@ uncommitted changes.
 
 The version identifier is used for multiple purposes:
 
-* to allow the module to self-identify its version: myproject.__version__
+* to allow the module to self-identify its version: `myproject.__version__`
 * to choose a name and prefix for a 'setup.py sdist' tarball
 
 
 ## Theory Of Operation
 
-This tool currently provides one script, named "versioneer.py". To
+This tool currently provides one script, named `versioneer.py`. To
 versioneer-enable your project, copy it into the top of your source tree,
 then follow the instructions in its docstring. This includes adding several
 lines to your setup.py (to teach the tool where your `_version.py` will live,
@@ -97,10 +97,10 @@ restriction will be fixed eventually (see issue #12).
 
 This tool is designed to make it easily extended to other version-control
 systems: all VCS-specific components are in separate directories like
-src/git/ . The top-level 'versioneer.py' script is assembled from these
+src/git/ . The top-level `versioneer.py` script is assembled from these
 components by running make-versioneer.py . In the future, make-versioneer.py
 will take a VCS name as an argument, and will construct a version of
-versioneer.py that is specific to the given VCS. It might also take the
+`versioneer.py` that is specific to the given VCS. It might also take the
 configuration arguments that are currently provided manually during
 installation by editing setup.py . Alternatively, it might go the other
 direction and include code from all supported VCS systems, reducing the
