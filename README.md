@@ -121,16 +121,16 @@ To versioneer-enable your project:
 * 2: add the following lines to the top of your `setup.py`, with suitable
      values for each configuration setting:
 
-    import versioneer
-    versioneer.versionfile_source = 'src/myproject/_version.py'
-    versioneer.versionfile_build = 'myproject/_version.py'
-    versioneer.tag_prefix = '' # tags are like 1.2.0
-    versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+        import versioneer
+        versioneer.versionfile_source = 'src/myproject/_version.py'
+        versioneer.versionfile_build = 'myproject/_version.py'
+        versioneer.tag_prefix = '' # tags are like 1.2.0
+        versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
 
 * 3: add the following arguments to the setup() call in your setup.py:
 
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+        version=versioneer.get_version(),
+        cmdclass=versioneer.get_cmdclass(),
 
 * 4: run `setup.py update_files`, which will create `_version.py`, and will
      modify your `__init__.py` to define `__version__` (by calling a function
