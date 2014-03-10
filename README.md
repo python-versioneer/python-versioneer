@@ -1,6 +1,7 @@
 The Versioneer
 ==============
 
+* like a rocketeer, but for versions!
 * https://github.com/warner/python-versioneer
 * Brian Warner
 * License: Public Domain
@@ -19,7 +20,7 @@ system, and maybe making new tarballs.
 
 * download https://github.com/warner/python-versioneer/raw/master/versioneer.py
 * copy `versioneer.py` into the top of your source tree
-* follow the instructions in its docstring
+* follow the instructions below
 
 ## Version Identifiers
 
@@ -60,17 +61,87 @@ The version identifier is used for multiple purposes:
 * to allow the module to self-identify its version: `myproject.__version__`
 * to choose a name and prefix for a 'setup.py sdist' tarball
 
+## Theory of Operation
 
-## Theory Of Operation
+Versioneer works by adding a special `_version.py` file into your source
+tree, where your `__init__.py` can import it. This _version.py knows how to
+dynamically ask the VCS tool for version information at import time. However,
+when you use "setup.py build" or "setup.py sdist", `_version.py` in the new
+copy is replaced by a small static file that contains just the generated
+version data.
 
-This tool currently provides one script, named `versioneer.py`. To
-versioneer-enable your project, copy it into the top of your source tree,
-then follow the instructions in its docstring. This includes adding several
-lines to your setup.py (to teach the tool where your `_version.py` will live,
-what tags look like, and to intercept the 'build' and 'sdist' commands), and
-running the 'setup.py update_files' command (to create the initial
-`_version.py`, modify your `__init__.py` to use it, and help get all the new
-files into revision control).
+`_version.py` also contains `$Revision$` markers, and the installation
+process marks _version.py to have this marker rewritten with a tag name
+during the "git archive" command. As a result, generated tarballs will
+contain enough information to get the proper version.
+
+
+## Installation
+
+You will need to provide versioneer with a few configuration variables:
+
+* `versionfile_source`:
+
+  A project-relative pathname into which the generated version strings should
+  be written. This is usually a _version.py next to your project's main
+  `__init__.py` file. If your project uses `src/myproject/__init__.py`, this
+  should be `src/myproject/_version.py`. This file should be checked in to
+  your VCS as usual: the copy created below by 'setup.py update_files' will
+  include code that parses expanded VCS keywords in generated tarballs. The
+  'build' and 'sdist' commands will replace it with a copy that has just the
+  calculated version string.
+
+*  `versionfile_build`:
+
+  Like `versionfile_source`, but relative to the build directory instead of
+  the source directory. These will differ when your setup.py uses
+  'package_dir='. If you have `package_dir={'myproject': 'src/myproject'}`,
+  then you will probably have `versionfile_build='myproject/_version.py'` and
+  `versionfile_source='src/myproject/_version.py'`.
+
+* `tag_prefix`:
+
+  a string, like 'PROJECTNAME-', which appears at the start of all VCS tags.
+  If your tags look like 'myproject-1.2.0', then you should use
+  tag_prefix='myproject-'. If you use unprefixed tags like '1.2.0', this
+  should be an empty string.
+
+* `parentdir_prefix`:
+
+  a string, frequently the same as tag_prefix, which appears at the start of
+  all unpacked tarball filenames. If your tarball unpacks into
+  'myproject-1.2.0', this should be 'myproject-'.
+
+This tool provides one script, named `versioneer.py`.
+
+To versioneer-enable your project:
+
+1: copy `versioneer.py` into the top of your source tree
+
+2: add the following lines to the top of your `setup.py`, with suitable
+   values for each configuration setting:
+
+    import versioneer
+    versioneer.versionfile_source = 'src/myproject/_version.py'
+    versioneer.versionfile_build = 'myproject/_version.py'
+    versioneer.tag_prefix = '' # tags are like 1.2.0
+    versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+
+3: add the following arguments to the setup() call in your setup.py:
+
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+
+4: run `setup.py update_files`, which will create `_version.py`, and will
+   modify your `__init__.py` to define `__version__` (by calling a function
+   from `_version.py`)
+
+5: modify your MANIFEST.in to include `versioneer.py` in sdist tarballs
+
+6: commit these changes to your VCS. `update_files` will mark both
+`versioneer.py` and the generated `_version.py` for addition.
+
+## Post-Installation Usage
 
 Once established, all uses of your tree from a VCS checkout should get the
 current version string. All generated tarballs should include an embedded
@@ -83,7 +154,7 @@ boil down to two steps:
  2: python setup.py register sdist upload
 
 If you distribute it through github (i.e. users use github to generate
-tarballs), the process is:
+tarballs with `git archive`), the process is:
 
  1: git tag 1.0
  2: git push; git push --tags

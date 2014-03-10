@@ -1,16 +1,19 @@
 
+def get(fn):
+    return open(fn, "r").read()
 def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
     return s.replace("@VERSIONEER@", "0.8+")
+def readme(s):
+    return s.replace("@README@", get("README.md"))
 
 def create_script():
     vcs = "git"
     if vcs not in ("git",):
         raise ValueError("Unhandled revision-control system '%s'" % vcs)
     f = open("versioneer.py", "w")
-    def get(fn): return open(fn, "r").read()
-    f.write(ver(get("src/header.py")))
+    f.write(readme(ver(get("src/header.py"))))
     f.write('VCS = "%s"\n' % vcs)
     f.write("\n\n")
     for line in open("src/%s/long-version.py" % vcs, "r").readlines():
