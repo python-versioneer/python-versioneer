@@ -64,14 +64,14 @@ The version identifier is used for multiple purposes:
 ## Theory of Operation
 
 Versioneer works by adding a special `_version.py` file into your source
-tree, where your `__init__.py` can import it. This _version.py knows how to
+tree, where your `__init__.py` can import it. This `_version.py` knows how to
 dynamically ask the VCS tool for version information at import time. However,
 when you use "setup.py build" or "setup.py sdist", `_version.py` in the new
 copy is replaced by a small static file that contains just the generated
 version data.
 
 `_version.py` also contains `$Revision$` markers, and the installation
-process marks _version.py to have this marker rewritten with a tag name
+process marks `_version.py` to have this marker rewritten with a tag name
 during the "git archive" command. As a result, generated tarballs will
 contain enough information to get the proper version.
 
@@ -83,7 +83,7 @@ You will need to provide versioneer with a few configuration variables:
 * `versionfile_source`:
 
   A project-relative pathname into which the generated version strings should
-  be written. This is usually a _version.py next to your project's main
+  be written. This is usually a `_version.py` next to your project's main
   `__init__.py` file. If your project uses `src/myproject/__init__.py`, this
   should be `src/myproject/_version.py`. This file should be checked in to
   your VCS as usual: the copy created below by 'setup.py update_files' will
@@ -181,4 +181,5 @@ number of intermediate scripts.
 ## License
 
 To make Versioneer easier to embed, all its code is hereby released into the
-public domain. The `_version.py` that it creates is also in the public domain.
+public domain. The `_version.py` that it creates is also in the public
+domain.
