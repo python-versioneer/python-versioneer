@@ -18,7 +18,7 @@ file of your choosing, where it can be included by your __init__.py
 
 For users who work from a VCS-generated tarball (e.g. 'git archive'), it will
 compute a version number by looking at the name of the directory created when
-te tarball is unpacked. This conventionally includes both the name of the
+the tarball is unpacked. This conventionally includes both the name of the
 project and a version number.
 
 For users who work from a tarball built by 'setup.py sdist', it will get a
