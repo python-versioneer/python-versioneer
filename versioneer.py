@@ -8,27 +8,43 @@
 * Version: 0.8+
 
 This file helps distutils-based projects manage their version number by just
-creating version-control tags.
+creating version-control tags. Stop manually updating a 'version.py'. Once
+you install versioneer into your source tree, then:
 
-For developers who work from a VCS-generated tree (e.g. 'git clone' etc),
-each 'setup.py version', 'setup.py build', 'setup.py sdist' will compute a
-version number by asking your version-control tool about the current
-checkout. The version number will be written into a generated _version.py
-file of your choosing, where it can be included by your __init__.py
+* running code from a source checkout (e.g. "git clone") will learn a version
+  string by asking your version-control tool about the current checkout ("git
+  status" and "git describe")
 
-For users who work from a VCS-generated tarball (e.g. 'git archive'), it will
-compute a version number by looking at the name of the directory created when
-the tarball is unpacked. This conventionally includes both the name of the
-project and a version number.
+* running "setup.py version" will report this deduced version string
 
-For users who work from a tarball built by 'setup.py sdist', it will get a
-version number from a previously-generated _version.py file.
+* creating a distribution tarball ("setup.py sdist") embeds the version in
+  the generated file, so downstream users do not need VCS tools or
+  versioneer.
 
-As a result, loading code directly from the source tree will not result in a
-real version. If you want real versions from VCS trees (where you frequently
-update from the upstream repository, or do new development), you will need to
-do a 'setup.py version' after each update, and load code from the build/
-directory.
+* VCS-generated tarballs ("git archive") use $Revision$ annotations to embed
+  the version string in the generated file, again allowing downstream users
+  to avoid the need for anything special.
+
+* as a last-ditch effort, running code from a non-annotated unpacked tarball
+  will still get the right version if the directory name follows the usual
+  "$projectname-$version" convention.
+
+This reduces the release engineer's workflow down to "git tag; git push",
+followed by an optional tarball-generation step (like "setup.py sdist
+upload").
+
+Versioneer works by adding a special "_version.py" file into your source
+tree, where your __init__.py can import it. This _version.py knows how to
+dynamically ask the VCS tool for version information at import time. However,
+when you use "setup.py build" or "setup.py sdist", _version.py in the new
+copy is replaced by a small static file that contains just the generated
+version data.
+
+"_version.py" also contains $Revision$ markers, and the installation process
+marks _version.py to have this marker rewritten with a tag name during the
+"git archive" command. As a result, generated tarballs will contain enough
+information to get the proper version.
+
 
 You need to provide this code with a few configuration values:
 
