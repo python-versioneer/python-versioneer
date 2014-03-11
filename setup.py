@@ -58,7 +58,7 @@ class make_versioneer(Command):
         pass
     def run(self):
         with open("versioneer.py", "w") as f:
-            f.write(generate_versioneer())
+            f.write(generate_versioneer().decode("utf8"))
         return 0
 
 class my_build_scripts(build_scripts):
