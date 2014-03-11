@@ -165,9 +165,12 @@ restriction will be fixed eventually (see issue #12).
 
 ## Version-String Flavors
 
-Code which uses Versioneer can learn about its version string by importing
-`_version` from your main `__init__.py` file and running the `get_versions()`
-method. This returns a dictionary with different keys for different flavors
+Code which uses Versioneer can learn about its version string at runtime by
+importing `_version` from your main `__init__.py` file and running the
+`get_versions()` function. From the "outside" (e.g. in `setup.py`), you can
+import the top-level `versioneer.py` and run `get_versions()`.
+
+Both functions return a dictionary with different keys for different flavors
 of the version string:
 
 * `['version']`: condensed tag+distance+shortid+dirty identifier. For git,
