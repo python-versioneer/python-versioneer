@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, base64, tempfile, StringIO
+import os, base64, tempfile
 from distutils.core import setup, Command
 from distutils.command.build_scripts import build_scripts
 
@@ -23,29 +23,29 @@ def generate_versioneer():
     vcs = "git"
     if vcs not in ("git",):
         raise ValueError("Unhandled revision-control system '%s'" % vcs)
-    f = StringIO.StringIO()
-    f.write(readme(ver(get("src/header.py"))))
-    f.write('VCS = "%s"\n' % vcs)
-    f.write("\n\n")
+    out = []
+    out.append(readme(ver(get("src/header.py"))))
+    out.append('VCS = "%s"\n' % vcs)
+    out.append("\n\n")
     for line in open("src/%s/long-version.py" % vcs, "r").readlines():
         if line.startswith("#### START"):
-            f.write("LONG_VERSION_PY = '''\n")
+            out.append("LONG_VERSION_PY = '''\n")
         elif line.startswith("#### SUBPROCESS_HELPER"):
-            f.write(unquote(get("src/subprocess_helper.py")))
+            out.append(unquote(get("src/subprocess_helper.py")))
         elif line.startswith("#### MIDDLE"):
-            f.write(unquote(get("src/%s/middle.py" % vcs)))
+            out.append(unquote(get("src/%s/middle.py" % vcs)))
         elif line.startswith("#### PARENTDIR"):
-            f.write(unquote(get("src/parentdir.py")))
+            out.append(unquote(get("src/parentdir.py")))
         elif line.startswith("#### END"):
-            f.write("'''\n")
+            out.append("'''\n")
         else:
-            f.write(ver(line))
-    f.write(get("src/subprocess_helper.py"))
-    f.write(get("src/%s/middle.py" % vcs))
-    f.write(get("src/parentdir.py"))
-    f.write(get("src/%s/install.py" % vcs))
-    f.write(ver(get("src/trailer.py")))
-    return f.getvalue()
+            out.append(ver(line))
+    out.append(get("src/subprocess_helper.py"))
+    out.append(get("src/%s/middle.py" % vcs))
+    out.append(get("src/parentdir.py"))
+    out.append(get("src/%s/install.py" % vcs))
+    out.append(ver(get("src/trailer.py")))
+    return ("".join(out)).encode("utf-8")
 
 
 class make_versioneer(Command):
@@ -64,7 +64,7 @@ class make_versioneer(Command):
 class my_build_scripts(build_scripts):
     def run(self):
         v = generate_versioneer()
-        v_b64 = base64.b64encode(v)
+        v_b64 = base64.b64encode(v).decode("ascii")
         lines = [v_b64[i:i+60] for i in range(0, len(v_b64), 60)]
         v_b64 = "\n".join(lines)+"\n"
 
