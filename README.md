@@ -190,11 +190,11 @@ developers). `version` is suitable for display in an "about" box or a CLI
 of bugs fixed in various releases.
 
 In the future, this will also include a
-[http://legacy.python.org/dev/peps/pep-0440/](PEP-440) -compatible flavor
-(e.g. `.post0.dev123`). This loses a lot of information (and has no place for
-a hash-based revision id), but is safe to use in a `setup.py` "`version=`"
-argument. It also enables tools like *pip* to compare version strings and
-evaluate compatibility constraint declarations.
+[PEP-0440](http://legacy.python.org/dev/peps/pep-0440/) -compatible flavor
+(e.g. `1.2.post0.dev123`). This loses a lot of information (and has no room
+for a hash-based revision id), but is safe to use in a `setup.py`
+"`version=`" argument. It also enables tools like *pip* to compare version
+strings and evaluate compatibility constraint declarations.
 
 The `setup.py update_files` command adds the following text to your
 `__init__.py` to place a basic version in `YOURPROJECT.__version__`:
