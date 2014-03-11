@@ -20,16 +20,16 @@ class my_build_scripts(build_scripts):
 
         with open("src/installer.py") as f:
             s = f.read()
-        s = s.replace("@VERSIONEER@", v_b64)
+        s = s.replace("@VERSIONEER-INSTALLER@", v_b64)
 
         tempdir = tempfile.mkdtemp()
-        versioneerer = os.path.join(tempdir, "versioneerer")
-        with open(versioneerer, "w") as f:
+        installer = os.path.join(tempdir, "versioneer-installer")
+        with open(installer, "w") as f:
             f.write(s)
 
-        self.scripts = [versioneerer]
+        self.scripts = [installer]
         rc = build_scripts.run(self)
-        os.unlink(versioneerer)
+        os.unlink(installer)
         os.rmdir(tempdir)
         return rc
 
@@ -41,7 +41,10 @@ setup(
     author = "Brian Warner",
     author_email = "warner@lothar.com",
     url = "https://github.com/warner/python-versioneer",
-    scripts = ["fake"], # replaced with "versioneerer" installer in build_scripts
+    # "fake" is replaced with versioneer-installer in build_scripts. We need
+    # a non-empty list to provoke "setup.py build" into making scripts,
+    # otherwise it skips that step.
+    scripts = ["fake"],
     long_description = LONG,
     cmdclass = { "build_scripts": my_build_scripts },
     )

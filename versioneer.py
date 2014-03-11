@@ -22,9 +22,9 @@ system, and maybe making new tarballs.
 
 ## Quick Install
 
-* `pip install versioneer` somewhere to your $PATH
-* run `versioneerer` in your source tree: installs `versioneer.py`
-* follow the instructions below
+* `pip install versioneer` to somewhere to your $PATH
+* run `versioneer-installer` in your source tree: this installs `versioneer.py`
+* follow the instructions below (also in the `versioneer.py` docstring)
 
 ## Version Identifiers
 
@@ -68,26 +68,26 @@ The version identifier is used for multiple purposes:
 ## Theory of Operation
 
 Versioneer works by adding a special `_version.py` file into your source
-tree, where your `__init__.py` can import it. This _version.py knows how to
+tree, where your `__init__.py` can import it. This `_version.py` knows how to
 dynamically ask the VCS tool for version information at import time. However,
 when you use "setup.py build" or "setup.py sdist", `_version.py` in the new
 copy is replaced by a small static file that contains just the generated
 version data.
 
 `_version.py` also contains `$Revision$` markers, and the installation
-process marks _version.py to have this marker rewritten with a tag name
+process marks `_version.py` to have this marker rewritten with a tag name
 during the "git archive" command. As a result, generated tarballs will
 contain enough information to get the proper version.
 
 
 ## Installation
 
-You will need to provide versioneer with a few configuration variables:
+First, decide on values for the following configuration variables:
 
 * `versionfile_source`:
 
   A project-relative pathname into which the generated version strings should
-  be written. This is usually a _version.py next to your project's main
+  be written. This is usually a `_version.py` next to your project's main
   `__init__.py` file. If your project uses `src/myproject/__init__.py`, this
   should be `src/myproject/_version.py`. This file should be checked in to
   your VCS as usual: the copy created below by 'setup.py update_files' will
@@ -116,34 +116,36 @@ You will need to provide versioneer with a few configuration variables:
   all unpacked tarball filenames. If your tarball unpacks into
   'myproject-1.2.0', this should be 'myproject-'.
 
-This tool provides one script, named `versioneer.py`.
+This tool provides one script, named `versioneer-installer`. That script does
+one thing: write a copy of `versioneer.py` into the current directory.
 
 To versioneer-enable your project:
 
-* 1: copy `versioneer.py` into the top of your source tree
+* 1: Run `versioneer-installer` to copy `versioneer.py` into the top of your
+  source tree.
 
-* 2: add the following lines to the top of your `setup.py`, with suitable
-     values for each configuration setting:
+* 2: add the following lines to the top of your `setup.py`, with the
+  configuration values you decided earlier:
 
-    import versioneer
-    versioneer.versionfile_source = 'src/myproject/_version.py'
-    versioneer.versionfile_build = 'myproject/_version.py'
-    versioneer.tag_prefix = '' # tags are like 1.2.0
-    versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+        import versioneer
+        versioneer.versionfile_source = 'src/myproject/_version.py'
+        versioneer.versionfile_build = 'myproject/_version.py'
+        versioneer.tag_prefix = '' # tags are like 1.2.0
+        versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
 
 * 3: add the following arguments to the setup() call in your setup.py:
 
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+        version=versioneer.get_version(),
+        cmdclass=versioneer.get_cmdclass(),
 
-* 4: run `setup.py update_files`, which will create `_version.py`, and will
-     modify your `__init__.py` to define `__version__` (by calling a function
-     from `_version.py`)
+* 4: now run `setup.py update_files`, which will create `_version.py`, and
+  will modify your `__init__.py` to define `__version__` (by calling a
+  function from `_version.py`)
 
 * 5: modify your MANIFEST.in to include `versioneer.py` in sdist tarballs
 
 * 6: commit these changes to your VCS. `update_files` will mark both
-     `versioneer.py` and the generated `_version.py` for addition.
+  `versioneer.py` and the generated `_version.py` for addition.
 
 ## Post-Installation Usage
 
@@ -185,7 +187,8 @@ number of intermediate scripts.
 ## License
 
 To make Versioneer easier to embed, all its code is hereby released into the
-public domain. The `_version.py` that it creates is also in the public domain.
+public domain. The `_version.py` that it creates is also in the public
+domain.
 
 """
 

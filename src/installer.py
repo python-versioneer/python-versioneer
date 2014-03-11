@@ -3,7 +3,7 @@
 import base64
 
 VERSIONEER_b64 = """
-@VERSIONEER@
+@VERSIONEER-INSTALLER@
 """
 
 v = base64.b64decode(VERSIONEER_b64)
