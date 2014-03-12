@@ -113,6 +113,25 @@ class cmd_build(_build):
         f.write(SHORT_VERSION_PY % versions)
         f.close()
 
+class cmd_build_exe(_build_exe):
+    def run(self):
+        versions = get_versions(verbose=True)
+        target_versionfile = versionfile_source
+        print("UPDATING %s" % target_versionfile)
+        os.unlink(target_versionfile)
+        f = open(target_versionfile, "w")
+        f.write(SHORT_VERSION_PY % versions)
+        f.close()
+        _build_exe.run(self)
+        os.unlink(target_versionfile)
+        f = open(versionfile_source, "w")
+        f.write(LONG_VERSION_PY % {"DOLLAR": "$",
+                                   "TAG_PREFIX": tag_prefix,
+                                   "PARENTDIR_PREFIX": parentdir_prefix,
+                                   "VERSIONFILE_SOURCE": versionfile_source,
+                                   })
+        f.close()
+
 class cmd_sdist(_sdist):
     def run(self):
         versions = get_versions(verbose=True)
@@ -170,8 +189,13 @@ class cmd_update_files(Command):
         do_vcs_install(versionfile_source, ipy)
 
 def get_cmdclass():
-    return {'version': cmd_version,
+    cmds = {'version': cmd_version,
             'update_files': cmd_update_files,
             'build': cmd_build,
             'sdist': cmd_sdist,
             }
+    if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
+        cmds['build_exe'] = cmd_build_exe
+        del cmds['build']
+
+    return cmds
