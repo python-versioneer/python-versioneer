@@ -1,0 +1,11 @@
+# we need to include a lot, because this package isn't really made up of
+# packages
+
+include MANIFEST.in README.md .travis.yml NOTES
+recursive-include src *.py
+recursive-include test *.py
+include test/demoapp/bin/rundemo
+include test/demoapp/MANIFEST.in
+include test/demoapp/README
+include test/demoapp/setup.py
+include test/demoapp/src/demo/__init__.py

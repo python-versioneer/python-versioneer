@@ -1,3 +1,5 @@
 /_test/
 /build/
 /versioneer.py
+/MANIFEST
+/dist/
