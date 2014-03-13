@@ -1,5 +1,5 @@
 
-# Version: @VERSIONEER@
+# Version: @VERSIONEER-VERSION@
 
 """
 @README@

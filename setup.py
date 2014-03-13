@@ -10,12 +10,15 @@ the conventional 'from PROJECT import _version' pattern) by asking your
 version-control system about the current tree.
 """
 
+# as nice as it'd be to versioneer ourselves, that sounds messy.
+VERSION = "0.8+"
+
 def get(fn):
     return open(fn, "r").read()
 def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
-    return s.replace("@VERSIONEER@", "0.8+")
+    return s.replace("@VERSIONEER-VERSION@", VERSION)
 def readme(s):
     return s.replace("@README@", get("README.md"))
 
@@ -70,7 +73,7 @@ class my_build_scripts(build_scripts):
 
         with open("src/installer.py") as f:
             s = f.read()
-        s = s.replace("@VERSIONEER-INSTALLER@", v_b64)
+        s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
 
         tempdir = tempfile.mkdtemp()
         installer = os.path.join(tempdir, "versioneer-installer")
@@ -86,7 +89,7 @@ class my_build_scripts(build_scripts):
 setup(
     name = "versioneer",
     license = "public domain",
-    version = "0.8+",
+    version = VERSION,
     description = "Easy VCS-based management of project version strings",
     author = "Brian Warner",
     author_email = "warner-versioneer@lothar.com",

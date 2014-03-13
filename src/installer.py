@@ -11,5 +11,5 @@ if os.path.exists("versioneer.py"):
     print "overwriting existing versioneer.py"
 with open("versioneer.py", "w") as f:
     f.write(v)
-print "versioneer.py installed into local tree"
+print "versioneer.py (@VERSIONEER-VERSION@) installed into local tree"
 print "Now please follow instructions in the docstring."
