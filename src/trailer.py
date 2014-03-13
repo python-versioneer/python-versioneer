@@ -114,26 +114,26 @@ class cmd_build(_build):
         f.close()
 
 if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
-  from cx_Freeze.dist import build_exe as _build_exe
+    from cx_Freeze.dist import build_exe as _build_exe
 
-  class cmd_build_exe(_build_exe):
-      def run(self):
-          versions = get_versions(verbose=True)
-          target_versionfile = versionfile_source
-          print("UPDATING %s" % target_versionfile)
-          os.unlink(target_versionfile)
-          f = open(target_versionfile, "w")
-          f.write(SHORT_VERSION_PY % versions)
-          f.close()
-          _build_exe.run(self)
-          os.unlink(target_versionfile)
-          f = open(versionfile_source, "w")
-          f.write(LONG_VERSION_PY % {"DOLLAR": "$",
-                                     "TAG_PREFIX": tag_prefix,
-                                     "PARENTDIR_PREFIX": parentdir_prefix,
-                                     "VERSIONFILE_SOURCE": versionfile_source,
-                                     })
-          f.close()
+    class cmd_build_exe(_build_exe):
+        def run(self):
+            versions = get_versions(verbose=True)
+            target_versionfile = versionfile_source
+            print("UPDATING %s" % target_versionfile)
+            os.unlink(target_versionfile)
+            f = open(target_versionfile, "w")
+            f.write(SHORT_VERSION_PY % versions)
+            f.close()
+            _build_exe.run(self)
+            os.unlink(target_versionfile)
+            f = open(versionfile_source, "w")
+            f.write(LONG_VERSION_PY % {"DOLLAR": "$",
+                                       "TAG_PREFIX": tag_prefix,
+                                       "PARENTDIR_PREFIX": parentdir_prefix,
+                                       "VERSIONFILE_SOURCE": versionfile_source,
+                                       })
+            f.close()
 
 class cmd_sdist(_sdist):
     def run(self):
