@@ -11,7 +11,7 @@ version-control system about the current tree.
 """
 
 # as nice as it'd be to versioneer ourselves, that sounds messy.
-VERSION = "0.8+"
+VERSION = "0.9"
 
 def get(fn):
     return open(fn, "r").read()
