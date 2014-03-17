@@ -122,10 +122,13 @@ class Repo(unittest.TestCase):
         self.assertEqual(out[0], "running update_files")
         self.assertEqual(out[1], " creating src/demo/_version.py")
         self.assertEqual(out[2], " appending to src/demo/__init__.py")
+        self.assertEqual(out[3], " appending 'versioneer.py' to MANIFEST.in")
+        self.assertEqual(out[4], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
         out = self.git("status", "--porcelain").splitlines()
         self.assertEqual(out[0], "A  .gitattributes")
-        self.assertEqual(out[1], "M  src/demo/__init__.py")
-        self.assertEqual(out[2], "A  src/demo/_version.py")
+        self.assertEqual(out[1], "A  MANIFEST.in")
+        self.assertEqual(out[2], "M  src/demo/__init__.py")
+        self.assertEqual(out[3], "A  src/demo/_version.py")
         f = open(self.subpath("demoapp/src/demo/__init__.py"))
         i = f.read().splitlines()
         f.close()
@@ -133,6 +136,17 @@ class Repo(unittest.TestCase):
         self.assertEqual(i[-2], "__version__ = get_versions()['version']")
         self.assertEqual(i[-1], "del get_versions")
         self.git("commit", "-m", "add _version stuff")
+
+        # "setup.py update_files" should be idempotent
+        out = self.python("setup.py", "update_files").splitlines()
+        self.assertEqual(out[0], "running update_files")
+        self.assertEqual(out[1], " creating src/demo/_version.py")
+        self.assertEqual(out[2], " src/demo/__init__.py unmodified")
+        self.assertEqual(out[3], " 'versioneer.py' already in MANIFEST.in")
+        self.assertEqual(out[4], " versionfile_source already in MANIFEST.in")
+        out = self.git("status", "--porcelain").splitlines()
+        self.assertEqual(out, [])
+
         self.git("tag", "demo-1.0")
         short = "1.0"
         full = self.git("rev-parse", "HEAD")

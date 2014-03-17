@@ -36,6 +36,11 @@ def write_to_version_file(filename, versions):
     f.close()
     print("set %s to '%s'" % (filename, versions["version"]))
 
+def get_root():
+    try:
+        return os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        return os.path.dirname(os.path.abspath(sys.argv[0]))
 
 def get_versions(default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
@@ -47,10 +52,7 @@ def get_versions(default=DEFAULT, verbose=False):
     # don't have __file__, in which case we fall back to sys.argv[0] (which
     # ought to be the setup.py script). We prefer __file__ since that's more
     # robust in cases where setup.py was invoked in some weird way (e.g. pip)
-    try:
-        root = os.path.dirname(os.path.abspath(__file__))
-    except NameError:
-        root = os.path.dirname(os.path.abspath(sys.argv[0]))
+    root = get_root()
     versionfile_abs = os.path.join(root, versionfile_source)
 
     # extract version from first of _version.py, 'git describe', parentdir.
@@ -169,7 +171,6 @@ class cmd_update_files(Command):
     def finalize_options(self):
         pass
     def run(self):
-        ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
         print(" creating %s" % versionfile_source)
         f = open(versionfile_source, "w")
         f.write(LONG_VERSION_PY % {"DOLLAR": "$",
@@ -178,6 +179,8 @@ class cmd_update_files(Command):
                                    "VERSIONFILE_SOURCE": versionfile_source,
                                    })
         f.close()
+
+        ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
         try:
             old = open(ipy, "r").read()
         except EnvironmentError:
@@ -189,7 +192,44 @@ class cmd_update_files(Command):
             f.close()
         else:
             print(" %s unmodified" % ipy)
-        do_vcs_install(versionfile_source, ipy)
+
+        # Make sure both the top-level "versioneer.py" and versionfile_source
+        # (PKG/_version.py, used by runtime code) are in MANIFEST.in, so
+        # they'll be copied into source distributions. Pip won't be able to
+        # install the package without this.
+        manifest_in = os.path.join(get_root(), "MANIFEST.in")
+        simple_includes = set()
+        try:
+            for line in open(manifest_in, "r").readlines():
+                if line.startswith("include "):
+                    for include in line.split()[1:]:
+                        simple_includes.add(include)
+        except EnvironmentError:
+            pass
+        # That doesn't cover everything MANIFEST.in can do
+        # (http://docs.python.org/2/distutils/sourcedist.html#commands), so
+        # it might give some false negatives. Appending redundant 'include'
+        # lines is safe, though.
+        if "versioneer.py" not in simple_includes:
+            print(" appending 'versioneer.py' to MANIFEST.in")
+            f = open(manifest_in, "a")
+            f.write("include versioneer.py\n")
+            f.close()
+        else:
+            print(" 'versioneer.py' already in MANIFEST.in")
+        if versionfile_source not in simple_includes:
+            print(" appending versionfile_source ('%s') to MANIFEST.in" %
+                  versionfile_source)
+            f = open(manifest_in, "a")
+            f.write("include %s\n" % versionfile_source)
+            f.close()
+        else:
+            print(" versionfile_source already in MANIFEST.in")
+
+        # Make VCS-specific changes. For git, this means creating/changing
+        # .gitattributes to mark _version.py for export-time keyword
+        # substitution.
+        do_vcs_install(manifest_in, versionfile_source, ipy)
 
 def get_cmdclass():
     cmds = {'version': cmd_version,
