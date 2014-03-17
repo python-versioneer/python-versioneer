@@ -19,11 +19,11 @@ def os_path_relpath(path, start=os.path.curdir):
         return os.path.curdir
     return os.path.join(*rel_list)
 
-def do_vcs_install(versionfile_source, ipy):
+def do_vcs_install(manifest_in, versionfile_source, ipy):
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
-    files = [versionfile_source, ipy]
+    files = [manifest_in, versionfile_source, ipy]
     try:
         me = __file__
         if me.endswith(".pyc") or me.endswith(".pyo"):

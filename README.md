@@ -134,12 +134,12 @@ To versioneer-enable your project:
 
 * 4: now run `setup.py update_files`, which will create `_version.py`, and
   will modify your `__init__.py` to define `__version__` (by calling a
-  function from `_version.py`)
+  function from `_version.py`). It will also modify your `MANIFEST.in` to
+  include both `versioneer.py` and the generated `_version.py` in sdist
+  tarballs.
 
-* 5: modify your MANIFEST.in to include `versioneer.py` in sdist tarballs
-
-* 6: commit these changes to your VCS. `update_files` will mark both
-  `versioneer.py` and the generated `_version.py` for addition.
+* 5: commit these changes to your VCS. To make sure you won't forget,
+  `update_files` will mark everything it touched for addition.
 
 ## Post-Installation Usage
 
