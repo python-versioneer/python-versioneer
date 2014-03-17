@@ -128,6 +128,7 @@ class Repo(unittest.TestCase):
         # Many folks have a ~/.gitignore with ignores .pyc files, but if they
         # don't, it will show up in the status here. Ignore it.
         out.discard("?? versioneer.pyc")
+        out.discard("?? __pycache__/")
         self.assertEqual(out, set(["A  .gitattributes",
                                    "A  MANIFEST.in",
                                    "M  src/demo/__init__.py",
@@ -149,6 +150,7 @@ class Repo(unittest.TestCase):
         self.assertEqual(out[4], " versionfile_source already in MANIFEST.in")
         out = set(self.git("status", "--porcelain").splitlines())
         out.discard("?? versioneer.pyc")
+        out.discard("?? __pycache__/")
         self.assertEqual(out, set([]))
 
         self.git("tag", "demo-1.0")
