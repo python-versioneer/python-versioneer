@@ -84,7 +84,7 @@ First, decide on values for the following configuration variables:
   be written. This is usually a `_version.py` next to your project's main
   `__init__.py` file. If your project uses `src/myproject/__init__.py`, this
   should be `src/myproject/_version.py`. This file should be checked in to
-  your VCS as usual: the copy created below by 'setup.py update_files' will
+  your VCS as usual: the copy created below by `setup.py versioneer` will
   include code that parses expanded VCS keywords in generated tarballs. The
   'build' and 'sdist' commands will replace it with a copy that has just the
   calculated version string.
@@ -132,14 +132,14 @@ To versioneer-enable your project:
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
 
-* 4: now run `setup.py update_files`, which will create `_version.py`, and
+* 4: now run `setup.py versioneer`, which will create `_version.py`, and
   will modify your `__init__.py` to define `__version__` (by calling a
   function from `_version.py`). It will also modify your `MANIFEST.in` to
   include both `versioneer.py` and the generated `_version.py` in sdist
   tarballs.
 
 * 5: commit these changes to your VCS. To make sure you won't forget,
-  `update_files` will mark everything it touched for addition.
+  `setup.py versioneer` will mark everything it touched for addition.
 
 ## Post-Installation Usage
 
@@ -199,12 +199,22 @@ for a hash-based revision id), but is safe to use in a `setup.py`
 "`version=`" argument. It also enables tools like *pip* to compare version
 strings and evaluate compatibility constraint declarations.
 
-The `setup.py update_files` command adds the following text to your
+The `setup.py versioneer` command adds the following text to your
 `__init__.py` to place a basic version in `YOURPROJECT.__version__`:
 
     from ._version import get_versions
     __version = get_versions()['version']
     del get_versions
+
+## Updating Versioneer
+
+To upgrade your project to a new release of Versioneer, do the following:
+
+* install the new Versioneer (`pip install -U versioneer` or equivalent)
+* re-run `versioneer-installer` in your source tree to replace `versioneer.py`
+* edit `setup.py`, if necessary, to include any new configuration settings indicated by the release notes
+* re-run `setup.py versioneer` to replace `SRC/_version.py`
+* commit any changed files
 
 ## Future Directions
 

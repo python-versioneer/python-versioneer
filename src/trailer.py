@@ -163,7 +163,7 @@ del get_versions
 """
 
 class cmd_update_files(Command):
-    description = "modify __init__.py and create _version.py"
+    description = "install/upgrade Versioneer files: __init__.py SRC/_version.py"
     user_options = []
     boolean_options = []
     def initialize_options(self):
@@ -233,7 +233,7 @@ class cmd_update_files(Command):
 
 def get_cmdclass():
     cmds = {'version': cmd_version,
-            'update_files': cmd_update_files,
+            'versioneer': cmd_update_files,
             'build': cmd_build,
             'sdist': cmd_sdist,
             }

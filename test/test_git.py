@@ -118,8 +118,8 @@ class Repo(unittest.TestCase):
                         "--version", workdir=self.testdir)
         self.assertEqual(v, "unknown")
 
-        out = self.python("setup.py", "update_files").splitlines()
-        self.assertEqual(out[0], "running update_files")
+        out = self.python("setup.py", "versioneer").splitlines()
+        self.assertEqual(out[0], "running versioneer")
         self.assertEqual(out[1], " creating src/demo/_version.py")
         self.assertEqual(out[2], " appending to src/demo/__init__.py")
         self.assertEqual(out[3], " appending 'versioneer.py' to MANIFEST.in")
@@ -141,9 +141,9 @@ class Repo(unittest.TestCase):
         self.assertEqual(i[-1], "del get_versions")
         self.git("commit", "-m", "add _version stuff")
 
-        # "setup.py update_files" should be idempotent
-        out = self.python("setup.py", "update_files").splitlines()
-        self.assertEqual(out[0], "running update_files")
+        # "setup.py versioneer" should be idempotent
+        out = self.python("setup.py", "versioneer").splitlines()
+        self.assertEqual(out[0], "running versioneer")
         self.assertEqual(out[1], " creating src/demo/_version.py")
         self.assertEqual(out[2], " src/demo/__init__.py unmodified")
         self.assertEqual(out[3], " 'versioneer.py' already in MANIFEST.in")
