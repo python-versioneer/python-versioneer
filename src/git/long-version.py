@@ -13,8 +13,8 @@ git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
 git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
 #### SUBPROCESS_HELPER
-#### MIDDLE
 #### PARENTDIR
+#### MIDDLE
 
 tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"

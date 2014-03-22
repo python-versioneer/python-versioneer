@@ -23,30 +23,29 @@ def readme(s):
     return s.replace("@README@", get("README.md"))
 
 def generate_versioneer():
-    vcs = "git"
-    if vcs not in ("git",):
-        raise ValueError("Unhandled revision-control system '%s'" % vcs)
     out = []
     out.append(readme(ver(get("src/header.py"))))
-    out.append('VCS = "%s"\n' % vcs)
     out.append("\n\n")
-    for line in open("src/%s/long-version.py" % vcs, "r").readlines():
-        if line.startswith("#### START"):
-            out.append("LONG_VERSION_PY = '''\n")
-        elif line.startswith("#### SUBPROCESS_HELPER"):
-            out.append(unquote(get("src/subprocess_helper.py")))
-        elif line.startswith("#### MIDDLE"):
-            out.append(unquote(get("src/%s/middle.py" % vcs)))
-        elif line.startswith("#### PARENTDIR"):
-            out.append(unquote(get("src/parentdir.py")))
-        elif line.startswith("#### END"):
-            out.append("'''\n")
-        else:
-            out.append(ver(line))
     out.append(get("src/subprocess_helper.py"))
-    out.append(get("src/%s/middle.py" % vcs))
     out.append(get("src/parentdir.py"))
-    out.append(get("src/%s/install.py" % vcs))
+
+    for VCS in ["git"]:
+        for line in open("src/%s/long-version.py" % VCS, "r").readlines():
+            if line.startswith("#### START"):
+                out.append("LONG_VERSION_PY = '''\n")
+            elif line.startswith("#### SUBPROCESS_HELPER"):
+                out.append(unquote(get("src/subprocess_helper.py")))
+            elif line.startswith("#### PARENTDIR"):
+                out.append(unquote(get("src/parentdir.py")))
+            elif line.startswith("#### MIDDLE"):
+                out.append(unquote(get("src/%s/middle.py" % VCS)))
+            elif line.startswith("#### END"):
+                out.append("'''\n")
+            else:
+                out.append(ver(line))
+        out.append(get("src/%s/middle.py" % VCS))
+        out.append(get("src/%s/install.py" % VCS))
+
     out.append(ver(get("src/trailer.py")))
     return ("".join(out)).encode("utf-8")
 
