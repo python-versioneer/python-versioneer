@@ -16,7 +16,7 @@ versionfile_source = None
 versionfile_build = None
 tag_prefix = None
 parentdir_prefix = None
-VCS = "git"
+VCS = None
 
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}
