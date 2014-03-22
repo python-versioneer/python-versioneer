@@ -4,7 +4,7 @@ import os.path
 
 def versions_from_vcs(tag_prefix, root, verbose=False):
     # this runs 'git' from the root of the source tree. This only gets called
-    # if the git-archive 'subst' variables were *not* expanded, and
+    # if the git-archive 'subst' keywords were *not* expanded, and
     # _version.py hasn't already been rewritten with a short version string,
     # meaning we're inside a checked out source tree.
 

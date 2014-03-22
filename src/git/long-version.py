@@ -25,10 +25,10 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
     # __file__, we can work backwards from there to the root. Some
     # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which
-    # case we can only use expanded variables.
+    # case we can only use expanded keywords.
 
-    variables = { "refnames": git_refnames, "full": git_full }
-    ver = versions_from_expanded_variables(variables, tag_prefix, verbose)
+    keywords = { "refnames": git_refnames, "full": git_full }
+    ver = versions_from_keywords(keywords, tag_prefix, verbose)
     if ver:
         return ver
 

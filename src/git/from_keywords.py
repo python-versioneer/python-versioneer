@@ -1,33 +1,33 @@
 
 import re
 
-def get_expanded_variables(versionfile_abs):
+def get_keywords(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
-    # variables. When used from setup.py, we don't want to import
-    # _version.py, so we do it with a regexp instead. This function is not
-    # used from _version.py.
-    variables = {}
+    # keywords. When used from setup.py, we don't want to import _version.py,
+    # so we do it with a regexp instead. This function is not used from
+    # _version.py.
+    keywords = {}
     try:
         f = open(versionfile_abs,"r")
         for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
-                    variables["refnames"] = mo.group(1)
+                    keywords["refnames"] = mo.group(1)
             if line.strip().startswith("git_full ="):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
-                    variables["full"] = mo.group(1)
+                    keywords["full"] = mo.group(1)
         f.close()
     except EnvironmentError:
         pass
-    return variables
+    return keywords
 
-def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
-    refnames = variables["refnames"].strip()
+def versions_from_keywords(keywords, tag_prefix, verbose=False):
+    refnames = keywords["refnames"].strip()
     if refnames.startswith("$Format"):
         if verbose:
-            print("variables are unexpanded, not using")
+            print("keywords are unexpanded, not using")
         return {} # unexpanded, so not in an unpacked git-archive tarball
     refs = set([r.strip() for r in refnames.strip("()").split(",")])
     # starting in git-1.8.3, tags are listed as "tag: foo-1.0" instead of
@@ -54,9 +54,9 @@ def versions_from_expanded_variables(variables, tag_prefix, verbose=False):
             if verbose:
                 print("picking %s" % r)
             return { "version": r,
-                     "full": variables["full"].strip() }
+                     "full": keywords["full"].strip() }
     # no suitable tags, so we use the full revision id
     if verbose:
         print("no suitable tags, using full revision id")
-    return { "version": variables["full"].strip(),
-             "full": variables["full"].strip() }
+    return { "version": keywords["full"].strip(),
+             "full": keywords["full"].strip() }

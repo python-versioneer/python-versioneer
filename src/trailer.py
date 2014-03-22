@@ -61,11 +61,11 @@ def get_versions(default=DEFAULT, verbose=False):
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    variables = get_expanded_variables(versionfile_abs)
-    if variables:
-        ver = versions_from_expanded_variables(variables, tag_prefix)
+    keywords = get_keywords(versionfile_abs)
+    if keywords:
+        ver = versions_from_keywords(keywords, tag_prefix)
         if ver:
-            if verbose: print("got version from expanded variable %s" % ver)
+            if verbose: print("got version from expanded keyword %s" % ver)
             return ver
 
     ver = versions_from_file(versionfile_abs)
