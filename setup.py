@@ -28,7 +28,7 @@ def generate_versioneer():
     out.append(get("src/subprocess_helper.py"))
 
     for VCS in ["git"]:
-        out.append("LONG_VERSION_PY = '''\n")
+        out.append("LONG_VERSION_PY['%s'] = '''\n" % VCS)
         out.append(ver(get("src/%s/long_header.py" % VCS)))
         out.append(unquote(get("src/subprocess_helper.py")))
         out.append(unquote(get("src/from_parentdir.py")))

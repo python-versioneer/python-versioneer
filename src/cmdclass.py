@@ -40,11 +40,12 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
             _build_exe.run(self)
             os.unlink(target_versionfile)
             f = open(versionfile_source, "w")
-            f.write(LONG_VERSION_PY % {"DOLLAR": "$",
-                                       "TAG_PREFIX": tag_prefix,
-                                       "PARENTDIR_PREFIX": parentdir_prefix,
-                                       "VERSIONFILE_SOURCE": versionfile_source,
-                                       })
+            LONG = LONG_VERSION_PY[VCS]
+            f.write(LONG % {"DOLLAR": "$",
+                            "TAG_PREFIX": tag_prefix,
+                            "PARENTDIR_PREFIX": parentdir_prefix,
+                            "VERSIONFILE_SOURCE": versionfile_source,
+                            })
             f.close()
 
 class cmd_sdist(_sdist):
@@ -83,11 +84,12 @@ class cmd_update_files(Command):
     def run(self):
         print(" creating %s" % versionfile_source)
         f = open(versionfile_source, "w")
-        f.write(LONG_VERSION_PY % {"DOLLAR": "$",
-                                   "TAG_PREFIX": tag_prefix,
-                                   "PARENTDIR_PREFIX": parentdir_prefix,
-                                   "VERSIONFILE_SOURCE": versionfile_source,
-                                   })
+        LONG = LONG_VERSION_PY[VCS]
+        f.write(LONG % {"DOLLAR": "$",
+                        "TAG_PREFIX": tag_prefix,
+                        "PARENTDIR_PREFIX": parentdir_prefix,
+                        "VERSIONFILE_SOURCE": versionfile_source,
+                        })
         f.close()
 
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
