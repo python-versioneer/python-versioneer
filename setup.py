@@ -37,13 +37,16 @@ def generate_versioneer():
                 out.append(unquote(get("src/subprocess_helper.py")))
             elif line.startswith("#### PARENTDIR"):
                 out.append(unquote(get("src/parentdir.py")))
-            elif line.startswith("#### MIDDLE"):
-                out.append(unquote(get("src/%s/middle.py" % VCS)))
+            elif line.startswith("#### FROM-KEYWORDS"):
+                out.append(unquote(get("src/%s/from_keywords.py" % VCS)))
+            elif line.startswith("#### FROM-VCS"):
+                out.append(unquote(get("src/%s/from_vcs.py" % VCS)))
             elif line.startswith("#### END"):
                 out.append("'''\n")
             else:
                 out.append(ver(line))
-        out.append(get("src/%s/middle.py" % VCS))
+        out.append(get("src/%s/from_keywords.py" % VCS))
+        out.append(get("src/%s/from_vcs.py" % VCS))
         out.append(get("src/%s/install.py" % VCS))
 
     out.append(ver(get("src/trailer.py")))

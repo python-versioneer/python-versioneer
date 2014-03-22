@@ -14,7 +14,8 @@ git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
 #### SUBPROCESS_HELPER
 #### PARENTDIR
-#### MIDDLE
+#### FROM-KEYWORDS
+#### FROM-VCS
 
 tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"

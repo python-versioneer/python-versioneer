@@ -7,7 +7,7 @@ import unittest
 import tempfile
 
 sys.path.insert(0, "src")
-from git.middle import versions_from_expanded_variables
+from git.from_keywords import versions_from_expanded_variables
 from subprocess_helper import run_command
 
 GITS = ["git"]
