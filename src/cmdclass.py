@@ -40,6 +40,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
             _build_exe.run(self)
             os.unlink(target_versionfile)
             f = open(versionfile_source, "w")
+            assert VCS is not None, "please set versioneer.VCS"
             LONG = LONG_VERSION_PY[VCS]
             f.write(LONG % {"DOLLAR": "$",
                             "TAG_PREFIX": tag_prefix,
@@ -84,6 +85,7 @@ class cmd_update_files(Command):
     def run(self):
         print(" creating %s" % versionfile_source)
         f = open(versionfile_source, "w")
+        assert VCS is not None, "please set versioneer.VCS"
         LONG = LONG_VERSION_PY[VCS]
         f.write(LONG % {"DOLLAR": "$",
                         "TAG_PREFIX": tag_prefix,

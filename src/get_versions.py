@@ -10,6 +10,8 @@ def get_versions(default=DEFAULT, verbose=False):
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
     assert parentdir_prefix is not None, "please set versioneer.parentdir_prefix"
+    assert VCS is not None, "please set versioneer.VCS"
+
     # I am in versioneer.py, which must live at the top of the source tree,
     # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
     # don't have __file__, in which case we fall back to sys.argv[0] (which
@@ -24,8 +26,11 @@ def get_versions(default=DEFAULT, verbose=False):
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    ver = git_versions_from_keywords(git_get_keywords(versionfile_abs),
-                                     tag_prefix)
+    if VCS == "git":
+        ver = git_versions_from_keywords(git_get_keywords(versionfile_abs),
+                                         tag_prefix)
+    else:
+        ver = None
     if ver:
         if verbose: print("got version from expanded keyword %s" % ver)
         return ver
@@ -35,7 +40,10 @@ def get_versions(default=DEFAULT, verbose=False):
         if verbose: print("got version from file %s %s" % (versionfile_abs,ver))
         return ver
 
-    ver = git_versions_from_vcs(tag_prefix, root, verbose)
+    if VCS == "git":
+        ver = git_versions_from_vcs(tag_prefix, root, verbose)
+    else:
+        ver = None
     if ver:
         if verbose: print("got version from git %s" % ver)
         return ver
