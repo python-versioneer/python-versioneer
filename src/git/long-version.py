@@ -13,7 +13,7 @@ git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
 git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
 #### SUBPROCESS_HELPER
-#### PARENTDIR
+#### FROM-PARENTDIR
 #### FROM-KEYWORDS
 #### FROM-VCS
 
