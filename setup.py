@@ -23,31 +23,28 @@ def readme(s):
     return s.replace("@README@", get("README.md"))
 
 def generate_versioneer():
-    vcs = "git"
-    if vcs not in ("git",):
-        raise ValueError("Unhandled revision-control system '%s'" % vcs)
     out = []
     out.append(readme(ver(get("src/header.py"))))
-    out.append('VCS = "%s"\n' % vcs)
-    out.append("\n\n")
-    for line in open("src/%s/long-version.py" % vcs, "r").readlines():
-        if line.startswith("#### START"):
-            out.append("LONG_VERSION_PY = '''\n")
-        elif line.startswith("#### SUBPROCESS_HELPER"):
-            out.append(unquote(get("src/subprocess_helper.py")))
-        elif line.startswith("#### MIDDLE"):
-            out.append(unquote(get("src/%s/middle.py" % vcs)))
-        elif line.startswith("#### PARENTDIR"):
-            out.append(unquote(get("src/parentdir.py")))
-        elif line.startswith("#### END"):
-            out.append("'''\n")
-        else:
-            out.append(ver(line))
     out.append(get("src/subprocess_helper.py"))
-    out.append(get("src/%s/middle.py" % vcs))
-    out.append(get("src/parentdir.py"))
-    out.append(get("src/%s/install.py" % vcs))
-    out.append(ver(get("src/trailer.py")))
+
+    for VCS in ["git"]:
+        out.append("LONG_VERSION_PY['%s'] = '''\n" % VCS)
+        out.append(ver(get("src/%s/long_header.py" % VCS)))
+        out.append(unquote(get("src/subprocess_helper.py")))
+        out.append(unquote(get("src/from_parentdir.py")))
+        out.append(unquote(get("src/%s/from_keywords.py" % VCS)))
+        out.append(unquote(get("src/%s/from_vcs.py" % VCS)))
+        out.append(unquote(get("src/%s/long_get_versions.py" % VCS)))
+        out.append("'''\n")
+        out.append(get("src/%s/from_keywords.py" % VCS))
+        out.append(get("src/%s/from_vcs.py" % VCS))
+        out.append(get("src/%s/install.py" % VCS))
+
+    out.append(get("src/from_parentdir.py"))
+    out.append(ver(get("src/from_file.py")))
+    out.append(ver(get("src/get_versions.py")))
+    out.append(ver(get("src/cmdclass.py")))
+
     return ("".join(out)).encode("utf-8")
 
 

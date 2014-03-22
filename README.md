@@ -38,7 +38,7 @@ this tool is format-agnostic) can come from a variety of places:
 * ask the VCS tool itself, e.g. "git describe" (for checkouts), which knows
   about recent "tags" and an absolute revision-id
 * the name of the directory into which the tarball was unpacked
-* an expanded VCS variable ($Id$, etc)
+* an expanded VCS keyword ($Id$, etc)
 * a `_version.py` created by some earlier build step
 
 For released software, the version identifier is closely related to a VCS
@@ -77,6 +77,8 @@ contain enough information to get the proper version.
 ## Installation
 
 First, decide on values for the following configuration variables:
+
+* `VCS`: the version control system you use. Currently accepts "git".
 
 * `versionfile_source`:
 
@@ -122,6 +124,7 @@ To versioneer-enable your project:
   configuration values you decided earlier:
 
         import versioneer
+        versioneer.VCS = 'git'
         versioneer.versionfile_source = 'src/myproject/_version.py'
         versioneer.versionfile_build = 'myproject/_version.py'
         versioneer.tag_prefix = '' # tags are like 1.2.0

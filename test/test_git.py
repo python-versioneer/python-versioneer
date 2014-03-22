@@ -7,17 +7,17 @@ import unittest
 import tempfile
 
 sys.path.insert(0, "src")
-from git.middle import versions_from_expanded_variables
+from git.from_keywords import git_versions_from_keywords
 from subprocess_helper import run_command
 
 GITS = ["git"]
 if sys.platform == "win32":
     GITS = ["git.cmd", "git.exe"]
 
-class Variables(unittest.TestCase):
+class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
-        return versions_from_expanded_variables({"refnames": refnames,
-                                                 "full": full}, prefix)
+        return git_versions_from_keywords({"refnames": refnames, "full": full},
+                                          prefix)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
@@ -107,6 +107,12 @@ class Repo(unittest.TestCase):
         self.git("tag", "demo-4.0", workdir=self.testdir)
 
         shutil.copytree("test/demoapp", self.subpath("demoapp"))
+        setup_py_fn = os.path.join(self.subpath("demoapp"), "setup.py")
+        with open(setup_py_fn, "r") as f:
+            setup_py = f.read()
+        setup_py = setup_py.replace("@VCS@", "git")
+        with open(setup_py_fn, "w") as f:
+            f.write(setup_py)
         shutil.copyfile("versioneer.py", self.subpath("demoapp/versioneer.py"))
         self.git("init")
         self.git("add", "--all")
@@ -205,10 +211,10 @@ class Repo(unittest.TestCase):
         t.close()
         exp_short_TD = exp_short
         if state == "SC":
-            # expanded variables only tell us about tags and full
-            # revisionids, not how many patches we are beyond a tag. So we
-            # can't expect the short version to be like 1.0-1-gHEXID. The
-            # code falls back to short=long
+            # expanded keywords only tell us about tags and full revisionids,
+            # not how many patches we are beyond a tag. So we can't expect
+            # the short version to be like 1.0-1-gHEXID. The code falls back
+            # to short=long
             exp_short_TD = exp_long
         self.check_version(target, exp_short_TD, exp_long, False, state, tree="TD")
 
