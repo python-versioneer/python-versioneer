@@ -24,9 +24,9 @@ def get_versions(default=DEFAULT, verbose=False):
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    keywords = get_keywords(versionfile_abs)
+    keywords = git_get_keywords(versionfile_abs)
     if keywords:
-        ver = versions_from_keywords(keywords, tag_prefix)
+        ver = git_versions_from_keywords(keywords, tag_prefix)
         if ver:
             if verbose: print("got version from expanded keyword %s" % ver)
             return ver
@@ -36,7 +36,7 @@ def get_versions(default=DEFAULT, verbose=False):
         if verbose: print("got version from file %s %s" % (versionfile_abs,ver))
         return ver
 
-    ver = versions_from_vcs(tag_prefix, root, verbose)
+    ver = git_versions_from_vcs(tag_prefix, root, verbose)
     if ver:
         if verbose: print("got version from git %s" % ver)
         return ver

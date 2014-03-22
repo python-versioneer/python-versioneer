@@ -20,6 +20,7 @@ tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
 
+
 def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
     # __file__, we can work backwards from there to the root. Some
@@ -27,7 +28,7 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     # case we can only use expanded keywords.
 
     keywords = { "refnames": git_refnames, "full": git_full }
-    ver = versions_from_keywords(keywords, tag_prefix, verbose)
+    ver = git_versions_from_keywords(keywords, tag_prefix, verbose)
     if ver:
         return ver
 
@@ -41,6 +42,6 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     except NameError:
         return default
 
-    return (versions_from_vcs(tag_prefix, root, verbose)
+    return (git_versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
             or default)

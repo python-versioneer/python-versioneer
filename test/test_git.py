@@ -7,7 +7,7 @@ import unittest
 import tempfile
 
 sys.path.insert(0, "src")
-from git.from_keywords import versions_from_keywords
+from git.from_keywords import git_versions_from_keywords
 from subprocess_helper import run_command
 
 GITS = ["git"]
@@ -16,8 +16,8 @@ if sys.platform == "win32":
 
 class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
-        return versions_from_keywords({"refnames": refnames, "full": full},
-                                      prefix)
+        return git_versions_from_keywords({"refnames": refnames, "full": full},
+                                          prefix)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")

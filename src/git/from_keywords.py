@@ -1,7 +1,7 @@
 
 import re
 
-def get_keywords(versionfile_abs):
+def git_get_keywords(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
     # so we do it with a regexp instead. This function is not used from
@@ -23,7 +23,7 @@ def get_keywords(versionfile_abs):
         pass
     return keywords
 
-def versions_from_keywords(keywords, tag_prefix, verbose=False):
+def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
     refnames = keywords["refnames"].strip()
     if refnames.startswith("$Format"):
         if verbose:
@@ -60,3 +60,4 @@ def versions_from_keywords(keywords, tag_prefix, verbose=False):
         print("no suitable tags, using full revision id")
     return { "version": keywords["full"].strip(),
              "full": keywords["full"].strip() }
+
