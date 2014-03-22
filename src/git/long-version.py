@@ -1,4 +1,3 @@
-#### START
 # This file helps to compute a version number in source trees obtained from
 # git-archive tarball (such as those provided by githubs download-from-tag
 # feature). Distribution tarballs (build by setup.py sdist) and build
@@ -45,6 +44,3 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     return (versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
             or default)
-
-#### END
-
