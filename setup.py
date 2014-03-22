@@ -29,17 +29,12 @@ def generate_versioneer():
 
     for VCS in ["git"]:
         out.append("LONG_VERSION_PY = '''\n")
-        for line in open("src/%s/long-version.py" % VCS, "r").readlines():
-            if line.startswith("#### SUBPROCESS_HELPER"):
-                out.append(unquote(get("src/subprocess_helper.py")))
-            elif line.startswith("#### FROM-PARENTDIR"):
-                out.append(unquote(get("src/from_parentdir.py")))
-            elif line.startswith("#### FROM-KEYWORDS"):
-                out.append(unquote(get("src/%s/from_keywords.py" % VCS)))
-            elif line.startswith("#### FROM-VCS"):
-                out.append(unquote(get("src/%s/from_vcs.py" % VCS)))
-            else:
-                out.append(ver(line))
+        out.append(ver(get("src/%s/long_header.py" % VCS)))
+        out.append(unquote(get("src/subprocess_helper.py")))
+        out.append(unquote(get("src/from_parentdir.py")))
+        out.append(unquote(get("src/%s/from_keywords.py" % VCS)))
+        out.append(unquote(get("src/%s/from_vcs.py" % VCS)))
+        out.append(unquote(get("src/%s/long_get_versions.py" % VCS)))
         out.append("'''\n")
         out.append(get("src/%s/from_keywords.py" % VCS))
         out.append(get("src/%s/from_vcs.py" % VCS))
