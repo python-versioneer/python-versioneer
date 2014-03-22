@@ -25,10 +25,7 @@ def readme(s):
 def generate_versioneer():
     out = []
     out.append(readme(ver(get("src/header.py"))))
-    out.append("\n\n")
     out.append(get("src/subprocess_helper.py"))
-    out.append(get("src/from_parentdir.py"))
-    out.append("\n\n")
 
     for VCS in ["git"]:
         out.append("LONG_VERSION_PY = '''\n")
@@ -48,7 +45,11 @@ def generate_versioneer():
         out.append(get("src/%s/from_vcs.py" % VCS))
         out.append(get("src/%s/install.py" % VCS))
 
-    out.append(ver(get("src/trailer.py")))
+    out.append(get("src/from_parentdir.py"))
+    out.append(ver(get("src/from_file.py")))
+    out.append(ver(get("src/get_versions.py")))
+    out.append(ver(get("src/cmdclass.py")))
+
     return ("".join(out)).encode("utf-8")
 
 
