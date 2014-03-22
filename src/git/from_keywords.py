@@ -24,6 +24,8 @@ def git_get_keywords(versionfile_abs):
     return keywords
 
 def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
+    if not keywords:
+        return {} # keyword-finding function failed to find keywords
     refnames = keywords["refnames"].strip()
     if refnames.startswith("$Format"):
         if verbose:
