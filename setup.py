@@ -4,6 +4,7 @@ import os, base64, tempfile, io
 
 from distutils.core import setup, Command
 from distutils.command.build_scripts import build_scripts
+from os import path
 
 LONG="""
 Versioneer is a tool to automatically update version strings (in setup.py and
@@ -23,12 +24,19 @@ def ver(s):
 def readme(s):
     return s.replace("@README@", get("README.md"))
 
+def get_vcs_list():
+    project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
+    return [filename 
+            for filename 
+            in os.listdir(project_path) \
+            if path.isdir(path.join(project_path, filename))]
+
 def generate_versioneer():
     s = io.StringIO()
     s.write(readme(ver(get("src/header.py"))))
     s.write(get("src/subprocess_helper.py"))
 
-    for VCS in ["git"]:
+    for VCS in get_vcs_list():
         s.write("LONG_VERSION_PY['%s'] = '''\n" % VCS)
         s.write(ver(get("src/%s/long_header.py" % VCS)))
         s.write(unquote(get("src/subprocess_helper.py")))
