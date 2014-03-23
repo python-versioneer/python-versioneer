@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, base64, tempfile, io
+import os, base64, tempfile, io, sys
 
 from distutils.core import setup, Command
 from distutils.command.build_scripts import build_scripts
@@ -16,7 +16,18 @@ version-control system about the current tree.
 VERSION = "0.10+"
 
 def get(fn):
-    return open(fn, "r").read()
+    with open(fn) as f:
+        text = f.read()
+
+    # If we're in Python <3 and have a separate Unicode type, we would've read 
+    # a non-unicode string. Else, all strings will be unicode strings.
+    try:
+        __builtins__.unicode
+    except AttributeError:
+        return text
+    else:
+        return text.decode('ASCII')
+
 def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
@@ -37,14 +48,14 @@ def generate_versioneer():
     s.write(get("src/subprocess_helper.py"))
 
     for VCS in get_vcs_list():
-        s.write("LONG_VERSION_PY['%s'] = '''\n" % VCS)
+        s.write(u"LONG_VERSION_PY['%s'] = '''\n" % VCS)
         s.write(ver(get("src/%s/long_header.py" % VCS)))
         s.write(unquote(get("src/subprocess_helper.py")))
         s.write(unquote(get("src/from_parentdir.py")))
         s.write(unquote(get("src/%s/from_keywords.py" % VCS)))
         s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
         s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
-        s.write("'''\n")
+        s.write(u"'''\n")
         s.write(get("src/%s/from_keywords.py" % VCS))
         s.write(get("src/%s/from_vcs.py" % VCS))
         s.write(get("src/%s/install.py" % VCS))

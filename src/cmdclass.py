@@ -21,9 +21,8 @@ class cmd_build(_build):
         target_versionfile = os.path.join(self.build_lib, versionfile_build)
         print("UPDATING %s" % target_versionfile)
         os.unlink(target_versionfile)
-        f = open(target_versionfile, "w")
-        f.write(SHORT_VERSION_PY % versions)
-        f.close()
+        with open(target_versionfile, "w") as f:
+            f.write(SHORT_VERSION_PY % versions)
 
 if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
     from cx_Freeze.dist import build_exe as _build_exe
@@ -34,20 +33,19 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
             target_versionfile = versionfile_source
             print("UPDATING %s" % target_versionfile)
             os.unlink(target_versionfile)
-            f = open(target_versionfile, "w")
-            f.write(SHORT_VERSION_PY % versions)
-            f.close()
+            with open(target_versionfile, "w") as f:
+                f.write(SHORT_VERSION_PY % versions)
+
             _build_exe.run(self)
             os.unlink(target_versionfile)
-            f = open(versionfile_source, "w")
-            assert VCS is not None, "please set versioneer.VCS"
-            LONG = LONG_VERSION_PY[VCS]
-            f.write(LONG % {"DOLLAR": "$",
-                            "TAG_PREFIX": tag_prefix,
-                            "PARENTDIR_PREFIX": parentdir_prefix,
-                            "VERSIONFILE_SOURCE": versionfile_source,
-                            })
-            f.close()
+            with open(versionfile_source, "w") as f:
+                assert VCS is not None, "please set versioneer.VCS"
+                LONG = LONG_VERSION_PY[VCS]
+                f.write(LONG % {"DOLLAR": "$",
+                                "TAG_PREFIX": tag_prefix,
+                                "PARENTDIR_PREFIX": parentdir_prefix,
+                                "VERSIONFILE_SOURCE": versionfile_source,
+                                })
 
 class cmd_sdist(_sdist):
     def run(self):
@@ -64,9 +62,8 @@ class cmd_sdist(_sdist):
         target_versionfile = os.path.join(base_dir, versionfile_source)
         print("UPDATING %s" % target_versionfile)
         os.unlink(target_versionfile)
-        f = open(target_versionfile, "w")
-        f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
-        f.close()
+        with open(target_versionfile, "w") as f:
+            f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
 
 INIT_PY_SNIPPET = """
 from ._version import get_versions
@@ -84,26 +81,25 @@ class cmd_update_files(Command):
         pass
     def run(self):
         print(" creating %s" % versionfile_source)
-        f = open(versionfile_source, "w")
-        assert VCS is not None, "please set versioneer.VCS"
-        LONG = LONG_VERSION_PY[VCS]
-        f.write(LONG % {"DOLLAR": "$",
-                        "TAG_PREFIX": tag_prefix,
-                        "PARENTDIR_PREFIX": parentdir_prefix,
-                        "VERSIONFILE_SOURCE": versionfile_source,
-                        })
-        f.close()
+        with open(versionfile_source, "w") as f:
+            assert VCS is not None, "please set versioneer.VCS"
+            LONG = LONG_VERSION_PY[VCS]
+            f.write(LONG % {"DOLLAR": "$",
+                            "TAG_PREFIX": tag_prefix,
+                            "PARENTDIR_PREFIX": parentdir_prefix,
+                            "VERSIONFILE_SOURCE": versionfile_source,
+                            })
 
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
         try:
-            old = open(ipy, "r").read()
+            with open(ipy, "r") as f:
+                old = f.read()
         except EnvironmentError:
             old = ""
         if INIT_PY_SNIPPET not in old:
             print(" appending to %s" % ipy)
-            f = open(ipy, "a")
-            f.write(INIT_PY_SNIPPET)
-            f.close()
+            with open(ipy, "a") as f:
+                f.write(INIT_PY_SNIPPET)
         else:
             print(" %s unmodified" % ipy)
 
@@ -114,10 +110,11 @@ class cmd_update_files(Command):
         manifest_in = os.path.join(get_root(), "MANIFEST.in")
         simple_includes = set()
         try:
-            for line in open(manifest_in, "r").readlines():
-                if line.startswith("include "):
-                    for include in line.split()[1:]:
-                        simple_includes.add(include)
+            with open(manifest_in, "r") as f:
+                for line in f:
+                    if line.startswith("include "):
+                        for include in line.split()[1:]:
+                            simple_includes.add(include)
         except EnvironmentError:
             pass
         # That doesn't cover everything MANIFEST.in can do
@@ -126,17 +123,15 @@ class cmd_update_files(Command):
         # lines is safe, though.
         if "versioneer.py" not in simple_includes:
             print(" appending 'versioneer.py' to MANIFEST.in")
-            f = open(manifest_in, "a")
-            f.write("include versioneer.py\n")
-            f.close()
+            with open(manifest_in, "a") as f:
+                f.write("include versioneer.py\n")
         else:
             print(" 'versioneer.py' already in MANIFEST.in")
         if versionfile_source not in simple_includes:
             print(" appending versionfile_source ('%s') to MANIFEST.in" %
                   versionfile_source)
-            f = open(manifest_in, "a")
-            f.write("include %s\n" % versionfile_source)
-            f.close()
+            with open(manifest_in, "a") as f:
+                f.write("include %s\n" % versionfile_source)
         else:
             print(" versionfile_source already in MANIFEST.in")
 
