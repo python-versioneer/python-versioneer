@@ -56,8 +56,7 @@ def generate_versioneer():
         s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
         s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
         s.write(u"'''\n")
-        s.write(get("src/%s/from_keywords.py" % VCS))
-        s.write(get("src/%s/from_vcs.py" % VCS))
+
         s.write(get("src/%s/install.py" % VCS))
 
     s.write(get("src/from_parentdir.py"))
