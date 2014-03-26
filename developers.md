@@ -36,17 +36,27 @@ setup(...
       )
 ```
 
-The version information is intended to be mostly VCS-neutral, but some VCSes cannot support everything. The keys available are:
+The version information is intended to be mostly VCS-neutral, but some VCSes cannot support everything. The basic keys available are:
 
-* `describe`: `TAG[-DISTANCE-gSHORTHASH][-dirty]`, equivalent to `git describe --tags --dirty --always`. The distance and shorthash are only included if the commit is not tagged.
-* `long`: `TAG-DISTANCE-gSHORTHASH[-dirty]`, equivalent to `git describe --tags --dirty --always --long`. The distance and shorthash are included unconditionally.
-* `closest_tag`: a string (or None if nothing has been tagged), with the name of the closest ancestor tag
-* `distance`: an integer, the number of commits since the most recent tag. If the current revision is tagged, this will be 0
-* `dash_distance`: an empty string if `distance==0`, else `"-%d" % distance`
-* `dirty`: a boolean, indicating that the working directory has modified files
-* `dash_dirty`: ana empty string if `dirty` is False, else the string `"-dirty"`
 * `full_revisionid`: a full-length id (hex SHA1 for git) for the current revision
-* `pep440`: `TAG[.post0.devDISTANCE]`, a PEP-0440 compatible version string which loses information but is suitable for uploading to PyPI and installing with pip.
+* `short_revisionid`: a truncated form of `full_revisionid`, typically 7 characters for git (but might be more in large repositories if necessary to uniquely identify the commit)
+* `dirty`: a boolean, indicating that the working directory has modified files
+* `closest_tag`: a string (or None if nothing has been tagged), with the name of the closest ancestor tag. The "tag prefix" is stripped off.
+* `distance`: an integer, the number of commits since the most recent tag. If the current revision is tagged, this will be 0. If nothing has been tagged, this will be the total number of commits.
+* `dash_dirty`: an empty string if `dirty` is False, else the string `"-dirty"`
+* `closest_tag_or_zero`: like `closest_tag`, but "0" if nothing has been tagged
+* `dash_distance`: an empty string if `distance==0`, else `"-%d" % distance`
+
+In addition, there are several composite pre-formatted strings available:
+
+* `describe`: `TAG[-DISTANCE-gSHORTHASH][-dirty]`, equivalent to `git describe --tags --dirty --always`. The distance and shorthash are only included if the commit is not tagged. If nothing was tagged, this will be the short revisionid, plus "-dirty" if dirty.
+* `long`: `TAG-DISTANCE-gSHORTHASH[-dirty]`, equivalent to `git describe --tags --dirty --always --long`. The distance and shorthash are included unconditionally. As with `describe`, if nothing was tagged, this will be the short revisionid, possibly with "-dirty".
+* `default`: Like `describe`, but uses a fake tag of "0" if nothing was actually tagged.
+* `pep440`: `TAG[.postDISTANCE[.dev0]]`, a PEP-0440 compatible version string which loses information but is suitable for uploading to PyPI and installing with pip. The ".dev0" suffix indicates a dirty tree. If nothing has been tagged, this will be `0.postDISTANCE[.dev0]`. Note that PEP-0440 rules indicate that `X.dev0` sorts as "older" than `X`, so our -dirty flag is expressed somewhat backwards (usually "dirty" indicates newer changes than the base commit), but PEP-0440 offers no positive post-".postN" component. You should never be releasing software with -dirty anyways.
+
+When the version is deduced from a parent directory, the composite strings are provided, but they are all equal to the trimmed parent directory name.
+
+When the version is deduced from expanded keywords, `full_revisionid` and `short_revisionid` are available as usual. `closest_tag` is the shortest tag which matches the revision, otherwise it is None. `distance` is not present, as the git keyword expansion does not offer a way to search for a recent tag. `dirty` is always False. The composite strings are all equal to the tag if present, otherwise they are set equal to the full revision id.
 
 ## What does get_version() return?
 

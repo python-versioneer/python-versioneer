@@ -14,10 +14,14 @@ def git_get_keywords(versionfile_abs):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
                     keywords["refnames"] = mo.group(1)
-            if line.strip().startswith("git_full ="):
+            if line.strip().startswith("git_full_revisionid ="):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
-                    keywords["full"] = mo.group(1)
+                    keywords["full_revisionid"] = mo.group(1)
+            if line.strip().startswith("git_short_revisionid ="):
+                mo = re.search(r'=\s*"(.*)"', line)
+                if mo:
+                    keywords["short_revisionid"] = mo.group(1)
         f.close()
     except EnvironmentError:
         pass
@@ -49,17 +53,28 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
             print("discarding '%s', no digits" % ",".join(refs-tags))
     if verbose:
         print("likely tags: %s" % ",".join(sorted(tags)))
+    shortest_tag = None
     for ref in sorted(tags):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
-            r = ref[len(tag_prefix):]
+            shortest_tag = ref[len(tag_prefix):]
             if verbose:
-                print("picking %s" % r)
-            return { "version": r,
-                     "full": keywords["full"].strip() }
-    # no suitable tags, so we use the full revision id
-    if verbose:
+                print("picking %s" % shortest_tag)
+            break
+    versions = {
+        "full_revisionid": keywords["full_revisionid"].strip(),
+        "short_revisionid": keywords["short_revisionid"].strip(),
+        "dirty": False, "dash_dirty": "",
+        "closest_tag": shortest_tag,
+        "closest_tag_or_zero": shortest_tag or "0",
+        # "distance" is not provided: cannot deduce from keyword expansion
+        }
+    if not shortest_tag and verbose:
         print("no suitable tags, using full revision id")
-    return { "version": keywords["full"].strip(),
-             "full": keywords["full"].strip() }
+    composite = shortest_tag or versions["full_revisionid"]
+    versions["describe"] = composite
+    versions["long"] = composite
+    versions["default"] = composite
+    versions["pep440"] = composite
+    return versions
 

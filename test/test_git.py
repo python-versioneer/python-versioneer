@@ -16,23 +16,25 @@ if sys.platform == "win32":
 
 class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
-        return git_versions_from_keywords({"refnames": refnames, "full": full},
+        return git_versions_from_keywords({"refnames": refnames,
+                                           "full_revisionid": full,
+                                           "short_revisionid": full[:7]},
                                           prefix)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
-        self.assertEqual(v["version"], "2.0")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["default"], "2.0")
+        self.assertEqual(v["full_revisionid"], "full")
 
     def test_prefer_short(self):
         v = self.parse(" (HEAD, 2.0rc1, 2.0, 2.0rc2) ", " full ")
-        self.assertEqual(v["version"], "2.0")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["default"], "2.0")
+        self.assertEqual(v["full_revisionid"], "full")
 
     def test_prefix(self):
         v = self.parse(" (HEAD, projectname-2.0) ", " full ", "projectname-")
-        self.assertEqual(v["version"], "2.0")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["default"], "2.0")
+        self.assertEqual(v["full_revisionid"], "full")
 
     def test_unexpanded(self):
         v = self.parse(" $Format$ ", " full ", "projectname-")
@@ -40,13 +42,13 @@ class Keywords(unittest.TestCase):
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
-        self.assertEqual(v["version"], "full")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["default"], "full")
+        self.assertEqual(v["full_revisionid"], "full")
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
-        self.assertEqual(v["version"], "full")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["default"], "full")
+        self.assertEqual(v["full_revisionid"], "full")
 
 VERBOSE = False
 
@@ -117,12 +119,13 @@ class Repo(unittest.TestCase):
         self.git("init")
         self.git("add", "--all")
         self.git("commit", "-m", "comment")
+        first_rev = self.git("rev-parse", "HEAD")
 
         v = self.python("setup.py", "--version")
-        self.assertEqual(v, "unknown")
+        self.assertEqual(v, "0-1-g%s" % first_rev[:7])
         v = self.python(os.path.join(self.subpath("demoapp"), "setup.py"),
                         "--version", workdir=self.testdir)
-        self.assertEqual(v, "unknown")
+        self.assertEqual(v, "0-1-g%s" % first_rev[:7])
 
         out = self.python("setup.py", "versioneer").splitlines()
         self.assertEqual(out[0], "running versioneer")
@@ -143,7 +146,7 @@ class Repo(unittest.TestCase):
         i = f.read().splitlines()
         f.close()
         self.assertEqual(i[-3], "from ._version import get_versions")
-        self.assertEqual(i[-2], "__version__ = get_versions()['version']")
+        self.assertEqual(i[-2], "__version__ = get_versions()['default']")
         self.assertEqual(i[-1], "del get_versions")
         self.git("commit", "-m", "add _version stuff")
 
@@ -272,8 +275,8 @@ class Repo(unittest.TestCase):
         out = self.python("rundemo", "--version", workdir=build_lib)
         data = dict([line.split(":",1) for line in out.splitlines()])
         self.compare(data["__version__"], exp_short, state, tree, "RB")
-        self.compare(data["shortversion"], exp_short, state, tree, "RB")
-        self.compare(data["longversion"], exp_long, state, tree, "RB")
+        self.compare(data["short_revisionid"], exp_short, state, tree, "RB")
+        self.compare(data["full_revisionid"], exp_long, state, tree, "RB")
 
 
 if __name__ == '__main__':

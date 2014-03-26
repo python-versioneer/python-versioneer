@@ -9,10 +9,12 @@
 
 # these strings will be replaced by git during git-archive
 git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
-git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
+git_full_revisionid = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
+git_short_revisionid = "%(DOLLAR)sFormat:%%h%(DOLLAR)s"
 
 # these strings are filled in when 'setup.py versioneer' creates _version.py
 tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"
 versionfile_source = "%(VERSIONFILE_SOURCE)s"
+version_string_template = "%(VERSION_STRING_TEMPLATE)s"
 

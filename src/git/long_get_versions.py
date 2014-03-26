@@ -6,7 +6,9 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which
     # case we can only use expanded keywords.
 
-    keywords = { "refnames": git_refnames, "full": git_full }
+    keywords = { "refnames": git_refnames,
+                 "full_revisionid": git_full_revisionid,
+                 "short_revisionid": git_short_revisionid }
     ver = git_versions_from_keywords(keywords, tag_prefix, verbose)
     if ver:
         return ver

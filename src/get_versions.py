@@ -60,4 +60,4 @@ def get_versions(default=DEFAULT, verbose=False):
     return default
 
 def get_version(verbose=False):
-    return get_versions(verbose=verbose)["version"]
+    return version_string_template % get_versions(verbose=verbose)

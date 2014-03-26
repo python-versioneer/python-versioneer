@@ -22,7 +22,7 @@ class cmd_build(_build):
         print("UPDATING %s" % target_versionfile)
         os.unlink(target_versionfile)
         with open(target_versionfile, "w") as f:
-            f.write(SHORT_VERSION_PY % versions)
+            f.write(build_short_version_py(versions) % versions)
 
 if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
     from cx_Freeze.dist import build_exe as _build_exe
@@ -34,7 +34,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
             print("UPDATING %s" % target_versionfile)
             os.unlink(target_versionfile)
             with open(target_versionfile, "w") as f:
-                f.write(SHORT_VERSION_PY % versions)
+                f.write(build_short_version_py(versions) % versions)
 
             _build_exe.run(self)
             os.unlink(target_versionfile)
@@ -45,6 +45,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
                                 "TAG_PREFIX": tag_prefix,
                                 "PARENTDIR_PREFIX": parentdir_prefix,
                                 "VERSIONFILE_SOURCE": versionfile_source,
+                                "VERSION_STRING_TEMPLATE": version_string_template,
                                 })
 
 class cmd_sdist(_sdist):
@@ -52,7 +53,7 @@ class cmd_sdist(_sdist):
         versions = get_versions(verbose=True)
         self._versioneer_generated_versions = versions
         # unless we update this, the command will keep using the old version
-        self.distribution.metadata.version = versions["version"]
+        self.distribution.metadata.version = versions["describe"] # XXX
         return _sdist.run(self)
 
     def make_release_tree(self, base_dir, files):
@@ -63,11 +64,11 @@ class cmd_sdist(_sdist):
         print("UPDATING %s" % target_versionfile)
         os.unlink(target_versionfile)
         with open(target_versionfile, "w") as f:
-            f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
+            f.write(build_short_version_py(versions) % self._versioneer_generated_versions)
 
 INIT_PY_SNIPPET = """
 from ._version import get_versions
-__version__ = get_versions()['version']
+__version__ = get_versions()['default']
 del get_versions
 """
 
@@ -88,6 +89,7 @@ class cmd_update_files(Command):
                             "TAG_PREFIX": tag_prefix,
                             "PARENTDIR_PREFIX": parentdir_prefix,
                             "VERSIONFILE_SOURCE": versionfile_source,
+                            "VERSION_STRING_TEMPLATE": version_string_template,
                             })
 
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")

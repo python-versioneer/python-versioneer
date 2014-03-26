@@ -4,6 +4,6 @@ import demo
 from demo import _version
 print("__version__:%s" % demo.__version__)
 print("_version:%s" % str(_version))
-v = _version.get_versions(verbose=True)
-print("shortversion:%s" % v["version"])
-print("longversion:%s" % v["full"])
+versions = _version.get_versions(verbose=True)
+for k in sorted(versions):
+    print("%s:%s" % (k, versions[k]))
