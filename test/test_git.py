@@ -71,9 +71,10 @@ class Repo(unittest.TestCase):
         return os.path.join(self.testdir, path)
 
     # There are three tree states we're interested in:
-    #  SA: sitting on the 1.0 tag
-    #  SB: dirtying the tree after 1.0
-    #  SC: making a new commit after 1.0, clean tree
+    #  SA: sitting on the first commit, no tags yet
+    #  SB: sitting on the 1.0 tag
+    #  SC: dirtying the tree after 1.0
+    #  SD: making a new commit after 1.0, clean tree
     #
     # Then we're interested in 5 kinds of trees:
     #  TA: source tree (with .git)
@@ -83,12 +84,12 @@ class Repo(unittest.TestCase):
     #  TE: unpacked sdist tarball
     #
     # In three runtime situations:
-    #  RA1: setup.py --version
-    #  RA2: ...path/to/setup.py --version (from outside the source tree)
+    #  RA1: setup.py version
+    #  RA2: ...path/to/setup.py version (from outside the source tree)
     #  RB: setup.py build;  demoapp --version
     #
     # We can only detect dirty files in real git trees, so we don't examine
-    # SB for TB/TC/TD/TE, or RB.
+    # SC for TB/TC/TD/TE, or RB.
 
     def test_full(self):
         self.testdir = tempfile.mkdtemp()
@@ -121,6 +122,7 @@ class Repo(unittest.TestCase):
         self.git("commit", "-m", "comment")
         first_rev = self.git("rev-parse", "HEAD")
 
+        # SA: the tree is sitting on the first commit, no tags yet
         v = self.python("setup.py", "--version")
         self.assertEqual(v, "0-1-g%s" % first_rev[:7])
         v = self.python(os.path.join(self.subpath("demoapp"), "setup.py"),
@@ -166,28 +168,29 @@ class Repo(unittest.TestCase):
         short = "1.0"
         full = self.git("rev-parse", "HEAD")
         if VERBOSE: print("FULL %s" % full)
-        # SA: the tree is now sitting on the 1.0 tag
-        self.do_checks(short, full, dirty=False, state="SA")
+        # SB: the tree is now sitting on the 1.0 tag
+        self.do_checks(short, full, dirty=False, state="SB")
 
-        # SB: now we dirty the tree
+        # SC: now we dirty the tree
         f = open(self.subpath("demoapp/setup.py"),"a")
         f.write("# dirty\n")
         f.close()
-        self.do_checks("1.0-dirty", full+"-dirty", dirty=True, state="SB")
+        self.do_checks("1.0-dirty", full+"-dirty", dirty=True, state="SC")
 
-        # SC: now we make one commit past the tag
+        # SD: now we make one commit past the tag
         self.git("add", "setup.py")
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
         short = "1.0-1-g%s" % full[:7]
-        self.do_checks(short, full, dirty=False, state="SC")
+        self.do_checks(short, full, dirty=False, state="SD")
 
 
     def do_checks(self, exp_short, exp_long, dirty, state):
         if os.path.exists(self.subpath("out")):
             shutil.rmtree(self.subpath("out"))
         # TA: source tree
-        self.check_version(self.subpath("demoapp"), exp_short, exp_long,
+        self.check_version(self.subpath("demoapp"),
+                           { ?: exp_short, ?: exp_long, },
                            dirty, state, tree="TA")
         if dirty:
             return
@@ -196,13 +199,15 @@ class Repo(unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, "unknown", "unknown", False, state, tree="TB")
+        self.check_version(target, { ?:"unknown", ?:"unknown"},
+                           False, state, tree="TB")
 
         # TC: source tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, "1.1", "", False, state, tree="TC")
+        self.check_version(target, {?:"1.1", ?:""},
+                           False, state, tree="TC")
 
         # TD: unpacked git-archive tarball
         target = self.subpath("out/TD/demoapp-TD")
@@ -213,13 +218,14 @@ class Repo(unittest.TestCase):
         t.extractall(path=self.subpath("out/TD"))
         t.close()
         exp_short_TD = exp_short
-        if state == "SC":
+        if state == "SD":
             # expanded keywords only tell us about tags and full revisionids,
             # not how many patches we are beyond a tag. So we can't expect
             # the short version to be like 1.0-1-gHEXID. The code falls back
             # to short=long
             exp_short_TD = exp_long
-        self.check_version(target, exp_short_TD, exp_long, False, state, tree="TD")
+        self.check_version(target, {?:exp_short_TD, ?:exp_long},
+                           False, state, tree="TD")
 
         # TE: unpacked setup.py sdist tarball
         if os.path.exists(self.subpath("demoapp/dist")):
@@ -236,7 +242,8 @@ class Repo(unittest.TestCase):
         t.close()
         target = self.subpath("out/TE/demo-%s" % exp_short)
         self.assertTrue(os.path.isdir(target))
-        self.check_version(target, exp_short, exp_long, False, state, tree="TE")
+        self.check_version(target, {?:exp_short, ?:exp_long},
+                           False, state, tree="TE")
 
     def compare(self, got, expected, state, tree, runtime):
         where = "/".join([state, tree, runtime])
@@ -244,20 +251,30 @@ class Repo(unittest.TestCase):
                          % (where, got, expected))
         if VERBOSE: print(" good %s" % where)
 
-    def check_version(self, workdir, exp_short, exp_long, dirty, state, tree):
+    def parse_all_versions(self, out):
+        return dict([line.split(":",1) for line in out.splitlines()])
+
+    def compare_expected(self, got, expected, state, tree, sit):
+        for k,v in expected.items():
+            self.compare(got[k], expected[k], state, tree, "%s-%s" % (sit,k))
+
+    def check_version(self, workdir, expected, dirty, state, tree):
         if VERBOSE: print("== starting %s %s" % (state, tree))
-        # RA: setup.py --version
+        # RA1: setup.py version . We add --everything to test all components
         if VERBOSE:
             # setup.py version invokes cmd_version, which uses verbose=True
             # and has more boilerplate.
-            print(self.python("setup.py", "version", workdir=workdir))
-        # setup.py --version gives us get_version() with verbose=False.
-        v = self.python("setup.py", "--version", workdir=workdir)
-        self.compare(v, exp_short, state, tree, "RA1")
-        # and test again from outside the tree
+            print(self.python("setup.py", "version",
+                              "--everything", "--verbose", workdir=workdir))
+        v = self.python("setup.py", "version", "--everything", workdir=workdir)
+        self.compare_expected(self.parse_all_versions(v),
+                              expected, state, tree, "RA1")
+
+        # RA2: test again from outside the tree
         v = self.python(os.path.join(workdir, "setup.py"), "--version",
                         workdir=self.testdir)
-        self.compare(v, exp_short, state, tree, "RA2")
+        self.compare_expected(self.parse_all_versions(v),
+                              expected, state, tree, "RA2")
 
         if dirty:
             return # cannot detect dirty files in a build
@@ -273,10 +290,10 @@ class Repo(unittest.TestCase):
         shutil.copyfile(os.path.join(workdir, "bin", "rundemo"),
                         os.path.join(build_lib, "rundemo"))
         out = self.python("rundemo", "--version", workdir=build_lib)
-        data = dict([line.split(":",1) for line in out.splitlines()])
-        self.compare(data["__version__"], exp_short, state, tree, "RB")
-        self.compare(data["short_revisionid"], exp_short, state, tree, "RB")
-        self.compare(data["full_revisionid"], exp_long, state, tree, "RB")
+        print "\n",out,"\n"
+        #self.compare(data["__version__"], expected["default"], 
+        self.compare_expected(self.parse_all_versions(out),
+                              expected, state, tree, "RB")
 
 
 if __name__ == '__main__':

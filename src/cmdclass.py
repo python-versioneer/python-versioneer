@@ -2,14 +2,19 @@
 class cmd_version(Command):
     description = "report generated version string"
     user_options = []
-    boolean_options = []
+    boolean_options = ["everything", "verbose"]
     def initialize_options(self):
-        pass
+        self.everything = False
+        self.verbose = False
     def finalize_options(self):
         pass
     def run(self):
-        ver = get_version(verbose=True)
+        ver = get_version(verbose=self.verbose)
         print("Version is currently: %s" % ver)
+        if self.everything:
+            versions = versioneer.get_versions(verbose=self.verbose)
+            for k in sorted(versions):
+                print("%s:%s" % (k, versions[k]))
 
 
 class cmd_build(_build):
