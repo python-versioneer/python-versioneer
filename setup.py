@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import os, base64, tempfile, io, sys
-
+from os import path
 from distutils.core import setup, Command
 from distutils.command.build_scripts import build_scripts
-from os import path
 
 LONG="""
 Versioneer is a tool to automatically update version strings (in setup.py and
@@ -19,8 +18,8 @@ def get(fn):
     with open(fn) as f:
         text = f.read()
 
-    # If we're in Python <3 and have a separate Unicode type, we would've read 
-    # a non-unicode string. Else, all strings will be unicode strings.
+    # If we're in Python <3 and have a separate Unicode type, we would've
+    # read a non-unicode string. Else, all strings will be unicode strings.
     try:
         __builtins__.unicode
     except AttributeError:
@@ -37,8 +36,8 @@ def readme(s):
 
 def get_vcs_list():
     project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
-    return [filename 
-            for filename 
+    return [filename
+            for filename
             in os.listdir(project_path)
             if path.isdir(path.join(project_path, filename))]
 
@@ -56,10 +55,10 @@ def generate_versioneer():
         s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
         s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
         s.write(u"'''\n")
-        
+
         s.write(get("src/%s/from_keywords.py" % VCS))
         s.write(get("src/%s/from_vcs.py" % VCS))
-        
+
         s.write(get("src/%s/install.py" % VCS))
 
     s.write(get("src/from_parentdir.py"))
