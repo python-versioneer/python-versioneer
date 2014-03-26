@@ -6,6 +6,9 @@ def get_root():
     except NameError:
         return os.path.dirname(os.path.abspath(sys.argv[0]))
 
+def vcs_function(vcs, suffix):
+    return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix))
+
 def get_versions(default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
@@ -28,19 +31,22 @@ def get_versions(default=DEFAULT, verbose=False):
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    def vcs_function(vcs, suffix):
-        return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix))
+    ver = None
 
     try:
         get_keywords_f = vcs_function(VCS, 'get_keywords')
+    except AttributeError:
+        get_keywords_f = None        
+
+    if get_keywords_f is not None:
         vcs_keywords = get_keywords_f(versionfile_abs)
 
-        versions_from_keywords_f = vcs_function(VCS, 'versions_from_keywords')
-        ver = versions_from_keywords_f(vcs_keywords, tag_prefix)
-    except AttributeError:
-# TODO(dustin): We used to take Non when the VCS was unknown. Now we'll only 
-# take None if the VCS-specific function isn't defined. Is this okay?
-        ver = None
+        try:
+            versions_from_keywords_f = vcs_function(VCS, 'versions_from_keywords')
+        except AttributeError:
+            pass
+        else:
+            ver = versions_from_keywords_f(vcs_keywords, tag_prefix)
 
     if ver:
         if verbose: print("got version from expanded keyword %s" % ver)
@@ -53,11 +59,11 @@ def get_versions(default=DEFAULT, verbose=False):
 
     try:
         versions_from_vcs_f = vcs_function(VCS, 'versions_from_vcs')
-        ver = versions_from_vcs_f(tag_prefix, root, verbose)
     except AttributeError:
-# TODO(dustin): We used to take Non when the VCS was unknown. Now we'll only 
-# take None if the VCS-specific function isn't defined. Is this okay?
         ver = None
+    else:
+        ver = versions_from_vcs_f(tag_prefix, root, verbose)
+
 
     if ver:
         if verbose: print("got version from VCS %s" % ver)

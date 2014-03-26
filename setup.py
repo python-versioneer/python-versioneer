@@ -39,7 +39,7 @@ def get_vcs_list():
     project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
     return [filename 
             for filename 
-            in os.listdir(project_path) \
+            in os.listdir(project_path)
             if path.isdir(path.join(project_path, filename))]
 
 def generate_versioneer():
@@ -56,7 +56,10 @@ def generate_versioneer():
         s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
         s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
         s.write(u"'''\n")
-
+        
+        s.write(get("src/%s/from_keywords.py" % VCS))
+        s.write(get("src/%s/from_vcs.py" % VCS))
+        
         s.write(get("src/%s/install.py" % VCS))
 
     s.write(get("src/from_parentdir.py"))
