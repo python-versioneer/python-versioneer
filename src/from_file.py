@@ -17,22 +17,22 @@ DEFAULT = {"version": "unknown", "full": "unknown"}
 def versions_from_file(filename):
     versions = {}
     try:
-        f = open(filename)
+        with open(filename) as f:
+            for line in f.readlines():
+                mo = re.match("version_version = '([^']+)'", line)
+                if mo:
+                    versions["version"] = mo.group(1)
+                mo = re.match("version_full = '([^']+)'", line)
+                if mo:
+                    versions["full"] = mo.group(1)
     except EnvironmentError:
-        return versions
-    for line in f.readlines():
-        mo = re.match("version_version = '([^']+)'", line)
-        if mo:
-            versions["version"] = mo.group(1)
-        mo = re.match("version_full = '([^']+)'", line)
-        if mo:
-            versions["full"] = mo.group(1)
-    f.close()
+        return {}
+
     return versions
 
 def write_to_version_file(filename, versions):
-    f = open(filename, "w")
-    f.write(SHORT_VERSION_PY % versions)
-    f.close()
+    with open(filename, "w") as f:
+        f.write(SHORT_VERSION_PY % versions)
+
     print("set %s to '%s'" % (filename, versions["version"]))
 
