@@ -27,6 +27,9 @@ def get(fn):
     else:
         return text.decode('ASCII')
 
+def u(s): # so u("foo") yields unicode on all of py2.6/py2.7/py3.2/py3.3
+    return s.encode("ascii").decode("ascii")
+
 def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
@@ -47,14 +50,14 @@ def generate_versioneer():
     s.write(get("src/subprocess_helper.py"))
 
     for VCS in get_vcs_list():
-        s.write(u"LONG_VERSION_PY['%s'] = '''\n" % VCS)
+        s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
         s.write(ver(get("src/%s/long_header.py" % VCS)))
         s.write(unquote(get("src/subprocess_helper.py")))
         s.write(unquote(get("src/from_parentdir.py")))
         s.write(unquote(get("src/%s/from_keywords.py" % VCS)))
         s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
         s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
-        s.write(u"'''\n")
+        s.write(u("'''\n"))
 
         s.write(get("src/%s/from_keywords.py" % VCS))
         s.write(get("src/%s/from_vcs.py" % VCS))
