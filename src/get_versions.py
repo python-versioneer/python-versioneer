@@ -1,9 +1,13 @@
+import sys
 
 def get_root():
     try:
         return os.path.dirname(os.path.abspath(__file__))
     except NameError:
         return os.path.dirname(os.path.abspath(sys.argv[0]))
+
+def vcs_function(vcs, suffix):
+    return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix))
 
 def get_versions(default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
@@ -20,17 +24,30 @@ def get_versions(default=DEFAULT, verbose=False):
     root = get_root()
     versionfile_abs = os.path.join(root, versionfile_source)
 
+# TODO(dustin): Fix this comment to be VCS-agnostic.
     # extract version from first of _version.py, 'git describe', parentdir.
     # This is meant to work for developers using a source checkout, for users
     # of a tarball created by 'setup.py sdist', and for users of a
     # tarball/zipball created by 'git archive' or github's download-from-tag
     # feature.
 
-    if VCS == "git":
-        ver = git_versions_from_keywords(git_get_keywords(versionfile_abs),
-                                         tag_prefix)
-    else:
-        ver = None
+    ver = None
+
+    try:
+        get_keywords_f = vcs_function(VCS, 'get_keywords')
+    except AttributeError:
+        get_keywords_f = None        
+
+    if get_keywords_f is not None:
+        vcs_keywords = get_keywords_f(versionfile_abs)
+
+        try:
+            versions_from_keywords_f = vcs_function(VCS, 'versions_from_keywords')
+        except AttributeError:
+            pass
+        else:
+            ver = versions_from_keywords_f(vcs_keywords, tag_prefix)
+
     if ver:
         if verbose: print("got version from expanded keyword %s" % ver)
         return ver
@@ -40,12 +57,16 @@ def get_versions(default=DEFAULT, verbose=False):
         if verbose: print("got version from file %s %s" % (versionfile_abs,ver))
         return ver
 
-    if VCS == "git":
-        ver = git_versions_from_vcs(tag_prefix, root, verbose)
-    else:
+    try:
+        versions_from_vcs_f = vcs_function(VCS, 'versions_from_vcs')
+    except AttributeError:
         ver = None
+    else:
+        ver = versions_from_vcs_f(tag_prefix, root, verbose)
+
+
     if ver:
-        if verbose: print("got version from git %s" % ver)
+        if verbose: print("got version from VCS %s" % ver)
         return ver
 
     ver = versions_from_parentdir(parentdir_prefix, root, verbose)

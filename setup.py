@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-import os, base64, tempfile
+import os, base64, tempfile, io, sys
+
 from distutils.core import setup, Command
 from distutils.command.build_scripts import build_scripts
+from os import path
 
 LONG="""
 Versioneer is a tool to automatically update version strings (in setup.py and
@@ -14,7 +16,18 @@ version-control system about the current tree.
 VERSION = "0.10+"
 
 def get(fn):
-    return open(fn, "r").read()
+    with open(fn) as f:
+        text = f.read()
+
+    # If we're in Python <3 and have a separate Unicode type, we would've read 
+    # a non-unicode string. Else, all strings will be unicode strings.
+    try:
+        __builtins__.unicode
+    except AttributeError:
+        return text
+    else:
+        return text.decode('ASCII')
+
 def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
@@ -22,30 +35,39 @@ def ver(s):
 def readme(s):
     return s.replace("@README@", get("README.md"))
 
+def get_vcs_list():
+    project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
+    return [filename 
+            for filename 
+            in os.listdir(project_path)
+            if path.isdir(path.join(project_path, filename))]
+
 def generate_versioneer():
-    out = []
-    out.append(readme(ver(get("src/header.py"))))
-    out.append(get("src/subprocess_helper.py"))
+    s = io.StringIO()
+    s.write(readme(ver(get("src/header.py"))))
+    s.write(get("src/subprocess_helper.py"))
 
-    for VCS in ["git"]:
-        out.append("LONG_VERSION_PY['%s'] = '''\n" % VCS)
-        out.append(ver(get("src/%s/long_header.py" % VCS)))
-        out.append(unquote(get("src/subprocess_helper.py")))
-        out.append(unquote(get("src/from_parentdir.py")))
-        out.append(unquote(get("src/%s/from_keywords.py" % VCS)))
-        out.append(unquote(get("src/%s/from_vcs.py" % VCS)))
-        out.append(unquote(get("src/%s/long_get_versions.py" % VCS)))
-        out.append("'''\n")
-        out.append(get("src/%s/from_keywords.py" % VCS))
-        out.append(get("src/%s/from_vcs.py" % VCS))
-        out.append(get("src/%s/install.py" % VCS))
+    for VCS in get_vcs_list():
+        s.write(u"LONG_VERSION_PY['%s'] = '''\n" % VCS)
+        s.write(ver(get("src/%s/long_header.py" % VCS)))
+        s.write(unquote(get("src/subprocess_helper.py")))
+        s.write(unquote(get("src/from_parentdir.py")))
+        s.write(unquote(get("src/%s/from_keywords.py" % VCS)))
+        s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
+        s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
+        s.write(u"'''\n")
+        
+        s.write(get("src/%s/from_keywords.py" % VCS))
+        s.write(get("src/%s/from_vcs.py" % VCS))
+        
+        s.write(get("src/%s/install.py" % VCS))
 
-    out.append(get("src/from_parentdir.py"))
-    out.append(ver(get("src/from_file.py")))
-    out.append(ver(get("src/get_versions.py")))
-    out.append(ver(get("src/cmdclass.py")))
+    s.write(get("src/from_parentdir.py"))
+    s.write(ver(get("src/from_file.py")))
+    s.write(ver(get("src/get_versions.py")))
+    s.write(ver(get("src/cmdclass.py")))
 
-    return ("".join(out)).encode("utf-8")
+    return s.getvalue().encode("utf-8")
 
 
 class make_versioneer(Command):
