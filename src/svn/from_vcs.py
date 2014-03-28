@@ -3,7 +3,7 @@ import re
 import sys
 import os.path
 
-def git_versions_from_vcs(tag_prefix, root, verbose=False):
+def svn_versions_from_vcs(tag_prefix, root, verbose=False):
     """Return a dictionary of values derived directly from the VCS. This is the
     third attempt to find information by get_versions().
     """

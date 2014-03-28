@@ -147,7 +147,9 @@ class cmd_versioneer(Command):
         # Make VCS-specific changes. For git, this means creating/changing
         # .gitattributes to mark _version.py for export-time keyword
         # substitution.
-        do_vcs_install(manifest_in, versionfile_source, ipy)
+        
+        do_vcs_install_f = getattr(sys.modules[__name__], VCS + '_do_vcs_install')
+        do_vcs_install_f(manifest_in, versionfile_source, ipy)
 
 def get_cmdclass():
     """Returns a mapping of subcommand handlers for setup.py ."""

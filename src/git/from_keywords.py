@@ -80,4 +80,3 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
     versions["default"] = composite
     versions["pep440"] = composite
     return versions
-

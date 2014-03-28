@@ -78,7 +78,10 @@ contain enough information to get the proper version.
 
 First, decide on values for the following configuration variables:
 
-* `VCS`: the version control system you use. Currently accepts "git".
+* `VCS`: 
+
+  The version control system you use. Optional. Will simply be detected if not 
+  specified. Currently accepts "git" or "svn".
 
 * `versionfile_source`:
 
@@ -124,7 +127,7 @@ To versioneer-enable your project:
   configuration values you decided earlier:
 
         import versioneer
-        versioneer.VCS = 'git'
+
         versioneer.versionfile_source = 'src/myproject/_version.py'
         versioneer.versionfile_build = 'myproject/_version.py'
         versioneer.tag_prefix = '' # tags are like 1.2.0

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, base64, tempfile, io, sys
+import os, base64, tempfile, io, sys, json
 from os import path
 from distutils.core import setup, Command
 from distutils.command.build_scripts import build_scripts
@@ -34,22 +34,42 @@ def unquote(s):
     return s.replace("%", "%%")
 def ver(s):
     return s.replace("@VERSIONEER-VERSION@", VERSION)
-def readme(s):
-    return s.replace("@README@", get("README.md"))
+def header_replacements(s, vcs_list):
+    return s.replace("@README@", get("README.md")).\
+             replace("@SUPPORTED_REPOS@", json.dumps(vcs_list))
 
 def get_vcs_list():
     project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
+
+# TODO(dustin): We might have to force this into unicode.
     return [filename
             for filename
             in os.listdir(project_path)
-            if path.isdir(path.join(project_path, filename))]
+            if path.isdir(path.join(project_path, filename)) and 
+               filename != 'vcs_template']
 
 def generate_versioneer():
+    vcs_list = get_vcs_list()
+
     s = io.StringIO()
-    s.write(readme(ver(get("src/header.py"))))
+    s.write(header_replacements(ver(get("src/header.py")), vcs_list))
+
+    # Added VCS-specific detection code, and the function that invokes the detection.
+
+    for VCS in vcs_list:
+        s.write(get("src/%s/is_found.py" % VCS))
+
+    s.write(header_replacements(ver(get("src/vcs_detect.py")), vcs_list))
+    s.write(u"VCS = _derive_vcs()\n")
+
     s.write(get("src/subprocess_helper.py"))
 
-    for VCS in get_vcs_list():
+# TODO(dustin): At some point, we might consider only implanting VCS support 
+#               for the VCS found in the target directory.
+# TODO(dustin): Consider using Python string templates so that we can 
+#               efficiently replace for more than one token, and so that we 
+#               don't have to escape all of the replacement tokens.
+    for VCS in vcs_list:
         s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
         s.write(ver(get("src/%s/long_header.py" % VCS)))
         s.write(unquote(get("src/subprocess_helper.py")))
@@ -62,9 +82,12 @@ def generate_versioneer():
 
         s.write(u("'''\n"))
 
+        # We're going to double-insert a couple of files so that we have access 
+        # to them from versioneer.py, as well as from _version.py (written from 
+        # the comment, above).
+
         s.write(get("src/%s/from_keywords.py" % VCS))
         s.write(get("src/%s/from_vcs.py" % VCS))
-
         s.write(get("src/%s/install.py" % VCS))
 
     s.write(get("src/from_parentdir.py"))
