@@ -56,7 +56,10 @@ def generate_versioneer():
         s.write(unquote(get("src/from_parentdir.py")))
         s.write(unquote(get("src/%s/from_keywords.py" % VCS)))
         s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
+
+        # Deposit a version of get_versions() for use in _version.py .
         s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
+
         s.write(u("'''\n"))
 
         s.write(get("src/%s/from_keywords.py" % VCS))
@@ -66,7 +69,10 @@ def generate_versioneer():
 
     s.write(get("src/from_parentdir.py"))
     s.write(ver(get("src/from_file.py")))
+
+    # Deposit a version of get_versions() for use in versioneer.py .
     s.write(ver(get("src/get_versions.py")))
+
     s.write(ver(get("src/cmdclass.py")))
 
     return s.getvalue().encode("utf-8")

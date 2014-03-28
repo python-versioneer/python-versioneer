@@ -2,6 +2,10 @@
 import re
 
 def git_get_keywords(versionfile_abs):
+    """Return a dictionary of values replaced by the VCS, automatically. This 
+    is the first attempt to find information by get_versions().
+    """
+
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
     # so we do it with a regexp instead. This function is not used from

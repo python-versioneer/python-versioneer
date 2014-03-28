@@ -77,7 +77,7 @@ __version__ = get_versions()['default']
 del get_versions
 """
 
-class cmd_update_files(Command):
+class cmd_versioneer(Command):
     description = "install/upgrade Versioneer files: __init__.py SRC/_version.py"
     user_options = []
     boolean_options = []
@@ -86,6 +86,8 @@ class cmd_update_files(Command):
     def finalize_options(self):
         pass
     def run(self):
+        """Create the versioneer.py file."""
+
         print(" creating %s" % versionfile_source)
         with open(versionfile_source, "w") as f:
             assert VCS is not None, "please set versioneer.VCS"
@@ -148,8 +150,10 @@ class cmd_update_files(Command):
         do_vcs_install(manifest_in, versionfile_source, ipy)
 
 def get_cmdclass():
+    """Returns a mapping of subcommand handlers for setup.py ."""
+
     cmds = {'version': cmd_version,
-            'versioneer': cmd_update_files,
+            'versioneer': cmd_versioneer,
             'build': cmd_build,
             'sdist': cmd_sdist,
             }

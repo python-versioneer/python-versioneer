@@ -10,6 +10,9 @@ def vcs_function(vcs, suffix):
     return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 def get_versions(default=DEFAULT, verbose=False):
+    """This variation of get_versions() will be used in versioneer.py ."""
+
+
     # returns dict with two keys: 'version' and 'full'
     assert versionfile_source is not None, "please set versioneer.versionfile_source"
     assert tag_prefix is not None, "please set versioneer.tag_prefix"
@@ -30,6 +33,8 @@ def get_versions(default=DEFAULT, verbose=False):
     # and for users of a tarball/zipball created by 'git archive' or github's
     # download-from-tag feature or the equivalent in other VCSes.
 
+    # Try to get the version info from the VCS-specific replacement keywords.
+
     get_keywords_f = vcs_function(VCS, "get_keywords")
     versions_from_keywords_f = vcs_function(VCS, "versions_from_keywords")
     if get_keywords_f and versions_from_keywords_f:
@@ -39,10 +44,14 @@ def get_versions(default=DEFAULT, verbose=False):
             if verbose: print("got version from expanded keyword %s" % ver)
             return ver
 
+    # Try to get the version info from _version.py .
+
     ver = versions_from_file(versionfile_abs)
     if ver:
         if verbose: print("got version from file %s %s" % (versionfile_abs,ver))
         return ver
+
+    # Try to get the version info from the VCS, directly.
 
     versions_from_vcs_f = vcs_function(VCS, "versions_from_vcs")
     if versions_from_vcs_f:
@@ -50,6 +59,8 @@ def get_versions(default=DEFAULT, verbose=False):
         if ver:
             if verbose: print("got version from VCS %s" % ver)
             return ver
+
+    # Try to get the version info from the directory's naming.
 
     ver = versions_from_parentdir(parentdir_prefix, root, verbose)
     if ver:

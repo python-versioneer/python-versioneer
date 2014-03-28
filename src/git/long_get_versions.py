@@ -1,6 +1,8 @@
 import os
 
 def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
+    """This variation of get_versions() will be used in _version.py ."""
+
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
     # __file__, we can work backwards from there to the root. Some
     # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which

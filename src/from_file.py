@@ -17,6 +17,10 @@ def get_version():
 DEFAULT = {"version": "unknown", "full": "unknown"}
 
 def versions_from_file(filename):
+    """Return a dictionary of values derived from _version.py . This is the
+    second attempt to find information by get_versions().
+    """
+
     versions = {}
     try:
         with open(filename) as f:
