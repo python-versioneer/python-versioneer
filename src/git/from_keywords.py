@@ -8,21 +8,20 @@ def git_get_keywords(versionfile_abs):
     # _version.py.
     keywords = {}
     try:
-        f = open(versionfile_abs,"r")
-        for line in f.readlines():
-            if line.strip().startswith("git_refnames ="):
-                mo = re.search(r'=\s*"(.*)"', line)
-                if mo:
-                    keywords["refnames"] = mo.group(1)
-            if line.strip().startswith("git_full_revisionid ="):
-                mo = re.search(r'=\s*"(.*)"', line)
-                if mo:
-                    keywords["full_revisionid"] = mo.group(1)
-            if line.strip().startswith("git_short_revisionid ="):
-                mo = re.search(r'=\s*"(.*)"', line)
-                if mo:
-                    keywords["short_revisionid"] = mo.group(1)
-        f.close()
+        with open(versionfile_abs) as f:
+            for line in f.readlines():
+                if line.strip().startswith("git_refnames ="):
+                    mo = re.search(r'=\s*"(.*)"', line)
+                    if mo:
+                        keywords["refnames"] = mo.group(1)
+                if line.strip().startswith("git_full_revisionid ="):
+                    mo = re.search(r'=\s*"(.*)"', line)
+                    if mo:
+                        keywords["full_revisionid"] = mo.group(1)
+                if line.strip().startswith("git_short_revisionid ="):
+                    mo = re.search(r'=\s*"(.*)"', line)
+                    if mo:
+                        keywords["short_revisionid"] = mo.group(1)
     except EnvironmentError:
         pass
     return keywords
