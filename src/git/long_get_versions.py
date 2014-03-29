@@ -20,6 +20,7 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
         # versionfile_source is the relative path from the top of the source
         # tree (where the .git directory might live) to this file. Invert
         # this to find the root from __file__.
+# TODO(dustin): Shouldn't this always loop until it fails?
         for i in range(len(versionfile_source.split(os.sep))):
             root = os.path.dirname(root)
     except NameError:

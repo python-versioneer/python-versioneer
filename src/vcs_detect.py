@@ -5,6 +5,7 @@ def _derive_vcs():
         func_name = vcs + '_is_found'
         is_found_f = getattr(sys.modules[__name__], func_name)
         if is_found_f() is True:
+            print("Detected VCS: %s" % (vcs))
             return vcs
 
     raise SystemError("Could not identify VCS.")

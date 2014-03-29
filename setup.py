@@ -32,6 +32,8 @@ def u(s): # so u("foo") yields unicode on all of py2.6/py2.7/py3.2/py3.3
 
 def unquote(s):
     return s.replace("%", "%%")
+def escape(s):
+    return s.replace("\\", "\\\\")
 def ver(s):
     return s.replace("@VERSIONEER-VERSION@", VERSION)
 def header_replacements(s, vcs_list):
@@ -71,14 +73,14 @@ def generate_versioneer():
 #               don't have to escape all of the replacement tokens.
     for VCS in vcs_list:
         s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
-        s.write(ver(get("src/%s/long_header.py" % VCS)))
-        s.write(unquote(get("src/subprocess_helper.py")))
-        s.write(unquote(get("src/from_parentdir.py")))
-        s.write(unquote(get("src/%s/from_keywords.py" % VCS)))
-        s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
+        s.write(ver(escape(get("src/%s/long_header.py" % VCS))))
+        s.write(unquote(escape(get("src/subprocess_helper.py"))))
+        s.write(unquote(escape(get("src/from_parentdir.py"))))
+        s.write(unquote(escape(get("src/%s/from_keywords.py" % VCS))))
+        s.write(unquote(escape(get("src/%s/from_vcs.py" % VCS))))
 
         # Deposit a version of get_versions() for use in _version.py .
-        s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
+        s.write(unquote(escape(get("src/%s/long_get_versions.py" % VCS))))
 
         s.write(u("'''\n"))
 

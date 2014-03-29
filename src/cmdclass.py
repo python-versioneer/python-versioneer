@@ -1,3 +1,14 @@
+def get_vcs_code():
+    assert VCS is not None, "please set versioneer.VCS"
+    long_ = LONG_VERSION_PY[VCS]
+    complete = long_ % { "DOLLAR": "$",
+                         "TAG_PREFIX": tag_prefix,
+                         "PARENTDIR_PREFIX": parentdir_prefix,
+                         "VERSIONFILE_SOURCE": versionfile_source,
+                         "VERSION_STRING_TEMPLATE": version_string_template }
+
+    complete = complete.replace('\\\\', '\\')
+    return complete
 
 class cmd_version(Command):
     description = "report generated version string"
@@ -44,14 +55,8 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
             _build_exe.run(self)
             os.unlink(target_versionfile)
             with open(versionfile_source, "w") as f:
-                assert VCS is not None, "please set versioneer.VCS"
-                LONG = LONG_VERSION_PY[VCS]
-                f.write(LONG % {"DOLLAR": "$",
-                                "TAG_PREFIX": tag_prefix,
-                                "PARENTDIR_PREFIX": parentdir_prefix,
-                                "VERSIONFILE_SOURCE": versionfile_source,
-                                "VERSION_STRING_TEMPLATE": version_string_template,
-                                })
+                f.write(get_vcs_code())
+
 
 class cmd_sdist(_sdist):
     def run(self):
@@ -77,6 +82,7 @@ __version__ = get_versions()['default']
 del get_versions
 """
 
+
 class cmd_versioneer(Command):
     description = "install/upgrade Versioneer files: __init__.py SRC/_version.py"
     user_options = []
@@ -90,14 +96,7 @@ class cmd_versioneer(Command):
 
         print(" creating %s" % versionfile_source)
         with open(versionfile_source, "w") as f:
-            assert VCS is not None, "please set versioneer.VCS"
-            LONG = LONG_VERSION_PY[VCS]
-            f.write(LONG % {"DOLLAR": "$",
-                            "TAG_PREFIX": tag_prefix,
-                            "PARENTDIR_PREFIX": parentdir_prefix,
-                            "VERSIONFILE_SOURCE": versionfile_source,
-                            "VERSION_STRING_TEMPLATE": version_string_template,
-                            })
+            f.write(get_vcs_code())
 
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
         try:
