@@ -14,7 +14,7 @@ def svn_parse_tag_xml(info_xml):
     for release in release_list:
         release = dict([(e.tag, e) for e in release])
 
-        revision = release['commit'].attrib['revision']
+        revision = int(release['commit'].attrib['revision'])
         distilled = { 'name': release['name'].text }
         for e in release['commit']:
             distilled[e.tag] = e.text
@@ -51,8 +51,6 @@ def svn_versions_from_vcs(tag_prefix, root, verbose=False):
         raise ValueError("Please define VCS-specific 'tag_url' setting for "
                          "'svn' within 'versioneer'.")
 
-    print("Retrieving XML tag list.")
-
     svn_commands = ['svn']
     info_xml = run_command(svn_commands, ['ls', '--xml', tag_url], cwd=root)
 # TODO(dustin): This should raise an EnvironmentError upon failure.
@@ -63,7 +61,10 @@ def svn_versions_from_vcs(tag_prefix, root, verbose=False):
     (releases, latest_revision) = svn_parse_tag_xml(info_xml)
 
     release_info = releases[latest_revision]
-    versions = { 'default': release_info['name'] }
+    release_name = release_info['name']
+    versions = { 'default': release_name, 
+                 'version': release_name, 
+                 'full': release_name }
 
 # Examples of strings returned by Git.
 #

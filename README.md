@@ -133,6 +133,11 @@ To versioneer-enable your project:
         versioneer.tag_prefix = '' # tags are like 1.2.0
         versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
 
+    If you're using Subversion, than you'll need to declare the URL for your 
+    repository's tag path:
+
+      versioneer.vcs_settings['svn'] = { 'tag_url': 'https://svn_host/svn/repo/tags' }
+
 * 3: add the following arguments to the setup() call in your setup.py:
 
         version=versioneer.get_version(),
