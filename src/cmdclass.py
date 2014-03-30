@@ -8,6 +8,21 @@ def get_vcs_code():
                          "VERSION_STRING_TEMPLATE": version_string_template }
 
     complete = complete.replace('\\\\', '\\')
+
+    try:
+        vcs_settings[VCS]
+    except KeyError:
+        pass
+    else:
+        new_lines = []
+        for k, v in vcs_settings[VCS].items():
+            value_escaped = v.replace("\\", "\\\\").replace("\"", "\\\"")
+            new_lines.append("%s_%s = \"%s\"" % (VCS, k, value_escaped))
+
+        # Add VCS-specific assignments to top of _version.py .
+# TODO(dustin): We might want to put these below the file-version and comments.
+        complete = "\n".join(new_lines) + "\n" + complete
+
     return complete
 
 class cmd_version(Command):

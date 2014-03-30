@@ -4,8 +4,9 @@ def svn_get_keywords(versionfile_abs):
     is the first attempt to find information by get_versions().
     """
 
-    return {}
+    return {} #{ 'revision': svn_revision }
 
+# TODO(dustin): Needs to be tested.
 def svn_versions_from_keywords(keywords, tag_prefix, verbose=False):
 
-    return {}
+    return {} # { 'default': keywords['revision'] }

@@ -11,6 +11,8 @@
 version information by the VCS.
 """
 
+svn_revision = "%(DOLLAR)sRevision%(DOLLAR)s"
+
 # these strings are filled in when 'setup.py versioneer' creates _version.py
 tag_prefix = "%(TAG_PREFIX)s"
 parentdir_prefix = "%(PARENTDIR_PREFIX)s"

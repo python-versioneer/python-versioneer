@@ -30,6 +30,9 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
     if sys.version >= '3':
         stdout = stdout.decode()
     if p.returncode != 0:
+# TODO(dustin): Maybe we should contemplate raising a SystemError here, rather 
+# then returning a None. It's almost always preferable that it would default to 
+# being a terminal error unles specifically caught (rather than vice versa).
         if verbose:
             print("unable to run %s (error)" % args[0])
         return None

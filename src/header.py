@@ -20,6 +20,7 @@ versionfile_build = None
 tag_prefix = None
 parentdir_prefix = None
 version_string_template = "%(default)s"
+vcs_settings = {}
 
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}
