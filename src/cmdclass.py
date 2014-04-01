@@ -82,6 +82,9 @@ class cmd_sdist(_sdist):
         return _sdist.run(self)
 
     def make_release_tree(self, base_dir, files):
+# TODO(dustin): Fixed bug by defining this. Can we reduce the two separate 
+#               calls in this class to a single one?
+        versions = get_versions(verbose=True)
         _sdist.make_release_tree(self, base_dir, files)
         # now locate _version.py in the new base_dir directory (remembering
         # that it may be a hardlink) and replace it with an updated value

@@ -93,7 +93,7 @@ def generate_versioneer():
         s.write(get("src/%s/install.py" % VCS))
 
     s.write(get("src/from_parentdir.py"))
-    s.write(ver(get("src/from_file.py")))
+    s.write(ver(unquote(get("src/from_file.py"))))
 
     # Deposit a version of get_versions() for use in versioneer.py .
     s.write(ver(get("src/get_versions.py")))
