@@ -2,7 +2,7 @@
 
 import os, base64, tempfile, io, sys
 from os import path
-from distutils.core import setup, Command
+from setuptools import setup, Command
 from distutils.command.build_scripts import build_scripts
 
 LONG="""
