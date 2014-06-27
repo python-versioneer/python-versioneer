@@ -1,4 +1,3 @@
-import sys
 
 def get_root():
     try:

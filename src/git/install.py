@@ -1,5 +1,3 @@
-import os.path
-import sys
 
 def do_vcs_install(manifest_in, versionfile_source, ipy):
     GITS = ["git"]
