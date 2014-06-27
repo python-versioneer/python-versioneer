@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os, base64, tempfile, io, sys
+import os, base64, tempfile, io
 from os import path
 from setuptools import setup, Command
 from distutils.command.build_scripts import build_scripts
+from setuptools.dist import Distribution as _Distribution
 
 LONG="""
 Versioneer is a tool to automatically update version strings (in setup.py and
@@ -107,6 +108,13 @@ class my_build_scripts(build_scripts):
         os.rmdir(tempdir)
         return rc
 
+# python's distutils treats module-less packages as binary-specific (not
+# "pure"), so "setup.py bdist_wheel" creates binary-specific wheels. Override
+# this so we get cross-platform wheels instead. More info at:
+# https://bitbucket.org/pypa/wheel/issue/116/packages-with-only-filesdata_files-get
+class Distribution(_Distribution):
+    def is_pure(self): return True
+
 setup(
     name = "versioneer",
     license = "public domain",
@@ -120,6 +128,7 @@ setup(
     # otherwise it skips that step.
     scripts = ["fake"],
     long_description = LONG,
+    distclass=Distribution,
     cmdclass = { "build_scripts": my_build_scripts,
                  "make_versioneer": make_versioneer,
                  },
