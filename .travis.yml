@@ -7,10 +7,11 @@ python:
   - "3.4"
   - "pypy"
 install:
-  - echo "no dependencies to install"
+  - pip install pyflakes
 before_script:
   - git config --global user.email "foo@example.com"
   - git config --global user.name "foo"
 script:
   - python setup.py make_versioneer
   - python test/test_git.py
+  - pyflakes setup.py versioneer.py
