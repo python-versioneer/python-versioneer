@@ -1,3 +1,4 @@
+import re # --STRIP DURING BUILD
 
 def git_get_keywords(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these

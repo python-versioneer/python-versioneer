@@ -15,7 +15,11 @@ version-control system about the current tree.
 # as nice as it'd be to versioneer ourselves, that sounds messy.
 VERSION = "0.10+"
 
-def get(fn):
+
+def ver(s):
+    return s.replace("@VERSIONEER-VERSION@", VERSION)
+
+def get(fn, add_ver=False, unquote=False, do_strip=False, do_readme=False):
     with open(fn) as f:
         text = f.read()
 
@@ -24,19 +28,23 @@ def get(fn):
     try:
         __builtins__.unicode
     except AttributeError:
-        return text
+        pass
     else:
-        return text.decode('ASCII')
+        text =  text.decode('ASCII')
+    if add_ver:
+        text = ver(text)
+    if unquote:
+        text = text.replace("%", "%%")
+    if do_strip:
+        lines = [line for line in text.split("\n")
+                 if not line.endswith("# --STRIP DURING BUILD")]
+        text = "\n".join(lines)
+    if do_readme:
+        text = text.replace("@README@", get("README.md"))
+    return text
 
 def u(s): # so u("foo") yields unicode on all of py2.6/py2.7/py3.2/py3.3
     return s.encode("ascii").decode("ascii")
-
-def unquote(s):
-    return s.replace("%", "%%")
-def ver(s):
-    return s.replace("@VERSIONEER-VERSION@", VERSION)
-def readme(s):
-    return s.replace("@README@", get("README.md"))
 
 def get_vcs_list():
     project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
@@ -47,28 +55,30 @@ def get_vcs_list():
 
 def generate_versioneer():
     s = io.StringIO()
-    s.write(readme(ver(get("src/header.py"))))
-    s.write(get("src/subprocess_helper.py"))
+    s.write(get("src/header.py", add_ver=True, do_readme=True))
+    s.write(get("src/subprocess_helper.py", do_strip=True))
 
     for VCS in get_vcs_list():
         s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
-        s.write(ver(get("src/%s/long_header.py" % VCS)))
-        s.write(unquote(get("src/subprocess_helper.py")))
-        s.write(unquote(get("src/from_parentdir.py")))
-        s.write(unquote(get("src/%s/from_keywords.py" % VCS)))
-        s.write(unquote(get("src/%s/from_vcs.py" % VCS)))
-        s.write(unquote(get("src/%s/long_get_versions.py" % VCS)))
+        s.write(get("src/%s/long_header.py" % VCS, add_ver=True, do_strip=True))
+        s.write(get("src/subprocess_helper.py", unquote=True, do_strip=True))
+        s.write(get("src/from_parentdir.py", unquote=True, do_strip=True))
+        s.write(get("src/%s/from_keywords.py" % VCS,
+                    unquote=True, do_strip=True))
+        s.write(get("src/%s/from_vcs.py" % VCS, unquote=True, do_strip=True))
+        s.write(get("src/%s/long_get_versions.py" % VCS,
+                    unquote=True, do_strip=True))
         s.write(u("'''\n"))
 
-        s.write(get("src/%s/from_keywords.py" % VCS))
-        s.write(get("src/%s/from_vcs.py" % VCS))
+        s.write(get("src/%s/from_keywords.py" % VCS, do_strip=True))
+        s.write(get("src/%s/from_vcs.py" % VCS, do_strip=True))
 
-        s.write(get("src/%s/install.py" % VCS))
+        s.write(get("src/%s/install.py" % VCS, do_strip=True))
 
-    s.write(get("src/from_parentdir.py"))
-    s.write(ver(get("src/from_file.py")))
-    s.write(ver(get("src/get_versions.py")))
-    s.write(ver(get("src/cmdclass.py")))
+    s.write(get("src/from_parentdir.py", do_strip=True))
+    s.write(get("src/from_file.py", add_ver=True, do_strip=True))
+    s.write(get("src/get_versions.py", add_ver=True, do_strip=True))
+    s.write(get("src/cmdclass.py", add_ver=True, do_strip=True))
 
     return s.getvalue().encode("utf-8")
 
