@@ -4,3 +4,4 @@
 /git_version.py
 /MANIFEST
 /dist/
+/versioneer.egg-info/
