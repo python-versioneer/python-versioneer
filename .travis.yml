@@ -15,3 +15,7 @@ script:
   - python setup.py make_versioneer
   - python test/test_git.py
   - pyflakes setup.py versioneer.py
+  - cp versioneer.py test/flakesapp/
+  - cd test/flakesapp && python setup.py versioneer
+  - pyflakes test/flakesapp/src/demo/_version.py
+
