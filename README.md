@@ -214,10 +214,18 @@ The `setup.py versioneer` command adds the following text to your
 To upgrade your project to a new release of Versioneer, do the following:
 
 * install the new Versioneer (`pip install -U versioneer` or equivalent)
-* re-run `versioneer-installer` in your source tree to replace `versioneer.py`
-* edit `setup.py`, if necessary, to include any new configuration settings indicated by the release notes
+* re-run `versioneer-installer` in your source tree to replace your copy of
+  `versioneer.py`
+* edit `setup.py`, if necessary, to include any new configuration settings
+  indicated by the release notes
 * re-run `setup.py versioneer` to replace `SRC/_version.py`
 * commit any changed files
+
+### Upgrading from 0.10 to 0.11
+
+You must add a `versioneer.VCS = "git"` to your `setup.py` before re-running
+`setup.py versioneer`. This will enable the use of additional version-control
+systems (SVN, etc) in the future.
 
 ## Future Directions
 
