@@ -96,6 +96,26 @@ class make_versioneer(Command):
             f.write(generate_versioneer().decode("utf8"))
         return 0
 
+class make_long_version_py_git(Command):
+    description = "create standalone _version.py (for git)"
+    user_options = []
+    boolean_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        assert os.path.exists("versioneer.py")
+        from versioneer import LONG_VERSION_PY
+        with open("git_version.py", "w") as f:
+            f.write(LONG_VERSION_PY["git"] %
+                    {"DOLLAR": "$",
+                     "TAG_PREFIX": "tag-",
+                     "PARENTDIR_PREFIX": "parentdir_prefix",
+                     "VERSIONFILE_SOURCE": "versionfile_source",
+                     })
+        return 0
+
 class my_build_scripts(build_scripts):
     def run(self):
         v = generate_versioneer()
@@ -141,6 +161,7 @@ setup(
     distclass=Distribution,
     cmdclass = { "build_scripts": my_build_scripts,
                  "make_versioneer": make_versioneer,
+                 "make_long_version_py_git": make_long_version_py_git,
                  },
     classifiers=[
         "Programming Language :: Python",
