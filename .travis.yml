@@ -16,3 +16,4 @@ script:
   - python test/test_git.py
   - python setup.py make_long_version_py_git
   - pyflakes setup.py versioneer.py git_version.py
+  - pyflakes test src/subprocess_helper.py src/git/from_keywords.py
