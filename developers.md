@@ -11,3 +11,11 @@ So, you want to extend Versioneer to support your favorite version control syste
 * 6: add a line to .travis.yml to execute your `test_NEWVCS.py` upon checkins
 
 Then file a pull request!
+
+
+## To make a release
+
+* test, etc
+* edit setup.py to set VERSION=, commit -m "release X.X"
+* push origin master X.X
+* python setup.py bdist_wheel --universal sdist register upload
