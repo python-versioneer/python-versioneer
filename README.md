@@ -206,7 +206,7 @@ The `setup.py versioneer` command adds the following text to your
 `__init__.py` to place a basic version in `YOURPROJECT.__version__`:
 
     from ._version import get_versions
-    __version = get_versions()['version']
+    __version__ = get_versions()['version']
     del get_versions
 
 ## Updating Versioneer
