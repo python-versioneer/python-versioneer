@@ -21,7 +21,7 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
                     present = True
         f.close()
     except EnvironmentError:
-        pass    
+        pass
     if not present:
         f = open(".gitattributes", "a+")
         f.write("%s export-subst\n" % versionfile_source)
