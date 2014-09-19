@@ -16,9 +16,9 @@ class my_build_scripts(build_scripts):
         tempdir = tempfile.mkdtemp()
         generated = os.path.join(tempdir, "rundemo")
         with open(generated, "wb") as f:
-            for line in open("bin/rundemo-template"):
-                if line.strip() == "#versions":
-                    f.write('versions = %r\n' % (versions,))
+            for line in open("bin/rundemo-template", "rb"):
+                if line.strip().decode("ascii") == "#versions":
+                    f.write(('versions = %r\n' % (versions,)).encode("ascii"))
                 else:
                     f.write(line)
         self.scripts = [generated]
