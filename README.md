@@ -242,6 +242,10 @@ You must add a `versioneer.VCS = "git"` to your `setup.py` before re-running
 `setup.py versioneer`. This will enable the use of additional version-control
 systems (SVN, etc) in the future.
 
+### Upgrading from 0.11 to 0.12
+
+Nothing special.
+
 ## Future Directions
 
 This tool is designed to make it easily extended to other version-control
