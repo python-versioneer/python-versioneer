@@ -94,10 +94,10 @@ First, decide on values for the following configuration variables:
   This must be set even if your project does not have any modules (and will
   therefore never import `_version.py`), since "setup.py sdist" -based trees
   still need somewhere to record the pre-calculated version strings. Anywhere
-  in the source tree should do. Note, however, that 'setup.py versioneer'
-  will currently attempt to create an `__init__.py` next to your
-  `_version.py`, which will look pretty weird (this is a bug, and should
-  eventually be fixed somehow).
+  in the source tree should do. If there is a `__init__.py` next to your
+  `_version.py`, the `setup.py versioneer` command (described below) will
+  append some `__version__`-setting assignments, if they aren't already
+  present.
 
 *  `versionfile_build`:
 
@@ -150,11 +150,11 @@ To versioneer-enable your project:
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
 
-* 4: now run `setup.py versioneer`, which will create `_version.py`, and
-  will modify your `__init__.py` to define `__version__` (by calling a
-  function from `_version.py`). It will also modify your `MANIFEST.in` to
-  include both `versioneer.py` and the generated `_version.py` in sdist
-  tarballs.
+* 4: now run `setup.py versioneer`, which will create `_version.py`, and will
+  modify your `__init__.py` (if one exists next to `_version.py`) to define
+  `__version__` (by calling a function from `_version.py`). It will also
+  modify your `MANIFEST.in` to include both `versioneer.py` and the generated
+  `_version.py` in sdist tarballs.
 
 * 5: commit these changes to your VCS. To make sure you won't forget,
   `setup.py versioneer` will mark everything it touched for addition.

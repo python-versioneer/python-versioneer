@@ -93,7 +93,7 @@ class Repo(unittest.TestCase):
     # or test/demoapp-script-only/)
 
     def test_full(self):
-        self.run_test("test/demoapp")
+        self.run_test("test/demoapp", False)
 
     def test_script_only(self):
         # This test looks at an application that consists entirely of a
@@ -102,9 +102,9 @@ class Repo(unittest.TestCase):
         # anything executable. So of the 3 runtime situations examined by
         # Repo.test_full above, we only care about RB. (RA1 is valid too, but
         # covered by Repo).
-        self.run_test("test/demoapp-script-only")
+        self.run_test("test/demoapp-script-only", True)
 
-    def run_test(self, demoapp_dir):
+    def run_test(self, demoapp_dir, script_only):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
@@ -143,7 +143,10 @@ class Repo(unittest.TestCase):
         out = self.python("setup.py", "versioneer").splitlines()
         self.assertEqual(out[0], "running versioneer")
         self.assertEqual(out[1], " creating src/demo/_version.py")
-        self.assertEqual(out[2], " appending to src/demo/__init__.py")
+        if script_only:
+            self.assertEqual(out[2], " src/demo/__init__.py doesn't exist, ok")
+        else:
+            self.assertEqual(out[2], " appending to src/demo/__init__.py")
         self.assertEqual(out[3], " appending 'versioneer.py' to MANIFEST.in")
         self.assertEqual(out[4], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
         out = set(self.git("status", "--porcelain").splitlines())
@@ -151,23 +154,29 @@ class Repo(unittest.TestCase):
         # don't, it will show up in the status here. Ignore it.
         out.discard("?? versioneer.pyc")
         out.discard("?? __pycache__/")
-        self.assertEqual(out, set(["A  .gitattributes",
-                                   "M  MANIFEST.in",
-                                   "M  src/demo/__init__.py",
-                                   "A  src/demo/_version.py"]))
-        f = open(self.subpath("demoapp/src/demo/__init__.py"))
-        i = f.read().splitlines()
-        f.close()
-        self.assertEqual(i[-3], "from ._version import get_versions")
-        self.assertEqual(i[-2], "__version__ = get_versions()['version']")
-        self.assertEqual(i[-1], "del get_versions")
+        expected = set(["A  .gitattributes",
+                        "M  MANIFEST.in",
+                        "A  src/demo/_version.py"])
+        if not script_only:
+            expected.add("M  src/demo/__init__.py")
+        self.assertEqual(out, expected)
+        if not script_only:
+            f = open(self.subpath("demoapp/src/demo/__init__.py"))
+            i = f.read().splitlines()
+            f.close()
+            self.assertEqual(i[-3], "from ._version import get_versions")
+            self.assertEqual(i[-2], "__version__ = get_versions()['version']")
+            self.assertEqual(i[-1], "del get_versions")
         self.git("commit", "-m", "add _version stuff")
 
         # "setup.py versioneer" should be idempotent
         out = self.python("setup.py", "versioneer").splitlines()
         self.assertEqual(out[0], "running versioneer")
         self.assertEqual(out[1], " creating src/demo/_version.py")
-        self.assertEqual(out[2], " src/demo/__init__.py unmodified")
+        if script_only:
+            self.assertEqual(out[2], " src/demo/__init__.py doesn't exist, ok")
+        else:
+            self.assertEqual(out[2], " src/demo/__init__.py unmodified")
         self.assertEqual(out[3], " 'versioneer.py' already in MANIFEST.in")
         self.assertEqual(out[4], " versionfile_source already in MANIFEST.in")
         out = set(self.git("status", "--porcelain").splitlines())

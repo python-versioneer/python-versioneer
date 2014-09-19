@@ -1,2 +1,2 @@
-include bin/dummy
-include bin/rundemo-template
+include src/dummy
+include src/rundemo-template

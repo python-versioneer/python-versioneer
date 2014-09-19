@@ -3,7 +3,9 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
-    files = [manifest_in, versionfile_source, ipy]
+    files = [manifest_in, versionfile_source]
+    if ipy:
+        files.append(ipy)
     try:
         me = __file__
         if me.endswith(".pyc") or me.endswith(".pyo"):

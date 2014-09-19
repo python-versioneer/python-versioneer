@@ -92,17 +92,21 @@ class cmd_update_files(Command):
                             })
 
         ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
-        try:
-            with open(ipy, "r") as f:
-                old = f.read()
-        except EnvironmentError:
-            old = ""
-        if INIT_PY_SNIPPET not in old:
-            print(" appending to %s" % ipy)
-            with open(ipy, "a") as f:
-                f.write(INIT_PY_SNIPPET)
+        if os.path.exists(ipy):
+            try:
+                with open(ipy, "r") as f:
+                    old = f.read()
+            except EnvironmentError:
+                old = ""
+            if INIT_PY_SNIPPET not in old:
+                print(" appending to %s" % ipy)
+                with open(ipy, "a") as f:
+                    f.write(INIT_PY_SNIPPET)
+            else:
+                print(" %s unmodified" % ipy)
         else:
-            print(" %s unmodified" % ipy)
+            print(" %s doesn't exist, ok" % ipy)
+            ipy = None
 
         # Make sure both the top-level "versioneer.py" and versionfile_source
         # (PKG/_version.py, used by runtime code) are in MANIFEST.in, so
