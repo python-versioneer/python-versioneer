@@ -83,12 +83,15 @@ class Repo(unittest.TestCase):
     # In three runtime situations:
     #  RA1: setup.py --version
     #  RA2: ...path/to/setup.py --version (from outside the source tree)
-    #  RB: setup.py build;  demoapp --version
+    #  RB: setup.py build;  rundemo --version
     #
     # We can only detect dirty files in real git trees, so we don't examine
     # SB for TB/TC/TD/TE, or RB.
 
     def test_full(self):
+        self.run_test("test/demoapp")
+
+    def run_test(self, demoapp_dir):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
@@ -106,7 +109,7 @@ class Repo(unittest.TestCase):
         self.git("commit", "-m", "first false commit", workdir=self.testdir)
         self.git("tag", "demo-4.0", workdir=self.testdir)
 
-        shutil.copytree("test/demoapp", self.subpath("demoapp"))
+        shutil.copytree(demoapp_dir, self.subpath("demoapp"))
         setup_py_fn = os.path.join(self.subpath("demoapp"), "setup.py")
         with open(setup_py_fn, "r") as f:
             setup_py = f.read()
@@ -136,7 +139,7 @@ class Repo(unittest.TestCase):
         out.discard("?? versioneer.pyc")
         out.discard("?? __pycache__/")
         self.assertEqual(out, set(["A  .gitattributes",
-                                   "A  MANIFEST.in",
+                                   "M  MANIFEST.in",
                                    "M  src/demo/__init__.py",
                                    "A  src/demo/_version.py"]))
         f = open(self.subpath("demoapp/src/demo/__init__.py"))
@@ -257,7 +260,7 @@ class Repo(unittest.TestCase):
         self.compare(v, exp_short, state, tree, "RA2")
 
         if dirty:
-            return # cannot detect dirty files in a build
+            return # cannot detect dirty files in a build # XXX really?
 
         # RB: setup.py build; rundemo --version
         if os.path.exists(os.path.join(workdir, "build")):
@@ -265,10 +268,6 @@ class Repo(unittest.TestCase):
         self.python("setup.py", "build", "--build-lib=build/lib",
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
-        # copy bin/rundemo into the build libdir, so we don't have to muck
-        # with PYTHONPATH when we execute it
-        shutil.copyfile(os.path.join(workdir, "bin", "rundemo"),
-                        os.path.join(build_lib, "rundemo"))
         out = self.python("rundemo", "--version", workdir=build_lib)
         data = dict([line.split(":",1) for line in out.splitlines()])
         self.compare(data["__version__"], exp_short, state, tree, "RB")
