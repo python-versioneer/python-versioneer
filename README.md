@@ -84,12 +84,20 @@ First, decide on values for the following configuration variables:
 
   A project-relative pathname into which the generated version strings should
   be written. This is usually a `_version.py` next to your project's main
-  `__init__.py` file. If your project uses `src/myproject/__init__.py`, this
-  should be `src/myproject/_version.py`. This file should be checked in to
-  your VCS as usual: the copy created below by `setup.py versioneer` will
-  include code that parses expanded VCS keywords in generated tarballs. The
-  'build' and 'sdist' commands will replace it with a copy that has just the
-  calculated version string.
+  `__init__.py` file, so it can be imported at runtime. If your project uses
+  `src/myproject/__init__.py`, this should be `src/myproject/_version.py`.
+  This file should be checked in to your VCS as usual: the copy created below
+  by `setup.py versioneer` will include code that parses expanded VCS
+  keywords in generated tarballs. The 'build' and 'sdist' commands will
+  replace it with a copy that has just the calculated version string.
+
+  This must be set even if your project does not have any modules (and will
+  therefore never import `_version.py`), since "setup.py sdist" -based trees
+  still need somewhere to record the pre-calculated version strings. Anywhere
+  in the source tree should do. Note, however, that 'setup.py versioneer'
+  will currently attempt to create an `__init__.py` next to your
+  `_version.py`, which will look pretty weird (this is a bug, and should
+  eventually be fixed somehow).
 
 *  `versionfile_build`:
 
@@ -98,6 +106,13 @@ First, decide on values for the following configuration variables:
   'package_dir='. If you have `package_dir={'myproject': 'src/myproject'}`,
   then you will probably have `versionfile_build='myproject/_version.py'` and
   `versionfile_source='src/myproject/_version.py'`.
+
+  If this is set to None, then `setup.py build` will not attempt to rewrite
+  any `_version.py` in the built tree. If your project does not have any
+  libraries (e.g. if it only builds a script), then you should use
+  `versionfile_build = None` and override `distutils.command.build_scripts`
+  to explicitly insert a copy of `versioneer.get_version()` into your
+  generated script.
 
 * `tag_prefix`:
 

@@ -18,11 +18,12 @@ class cmd_build(_build):
         _build.run(self)
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
-        target_versionfile = os.path.join(self.build_lib, versionfile_build)
-        print("UPDATING %s" % target_versionfile)
-        os.unlink(target_versionfile)
-        with open(target_versionfile, "w") as f:
-            f.write(SHORT_VERSION_PY % versions)
+        if versionfile_build:
+            target_versionfile = os.path.join(self.build_lib, versionfile_build)
+            print("UPDATING %s" % target_versionfile)
+            os.unlink(target_versionfile)
+            with open(target_versionfile, "w") as f:
+                f.write(SHORT_VERSION_PY % versions)
 
 if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
     from cx_Freeze.dist import build_exe as _build_exe

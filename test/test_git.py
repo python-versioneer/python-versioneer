@@ -88,8 +88,21 @@ class Repo(unittest.TestCase):
     # We can only detect dirty files in real git trees, so we don't examine
     # SB for TB/TC/TD/TE, or RB.
 
+    # note that the repo being manipulated is always named "demoapp",
+    # regardless of which source directory we copied it from (test/demoapp/
+    # or test/demoapp-script-only/)
+
     def test_full(self):
         self.run_test("test/demoapp")
+
+    def test_script_only(self):
+        # This test looks at an application that consists entirely of a
+        # script: no libraries (so its setup.py has packages=[]). This sort
+        # of app cannot be run from source: you must 'setup.py build' to get
+        # anything executable. So of the 3 runtime situations examined by
+        # Repo.test_full above, we only care about RB. (RA1 is valid too, but
+        # covered by Repo).
+        self.run_test("test/demoapp-script-only")
 
     def run_test(self, demoapp_dir):
         self.testdir = tempfile.mkdtemp()

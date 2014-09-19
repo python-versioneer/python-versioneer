@@ -1,0 +1,5 @@
+This is a fake script, used to ensure that setup.py's scripts= list is
+non-empty. The real script is generated (by modifying a template) during the
+"setup.py build_scripts" command (run by "setup.py build"). If scripts= was
+empty, then build_scripts wouldn't get run (as distutils would mistakenly
+believe that this package produced no scripts).

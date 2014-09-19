@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+#versions
+
+print("__version__:%s" % versions['version'])
+print("shortversion:%s" % versions["version"])
+print("longversion:%s" % versions["full"])
