@@ -19,3 +19,5 @@ Then file a pull request!
 * edit setup.py to set VERSION=, commit -m "release X.X"
 * push origin master X.X
 * python setup.py bdist_wheel --universal sdist register upload
+
+(if setup.py doesn't acknowledge `bdist_wheel`, and the "wheel" package is installed, look for stale versions of setuptools and delete them)
