@@ -138,7 +138,13 @@ To versioneer-enable your project:
 * 2: add the following lines to the top of your `setup.py`, with the
   configuration values you decided earlier:
 
-        import versioneer
+        import imp
+        fp, pathname, description = imp.find_module('versioneer')
+        try:
+            versioneer = imp.load_module('versioneer', fp, pathname, description)
+        finally:
+            if fp: fp.close()
+        
         versioneer.VCS = 'git'
         versioneer.versionfile_source = 'src/myproject/_version.py'
         versioneer.versionfile_build = 'myproject/_version.py'
