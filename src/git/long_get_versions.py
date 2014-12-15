@@ -11,7 +11,7 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
         return ver
 
     try:
-        root = os.path.abspath(__file__)
+        root = os.path.realpath(__file__)
         # versionfile_source is the relative path from the top of the source
         # tree (where the .git directory might live) to this file. Invert
         # this to find the root from __file__.
