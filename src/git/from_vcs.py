@@ -4,15 +4,16 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
     # if the git-archive 'subst' keywords were *not* expanded, and
     # _version.py hasn't already been rewritten with a short version string,
     # meaning we're inside a checked out source tree.
-
-    if not os.path.exists(os.path.join(root, ".git")):
-        if verbose:
-            print("no .git in %s" % root)
-        return {}
-
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
+
+    retcode = run_command_for_return_code(GITS, ["rev-parse", "--git-dir"], cwd=root)
+    if retcode == 128:
+        if verbose:
+            print("Directory %s not under git control" % root)
+        return {}
+
     stdout = run_command(GITS, ["describe", "--tags", "--dirty", "--always"],
                          cwd=root)
     if stdout is None:
