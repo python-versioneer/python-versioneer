@@ -56,14 +56,14 @@ class Repo(unittest.TestCase):
         assert not kwargs, kwargs.keys()
         output = run_command(GITS, list(args), workdir, True)
         if output is None:
-            self.fail("problem running git")
+            self.fail("problem running git (workdir: %s)" % workdir)
         return output
     def python(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.projpath())
         assert not kwargs, kwargs.keys()
         output = run_command([sys.executable], list(args), workdir, True)
         if output is None:
-            self.fail("problem running python")
+            self.fail("problem running python (workdir: %s)" % workdir)
         return output
     def subpath(self, path, base_dir = ""):
         return os.path.join(self.testdir, base_dir, path)
@@ -124,17 +124,7 @@ class Repo(unittest.TestCase):
         self.projdir = "project" if sub_dir else ""
         self.gitdir = "demoapp"
 
-        # create an unrelated git tree above the testdir. Some tests will run
-        # from this directory, and they should use the demoapp git
-        # environment instead of the deceptive parent
         os.mkdir(self.testdir)
-        self.git("init", workdir=self.testdir)
-        f = open(os.path.join(self.testdir, "false-repo"), "w")
-        f.write("don't look at me\n")
-        f.close()
-        self.git("add", "false-repo", workdir=self.testdir)
-        self.git("commit", "-m", "first false commit", workdir=self.testdir)
-        self.git("tag", "demo-4.0", workdir=self.testdir)
 
         shutil.copytree(demoapp_dir, self.projpath())
         setup_py_fn = os.path.join(self.projpath(), "setup.py")
@@ -220,7 +210,7 @@ class Repo(unittest.TestCase):
         self.do_checks("1.0-dirty", full+"-dirty", dirty=True, state="SB")
 
         # SC: now we make one commit past the tag
-        self.git("add", "setup.py")
+        self.git("add", "setup.py", workdir=self.projpath())
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
         short = "1.0-1-g%s" % full[:7]
@@ -263,7 +253,7 @@ class Repo(unittest.TestCase):
             # the short version to be like 1.0-1-gHEXID. The code falls back
             # to short=long
             exp_short_TD = exp_long
-        self.check_version(target, exp_short_TD, exp_long, False, state, tree="TD")
+        self.check_version(self.projpath(target), exp_short_TD, exp_long, False, state, tree="TD")
 
         # TE: unpacked setup.py sdist tarball
         dist_path = os.path.join(self.projpath(), "dist")
