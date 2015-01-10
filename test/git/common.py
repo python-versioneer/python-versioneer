@@ -23,7 +23,7 @@ class Common:
         output = run_command(GITS, args=list(args), cwd=workdir, verbose=True,
                              env=env)
         if output is None:
-            self.fail("problem running git")
+            self.fail("problem running git (workdir: %s)" % workdir)
         return output
     def python(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.gitpath())
@@ -31,7 +31,7 @@ class Common:
         assert not kwargs, kwargs.keys()
         output = run_command([exe], list(args), workdir, True)
         if output is None:
-            self.fail("problem running python")
+            self.fail("problem running python (workdir: %s)" % workdir)
         return output
     def subpath(self, path, base_dir = ""):
         return os.path.join(self.testdir, base_dir, path)

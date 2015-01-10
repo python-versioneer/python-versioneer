@@ -318,17 +318,7 @@ class Repo(common.Common, unittest.TestCase):
         self.projdir = "project" if sub_dir else ""
         self.gitdir = "demoapp"
 
-        # create an unrelated git tree above the testdir. Some tests will run
-        # from this directory, and they should use the demoapp git
-        # environment instead of the deceptive parent
         os.mkdir(self.testdir)
-        self.git("init", workdir=self.testdir)
-        f = open(os.path.join(self.testdir, "false-repo"), "w")
-        f.write("don't look at me\n")
-        f.close()
-        self.git("add", "false-repo", workdir=self.testdir)
-        self.git("commit", "-m", "first false commit", workdir=self.testdir)
-        self.git("tag", "demo-4.0", workdir=self.testdir)
 
         shutil.copytree(demoapp_dir, self.projpath())
         setup_cfg_fn = os.path.join(self.projpath(), "setup.cfg")
@@ -432,7 +422,7 @@ class Repo(common.Common, unittest.TestCase):
                               })
 
         # S3: we commit that change, then make the first tag (1.0)
-        self.git("add", "setup.py")
+        self.git("add", "setup.py", workdir=self.projpath())
         self.git("commit", "-m", "dirty")
         self.git("tag", "demo-1.0")
         # also add an unrelated tag, to test exclusion. git-describe appears
@@ -464,7 +454,7 @@ class Repo(common.Common, unittest.TestCase):
                               })
 
         # S5: now we make one commit past the tag
-        self.git("add", "setup.py")
+        self.git("add", "setup.py", workdir=self.projpath())
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s" % full[:7]
@@ -499,13 +489,13 @@ class Repo(common.Common, unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.projpath(), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, state, "TB", exps["TB"])
+        self.check_version(self.projpath(target), state, "TB", exps["TB"])
 
         # TC: source tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.projpath(), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
+        self.check_version(self.projpath(target), state, "TC", ["1.1", None, False, None]) # XXX
 
         # TD: unpacked git-archive tarball
         target = self.subpath("out/TD/demoapp-TD")
@@ -515,7 +505,7 @@ class Repo(common.Common, unittest.TestCase):
         t = tarfile.TarFile(self.subpath("demo.tar"))
         t.extractall(path=self.subpath("out/TD"))
         t.close()
-        self.check_version(target, state, "TD", exps["TD"])
+        self.check_version(self.projpath(target), state, "TD", exps["TD"])
 
         # TE: unpacked setup.py sdist tarball
         dist_path = os.path.join(self.projpath(), "dist")
@@ -533,7 +523,7 @@ class Repo(common.Common, unittest.TestCase):
         t.close()
         target = self.subpath("out/TE/demo-%s" % exps["TE"][0])
         self.assertTrue(os.path.isdir(target))
-        self.check_version(target, state, "TE", exps["TE"])
+        self.check_version(self.projpath(target), state, "TE", exps["TE"])
 
     def check_version(self, workdir, state, tree, exps):
         exp_version, exp_full, exp_dirty, exp_error = exps
