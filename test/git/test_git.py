@@ -304,11 +304,19 @@ class Repo(common.Common, unittest.TestCase):
         # covered by Repo).
         self.run_test("test/demoapp-script-only", True)
 
-    def run_test(self, demoapp_dir, script_only):
+    def test_project_in_subdir(self):
+        # This test sets of the git repository so that the python project --
+        # i.e. setup.py -- is not located in the root directory
+        self.run_test("test/demoapp", False, sub_dir=True)
+
+    def run_test(self, demoapp_dir, script_only, sub_dir=False):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
             shutil.rmtree(self.testdir)
+
+        self.projdir = "project" if sub_dir else ""
+        self.gitdir = "demoapp"
 
         # create an unrelated git tree above the testdir. Some tests will run
         # from this directory, and they should use the demoapp git
@@ -322,14 +330,14 @@ class Repo(common.Common, unittest.TestCase):
         self.git("commit", "-m", "first false commit", workdir=self.testdir)
         self.git("tag", "demo-4.0", workdir=self.testdir)
 
-        shutil.copytree(demoapp_dir, self.subpath("demoapp"))
-        setup_cfg_fn = os.path.join(self.subpath("demoapp"), "setup.cfg")
+        shutil.copytree(demoapp_dir, self.projpath())
+        setup_cfg_fn = os.path.join(self.projpath(), "setup.cfg")
         with open(setup_cfg_fn, "r") as f:
             setup_cfg = f.read()
         setup_cfg = setup_cfg.replace("@VCS@", "git")
         with open(setup_cfg_fn, "w") as f:
             f.write(setup_cfg)
-        shutil.copyfile("versioneer.py", self.subpath("demoapp/versioneer.py"))
+        shutil.copyfile("versioneer.py", os.path.join(self.projpath(), "versioneer.py"))
         self.git("init")
         self.git("add", "--all")
         self.git("commit", "-m", "comment")
@@ -337,7 +345,7 @@ class Repo(common.Common, unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         v = self.python("setup.py", "--version")
         self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
-        v = self.python(os.path.join(self.subpath("demoapp"), "setup.py"),
+        v = self.python(os.path.join(self.projpath(), "setup.py"),
                         "--version", workdir=self.testdir)
         self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
 
@@ -349,11 +357,17 @@ class Repo(common.Common, unittest.TestCase):
             self.assertEqual(out[1], " appending to src/demo/__init__.py")
         self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
         self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
-        out = set(self.git("status", "--porcelain").splitlines())
+        if len(self.projdir) > 0:
+            out = set([x.replace(self.projdir + '/', '') for x in
+                       self.git("status", "--porcelain", workdir=self.projpath()).splitlines()])
+        else:
+            out = set(self.git("status", "--porcelain", workdir=self.projpath()).splitlines())
         # Many folks have a ~/.gitignore with ignores .pyc files, but if they
         # don't, it will show up in the status here. Ignore it.
         out.discard("?? versioneer.pyc")
         out.discard("?? __pycache__/")
+        out.discard("?? " + self.projdir + "/versioneer.pyc")
+        out.discard("?? " + self.projdir + "/__pycache__/")
         expected = set(["A  .gitattributes",
                         "M  MANIFEST.in",
                         "A  src/demo/_version.py"])
@@ -361,7 +375,7 @@ class Repo(common.Common, unittest.TestCase):
             expected.add("M  src/demo/__init__.py")
         self.assertEqual(out, expected)
         if not script_only:
-            f = open(self.subpath("demoapp/src/demo/__init__.py"))
+            f = open(os.path.join(self.projpath(),"src/demo/__init__.py"))
             i = f.read().splitlines()
             f.close()
             self.assertEqual(i[-3], "from ._version import get_versions")
@@ -381,6 +395,8 @@ class Repo(common.Common, unittest.TestCase):
         out = set(self.git("status", "--porcelain").splitlines())
         out.discard("?? versioneer.pyc")
         out.discard("?? __pycache__/")
+        out.discard("?? " + self.projdir + "/versioneer.pyc")
+        out.discard("?? " + self.projdir + "/__pycache__/")
         self.assertEqual(out, set([]))
 
         UNABLE = "unable to compute version"
@@ -403,7 +419,7 @@ class Repo(common.Common, unittest.TestCase):
         # necessarily clean.
 
         # S2: dirty the pre-tagged tree
-        f = open(self.subpath("demoapp/setup.py"),"a")
+        f = open(os.path.join(self.projpath(), "setup.py"),"a")
         f.write("# dirty\n")
         f.close()
         full = self.git("rev-parse", "HEAD")
@@ -435,7 +451,7 @@ class Repo(common.Common, unittest.TestCase):
                               })
 
         # S4: now we dirty the tree
-        f = open(self.subpath("demoapp/setup.py"),"a")
+        f = open(os.path.join(self.projpath(), "setup.py"),"a")
         f.write("# dirty\n")
         f.close()
         full = self.git("rev-parse", "HEAD")
@@ -460,7 +476,7 @@ class Repo(common.Common, unittest.TestCase):
                               })
 
         # S6: dirty the post-tag tree
-        f = open(self.subpath("demoapp/setup.py"),"a")
+        f = open(os.path.join(self.projpath(), "setup.py"),"a")
         f.write("# more dirty\n")
         f.close()
         full = self.git("rev-parse", "HEAD")
@@ -477,17 +493,17 @@ class Repo(common.Common, unittest.TestCase):
         if os.path.exists(self.subpath("out")):
             shutil.rmtree(self.subpath("out"))
         # TA: source tree
-        self.check_version(self.subpath("demoapp"), state, "TA", exps["TA"])
+        self.check_version(self.projpath(), state, "TA", exps["TA"])
 
         # TB: .git-less copy of source tree
         target = self.subpath("out/demoapp-TB")
-        shutil.copytree(self.subpath("demoapp"), target)
+        shutil.copytree(self.projpath(), target)
         shutil.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TB", exps["TB"])
 
         # TC: source tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
-        shutil.copytree(self.subpath("demoapp"), target)
+        shutil.copytree(self.projpath(), target)
         shutil.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
 
@@ -502,14 +518,15 @@ class Repo(common.Common, unittest.TestCase):
         self.check_version(target, state, "TD", exps["TD"])
 
         # TE: unpacked setup.py sdist tarball
-        if os.path.exists(self.subpath("demoapp/dist")):
-            shutil.rmtree(self.subpath("demoapp/dist"))
+        dist_path = os.path.join(self.projpath(), "dist")
+        if os.path.exists(dist_path):
+            shutil.rmtree(dist_path)
         self.python("setup.py", "sdist", "--formats=tar")
-        files = os.listdir(self.subpath("demoapp/dist"))
+        files = os.listdir(dist_path)
         self.assertTrue(len(files)==1, files)
         distfile = files[0]
         self.assertEqual(distfile, "demo-%s.tar" % exps["TE"][0])
-        fn = os.path.join(self.subpath("demoapp/dist"), distfile)
+        fn = os.path.join(dist_path, distfile)
         os.mkdir(self.subpath("out/TE"))
         t = tarfile.TarFile(fn)
         t.extractall(path=self.subpath("out/TE"))
