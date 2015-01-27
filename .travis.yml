@@ -8,7 +8,7 @@ python:
   - "pypy"
   - "pypy3"
 install:
-  - travis_retry pip install pyflakes
+  - travis_retry pip install pyflakes flake8
 before_script:
   - git config --global user.email "foo@example.com"
   - git config --global user.name "foo"
@@ -18,3 +18,4 @@ script:
   - python setup.py make_long_version_py_git
   - pyflakes setup.py versioneer.py git_version.py
   - pyflakes test src/subprocess_helper.py src/git/from_keywords.py
+  - flake8 git_version.py
