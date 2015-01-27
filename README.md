@@ -99,7 +99,7 @@ First, decide on values for the following configuration variables:
   append some `__version__`-setting assignments, if they aren't already
   present.
 
-*  `versionfile_build`:
+* `versionfile_build`:
 
   Like `versionfile_source`, but relative to the build directory instead of
   the source directory. These will differ when your setup.py uses
