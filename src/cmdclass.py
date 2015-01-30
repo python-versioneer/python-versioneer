@@ -30,7 +30,6 @@ class cmd_static_version(_build):
         versions = get_versions(verbose=True)
         # locate _version.py  and replace it
         # with an updated value
-        target_versionfile = os.path.join(self.build_lib, versionfile_build)
         print("UPDATING %s" % versionfile_source)
         os.unlink(versionfile_source)
         with open(versionfile_source, "w") as f:
