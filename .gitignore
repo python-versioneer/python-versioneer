@@ -5,3 +5,11 @@
 /MANIFEST
 /dist/
 /versioneer.egg-info/
+.name
+encodings.xml
+misc.xml
+modules.xml
+python-versioneer.iml
+vcs.xml
+workspace.xml
+scope_settings.xml

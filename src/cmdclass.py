@@ -25,6 +25,17 @@ class cmd_build(_build):
             with open(target_versionfile, "w") as f:
                 f.write(SHORT_VERSION_PY % versions)
 
+class cmd_static_version(_build):
+    def run(self):
+        versions = get_versions(verbose=True)
+        # locate _version.py  and replace it
+        # with an updated value
+        target_versionfile = os.path.join(self.build_lib, versionfile_build)
+        print("UPDATING %s" % versionfile_source)
+        os.unlink(versionfile_source)
+        with open(versionfile_source, "w") as f:
+            f.write(SHORT_VERSION_PY % versions)
+
 if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
     from cx_Freeze.dist import build_exe as _build_exe
 
@@ -148,6 +159,7 @@ class cmd_update_files(Command):
 def get_cmdclass():
     cmds = {'version': cmd_version,
             'versioneer': cmd_update_files,
+            'static_version': cmd_static_version,
             'build': cmd_build,
             'sdist': cmd_sdist,
             }
