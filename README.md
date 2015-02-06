@@ -6,8 +6,8 @@ The Versioneer
 * Brian Warner
 * License: Public Domain
 * Compatible With: python2.6, 2.7, 3.2, 3.3, 3.4, and pypy
-
-[![Build Status](https://travis-ci.org/warner/python-versioneer.png?branch=master)](https://travis-ci.org/warner/python-versioneer)
+* [![Latest Version](https://pypip.in/version/versioneer/badge.svg)](https://pypi.python.org/pypi/versioneer/)
+* [![Build Status](https://travis-ci.org/warner/python-versioneer.png?branch=master)](https://travis-ci.org/warner/python-versioneer)
 
 This is a tool for managing a recorded version number in distutils-based
 python projects. The goal is to remove the tedious and error-prone "update
