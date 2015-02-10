@@ -10,6 +10,23 @@ def vcs_function(vcs, suffix):
     return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 
+def git2pep440(ver_str):
+    """Convert Git version such as "1.2.1-17-gb92cc8d" to PEP440 compliant
+    version such as "1.2.1+17.gb92cc8d".
+    """
+    try:
+        tag, suffix = ver_str.split('-', 1)
+        suffix = '.'.join(suffix.split('-'))
+        return "{0}+{1}".format(tag, suffix)
+    except ValueError:
+        return ver_str
+
+
+def rep_by_pep440(ver):
+    ver["version"] = git2pep440(ver["version"])
+    return ver
+
+
 def get_versions(default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     assert versionfile_source is not None, \
@@ -41,13 +58,13 @@ def get_versions(default=DEFAULT, verbose=False):
         if ver:
             if verbose:
                 print("got version from expanded keyword %s" % ver)
-            return ver
+            return rep_by_pep440(ver)
 
     ver = versions_from_file(versionfile_abs)
     if ver:
         if verbose:
             print("got version from file %s %s" % (versionfile_abs, ver))
-        return ver
+        return rep_by_pep440(ver)
 
     versions_from_vcs_f = vcs_function(VCS, "versions_from_vcs")
     if versions_from_vcs_f:
@@ -55,17 +72,17 @@ def get_versions(default=DEFAULT, verbose=False):
         if ver:
             if verbose:
                 print("got version from VCS %s" % ver)
-            return ver
+            return rep_by_pep440(ver)
 
     ver = versions_from_parentdir(parentdir_prefix, root, verbose)
     if ver:
         if verbose:
             print("got version from parentdir %s" % ver)
-        return ver
+        return rep_by_pep440(ver)
 
     if verbose:
         print("got version from default %s" % default)
-    return default
+    return rep_by_pep440(default)
 
 
 def get_version(verbose=False):
