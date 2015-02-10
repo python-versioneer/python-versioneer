@@ -1,12 +1,16 @@
 
+
 class cmd_version(Command):
     description = "report generated version string"
     user_options = []
     boolean_options = []
+
     def initialize_options(self):
         pass
+
     def finalize_options(self):
         pass
+
     def run(self):
         ver = get_version(verbose=True)
         print("Version is currently: %s" % ver)
@@ -19,7 +23,8 @@ class cmd_build(_build):
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
         if versionfile_build:
-            target_versionfile = os.path.join(self.build_lib, versionfile_build)
+            target_versionfile = os.path.join(self.build_lib,
+                                              versionfile_build)
             print("UPDATING %s" % target_versionfile)
             os.unlink(target_versionfile)
             with open(target_versionfile, "w") as f:
@@ -48,6 +53,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
                                 "VERSIONFILE_SOURCE": versionfile_source,
                                 })
 
+
 class cmd_sdist(_sdist):
     def run(self):
         versions = get_versions(verbose=True)
@@ -72,14 +78,19 @@ __version__ = get_versions()['version']
 del get_versions
 """
 
+
 class cmd_update_files(Command):
-    description = "install/upgrade Versioneer files: __init__.py SRC/_version.py"
+    description = ("install/upgrade Versioneer files: "
+                   "__init__.py SRC/_version.py")
     user_options = []
     boolean_options = []
+
     def initialize_options(self):
         pass
+
     def finalize_options(self):
         pass
+
     def run(self):
         print(" creating %s" % versionfile_source)
         with open(versionfile_source, "w") as f:
@@ -144,6 +155,7 @@ class cmd_update_files(Command):
         # .gitattributes to mark _version.py for export-time keyword
         # substitution.
         do_vcs_install(manifest_in, versionfile_source, ipy)
+
 
 def get_cmdclass():
     cmds = {'version': cmd_version,

@@ -18,4 +18,4 @@ script:
   - python setup.py make_long_version_py_git
   - pyflakes setup.py versioneer.py git_version.py
   - pyflakes test src/subprocess_helper.py src/git/from_keywords.py
-  - flake8 git_version.py
+  - flake8 git_version.py versioneer.py

@@ -31,4 +31,3 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
             print("unable to run %s (error)" % args[0])
         return None
     return stdout
-

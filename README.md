@@ -6,8 +6,12 @@ The Versioneer
 * Brian Warner
 * License: Public Domain
 * Compatible With: python2.6, 2.7, 3.2, 3.3, 3.4, and pypy
-* [![Latest Version](https://pypip.in/version/versioneer/badge.svg?style=flat)](https://pypi.python.org/pypi/versioneer/)
-* [![Build Status](https://travis-ci.org/warner/python-versioneer.png?branch=master)](https://travis-ci.org/warner/python-versioneer)
+* [![Latest Version]
+(https://pypip.in/version/versioneer/badge.svg?style=flat)
+](https://pypi.python.org/pypi/versioneer/)
+* [![Build Status]
+(https://travis-ci.org/warner/python-versioneer.png?branch=master)
+](https://travis-ci.org/warner/python-versioneer)
 
 This is a tool for managing a recorded version number in distutils-based
 python projects. The goal is to remove the tedious and error-prone "update
@@ -138,12 +142,14 @@ To versioneer-enable your project:
 * 2: add the following lines to the top of your `setup.py`, with the
   configuration values you decided earlier:
 
-        import versioneer
-        versioneer.VCS = 'git'
-        versioneer.versionfile_source = 'src/myproject/_version.py'
-        versioneer.versionfile_build = 'myproject/_version.py'
-        versioneer.tag_prefix = '' # tags are like 1.2.0
-        versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+  ````
+  import versioneer
+  versioneer.VCS = 'git'
+  versioneer.versionfile_source = 'src/myproject/_version.py'
+  versioneer.versionfile_build = 'myproject/_version.py'
+  versioneer.tag_prefix = '' # tags are like 1.2.0
+  versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+  ````
 
 * 3: add the following arguments to the setup() call in your setup.py:
 
