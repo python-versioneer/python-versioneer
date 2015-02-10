@@ -14,6 +14,7 @@ def get_versions(default={}, verbose=False):
 
 DEFAULT = {"version": "unknown", "full": "unknown"}
 
+
 def versions_from_file(filename):
     versions = {}
     try:
@@ -29,6 +30,7 @@ def versions_from_file(filename):
         return {}
 
     return versions
+
 
 def write_to_version_file(filename, versions):
     with open(filename, "w") as f:

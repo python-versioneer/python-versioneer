@@ -195,13 +195,13 @@ class Repo(unittest.TestCase):
         f = open(self.subpath("demoapp/setup.py"),"a")
         f.write("# dirty\n")
         f.close()
-        self.do_checks("1.0-dirty", full+"-dirty", dirty=True, state="SB")
+        self.do_checks("1.0+dirty", full+"-dirty", dirty=True, state="SB")
 
         # SC: now we make one commit past the tag
         self.git("add", "setup.py")
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
-        short = "1.0-1-g%s" % full[:7]
+        short = "1.0+1.g%s" % full[:7]
         self.do_checks(short, full, dirty=False, state="SC")
 
 
