@@ -48,7 +48,7 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["version"], "full")
         self.assertEqual(v["full"], "full")
 
-VERBOSE = False
+VERBOSE = True
 
 class Repo(unittest.TestCase):
     def git(self, *args, **kwargs):
@@ -201,7 +201,7 @@ class Repo(unittest.TestCase):
         self.git("add", "setup.py")
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
-        short = "1.0-1-g%s" % full[:7]
+        short = "1.0.post.dev1+g%s" % full[:7]
         self.do_checks(short, full, dirty=False, state="SC")
 
 
