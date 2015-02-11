@@ -76,8 +76,11 @@ def get_version(verbose=False):
 
 def git2pep440(ver_str):
     try:
-        tag, commits, _ = ver_str.split('-', 2)
-        return "{}.{}{}".format(tag, release_type_string, commits)
+        tag, commits, local = ver_str.split('-', 2)
+        if local_version:
+            return "{}.{}{}+{}".format(tag, release_type_string, commits, local)
+        else:
+            return "{}.{}{}".format(tag, release_type_string, commits)
     except ValueError:
         return ver_str
 

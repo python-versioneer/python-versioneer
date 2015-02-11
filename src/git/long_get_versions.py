@@ -8,7 +8,7 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     keywords = {"refnames": git_refnames, "full": git_full}
     ver = git_versions_from_keywords(keywords, tag_prefix, verbose)
     if ver:
-        return ver
+        return rep_by_pep440(ver)
 
     try:
         root = os.path.realpath(__file__)
@@ -20,6 +20,6 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     except NameError:
         return default
 
-    return (git_versions_from_vcs(tag_prefix, root, verbose)
+    return rep_by_pep440(git_versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
             or default)

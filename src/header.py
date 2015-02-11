@@ -18,7 +18,7 @@ tag_prefix = None
 parentdir_prefix = None
 VCS = None
 pep440_compliant = False
-release_type_string = "dev"
-
+release_type_string = "post.dev"
+local_version = True
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}
