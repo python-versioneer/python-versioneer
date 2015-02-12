@@ -8,12 +8,34 @@ import tempfile
 from pkg_resources import parse_version, SetuptoolsLegacyVersion
 
 sys.path.insert(0, "src")
+from git.from_vcs import git_parse_vcs_describe
 from git.from_keywords import git_versions_from_keywords
 from subprocess_helper import run_command
 
 GITS = ["git"]
 if sys.platform == "win32":
     GITS = ["git.cmd", "git.exe"]
+
+class ParseGitDescribe(unittest.TestCase):
+    def test_parse(self):
+        def pv(git_describe):
+            return git_parse_vcs_describe(git_describe, "v")
+        self.assertEqual(pv("1f"), ("0+untagged.g1f", False))
+        self.assertEqual(pv("1f-dirty"), ("0+untagged.g1f.dirty", True))
+        self.assertEqual(pv("v1.0-0-g1f"), ("1.0", False))
+        self.assertEqual(pv("v1.0-0-g1f-dirty"), ("1.0+0.g1f.dirty", True))
+        self.assertEqual(pv("v1.0-1-g1f"), ("1.0+1.g1f", False))
+        self.assertEqual(pv("v1.0-1-g1f-dirty"), ("1.0+1.g1f.dirty", True))
+
+        def p(git_describe):
+            return git_parse_vcs_describe(git_describe, "")
+        self.assertEqual(p("1f"), ("0+untagged.g1f", False))
+        self.assertEqual(p("1f-dirty"), ("0+untagged.g1f.dirty", True))
+        self.assertEqual(p("1.0-0-g1f"), ("1.0", False))
+        self.assertEqual(p("1.0-0-g1f-dirty"), ("1.0+0.g1f.dirty", True))
+        self.assertEqual(p("1.0-1-g1f"), ("1.0+1.g1f", False))
+        self.assertEqual(p("1.0-1-g1f-dirty"), ("1.0+1.g1f.dirty", True))
+
 
 class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
@@ -41,12 +63,12 @@ class Keywords(unittest.TestCase):
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
-        self.assertEqual(v["version"], "unknown")
+        self.assertEqual(v["version"], "0+unknown")
         self.assertEqual(v["full"], "full")
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
-        self.assertEqual(v["version"], "unknown")
+        self.assertEqual(v["version"], "0+unknown")
         self.assertEqual(v["full"], "full")
 
 VERBOSE = False
@@ -136,11 +158,12 @@ class Repo(unittest.TestCase):
         self.git("add", "--all")
         self.git("commit", "-m", "comment")
 
+        full = self.git("rev-parse", "HEAD")
         v = self.python("setup.py", "--version")
-        self.assertEqual(v, "unknown")
+        self.assertEqual(v, "0+untagged.g%s" % full[:7])
         v = self.python(os.path.join(self.subpath("demoapp"), "setup.py"),
                         "--version", workdir=self.testdir)
-        self.assertEqual(v, "unknown")
+        self.assertEqual(v, "0+untagged.g%s" % full[:7])
 
         out = self.python("setup.py", "versioneer").splitlines()
         self.assertEqual(out[0], "running versioneer")
@@ -197,8 +220,8 @@ class Repo(unittest.TestCase):
         f = open(self.subpath("demoapp/setup.py"),"a")
         f.write("# dirty\n")
         f.close()
-        short = "1.0+0.g%s-dirty" % full[:7]
-        self.do_checks(short, full+"-dirty", dirty=True, state="SB")
+        short = "1.0+0.g%s.dirty" % full[:7]
+        self.do_checks(short, full+".dirty", dirty=True, state="SB")
 
         # SC: now we make one commit past the tag
         self.git("add", "setup.py")
@@ -212,8 +235,8 @@ class Repo(unittest.TestCase):
         f.write("# more dirty\n")
         f.close()
         full = self.git("rev-parse", "HEAD")
-        short = "1.0+1.g%s-dirty" % full[:7]
-        self.do_checks(short, full+"-dirty", dirty=True, state="SD")
+        short = "1.0+1.g%s.dirty" % full[:7]
+        self.do_checks(short, full+".dirty", dirty=True, state="SD")
 
 
     def do_checks(self, exp_short, exp_long, dirty, state):
@@ -229,7 +252,7 @@ class Repo(unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, "unknown", "unknown", False, state, tree="TB")
+        self.check_version(target, "0+unknown", "unknown", False, state, tree="TB")
 
         # TC: source tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
@@ -251,7 +274,7 @@ class Repo(unittest.TestCase):
             # not how many patches we are beyond a tag. So we can't expect
             # the short version to be like 1.0-1-gHEXID. The code falls back
             # to short="unknown"
-            exp_short_TD = "unknown"
+            exp_short_TD = "0+unknown"
         self.check_version(target, exp_short_TD, exp_long, False, state, tree="TD")
 
         # TE: unpacked setup.py sdist tarball
@@ -276,15 +299,13 @@ class Repo(unittest.TestCase):
         self.assertEqual(got, expected, "%s: got '%s' != expected '%s'"
                          % (where, got, expected))
         if pep440:
-            if got == "unknown":
-                return # not required to be compatible
             pv = parse_version(got)
-            if isinstance(pv, SetuptoolsLegacyVersion):
-                print "not PEP440:", where, got
-                return
             self.assertFalse(isinstance(pv, SetuptoolsLegacyVersion),
                              "%s: '%s' was not pep440-compatible"
                              % (where, got))
+            self.assertEqual(str(pv), got,
+                             "%s: '%s' pep440-normalized to '%s'"
+                             % (where, got, str(pv)))
         if VERBOSE: print(" good %s" % where)
 
     def check_version(self, workdir, exp_short, exp_long, dirty, state, tree):
