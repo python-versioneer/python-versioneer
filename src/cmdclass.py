@@ -25,6 +25,7 @@ class cmd_build(_build):
         if versionfile_build:
             target_versionfile = os.path.join(self.build_lib,
                                               versionfile_build)
+            # XXX: this is not an absolute path
             print("UPDATING %s" % target_versionfile)
             os.unlink(target_versionfile)
             with open(target_versionfile, "w") as f:
@@ -67,6 +68,7 @@ class cmd_sdist(_sdist):
         # now locate _version.py in the new base_dir directory (remembering
         # that it may be a hardlink) and replace it with an updated value
         target_versionfile = os.path.join(base_dir, versionfile_source)
+        # XXX: this should be absolute too
         print("UPDATING %s" % target_versionfile)
         os.unlink(target_versionfile)
         with open(target_versionfile, "w") as f:
