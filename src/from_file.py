@@ -12,7 +12,7 @@ def get_versions(default={}, verbose=False):
 
 """
 
-DEFAULT = {"version": "unknown", "full": "unknown"}
+DEFAULT = {"version": "0+unknown", "full": "unknown"}
 
 
 def versions_from_file(filename):
