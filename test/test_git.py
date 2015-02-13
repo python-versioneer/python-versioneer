@@ -92,10 +92,12 @@ class Repo(unittest.TestCase):
         return os.path.join(self.testdir, path)
 
     # There are three tree states we're interested in:
-    #  SA: sitting on the 1.0 tag
-    #  SB: dirtying the tree after 1.0
-    #  SC: making a new commit after 1.0, clean tree
-    #  SD: dirtying the tree after the post-1.0 commit
+    #  S1: sitting on the initial commit, no tags
+    #  S2: dirty tree after the initial commit
+    #  S3: sitting on the 1.0 tag
+    #  S4: dirtying the tree after 1.0
+    #  S5: making a new commit after 1.0, clean tree
+    #  S6: dirtying the tree after the post-1.0 commit
     #
     # Then we're interested in 5 kinds of trees:
     #  TA: source tree (with .git)
@@ -209,34 +211,49 @@ class Repo(unittest.TestCase):
         out.discard("?? __pycache__/")
         self.assertEqual(out, set([]))
 
+        # S1: the tree is sitting on a pre-tagged commit
+        full = self.git("rev-parse", "HEAD")
+        short = "0+untagged.g%s" % full[:7]
+        self.do_checks(short, full, dirty=False, state="S1")
+
+        # S2: dirty the pre-tagged tree
+        f = open(self.subpath("demoapp/setup.py"),"a")
+        f.write("# dirty\n")
+        f.close()
+        short = "0+untagged.g%s.dirty" % full[:7]
+        self.do_checks(short, full+".dirty", dirty=True, state="S2")
+
+        # S3: we commit that change, then make the first tag (1.0)
+        self.git("add", "setup.py")
+        self.git("commit", "-m", "dirty")
         self.git("tag", "demo-1.0")
         short = "1.0"
         full = self.git("rev-parse", "HEAD")
         if VERBOSE: print("FULL %s" % full)
-        # SA: the tree is now sitting on the 1.0 tag
-        self.do_checks(short, full, dirty=False, state="SA")
+        # the tree is now sitting on the 1.0 tag
+        self.do_checks(short, full, dirty=False, state="S3")
 
-        # SB: now we dirty the tree
+        # S4: now we dirty the tree
         f = open(self.subpath("demoapp/setup.py"),"a")
         f.write("# dirty\n")
         f.close()
         short = "1.0+0.g%s.dirty" % full[:7]
-        self.do_checks(short, full+".dirty", dirty=True, state="SB")
+        self.do_checks(short, full+".dirty", dirty=True, state="S4")
 
-        # SC: now we make one commit past the tag
+        # S5: now we make one commit past the tag
         self.git("add", "setup.py")
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s" % full[:7]
-        self.do_checks(short, full, dirty=False, state="SC")
+        self.do_checks(short, full, dirty=False, state="S5")
 
-        # SD: dirty the post-tag tree
+        # S6: dirty the post-tag tree
         f = open(self.subpath("demoapp/setup.py"),"a")
         f.write("# more dirty\n")
         f.close()
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s.dirty" % full[:7]
-        self.do_checks(short, full+".dirty", dirty=True, state="SD")
+        self.do_checks(short, full+".dirty", dirty=True, state="S6")
 
 
     def do_checks(self, exp_short, exp_long, dirty, state):
@@ -269,7 +286,7 @@ class Repo(unittest.TestCase):
         t.extractall(path=self.subpath("out/TD"))
         t.close()
         exp_short_TD = exp_short
-        if state == "SC":
+        if state  in ("S1", "S5"):
             # expanded keywords only tell us about tags and full revisionids,
             # not how many patches we are beyond a tag. So we can't expect
             # the short version to be like 1.0-1-gHEXID. The code falls back
