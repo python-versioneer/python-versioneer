@@ -112,7 +112,7 @@ class Repo(unittest.TestCase):
     #  RB: setup.py build;  rundemo --version
     #
     # We can only detect dirty files in real git trees, so we don't examine
-    # SB for TB/TC/TD/TE, or RB.
+    # S2/S4/S6 for TB/TC/TD/TE, or RB.
 
     # note that the repo being manipulated is always named "demoapp",
     # regardless of which source directory we copied it from (test/demoapp/
@@ -311,20 +311,6 @@ class Repo(unittest.TestCase):
         self.assertTrue(os.path.isdir(target))
         self.check_version(target, exp_short, exp_long, False, state, tree="TE")
 
-    def compare(self, got, expected, state, tree, runtime, pep440):
-        where = "/".join([state, tree, runtime])
-        self.assertEqual(got, expected, "%s: got '%s' != expected '%s'"
-                         % (where, got, expected))
-        if pep440:
-            pv = parse_version(got)
-            self.assertFalse(isinstance(pv, SetuptoolsLegacyVersion),
-                             "%s: '%s' was not pep440-compatible"
-                             % (where, got))
-            self.assertEqual(str(pv), got,
-                             "%s: '%s' pep440-normalized to '%s'"
-                             % (where, got, str(pv)))
-        if VERBOSE: print(" good %s" % where)
-
     def check_version(self, workdir, exp_short, exp_long, dirty, state, tree):
         if VERBOSE: print("== starting %s %s" % (state, tree))
         # RA: setup.py --version
@@ -334,12 +320,14 @@ class Repo(unittest.TestCase):
             print(self.python("setup.py", "version", workdir=workdir))
         # setup.py --version gives us get_version() with verbose=False.
         v = self.python("setup.py", "--version", workdir=workdir)
-        self.compare(v, exp_short, state, tree, "RA1", pep440=True)
+        self.compare(v, exp_short, state, tree, "RA1")
+        self.assertPEP440(v, state, tree, "RA1")
 
         # and test again from outside the tree
         v = self.python(os.path.join(workdir, "setup.py"), "--version",
                         workdir=self.testdir)
-        self.compare(v, exp_short, state, tree, "RA2", pep440=True)
+        self.compare(v, exp_short, state, tree, "RA2")
+        self.assertPEP440(v, state, tree, "RA2")
 
         if dirty:
             return # cannot detect dirty files in a build # XXX really?
@@ -352,13 +340,27 @@ class Repo(unittest.TestCase):
         build_lib = os.path.join(workdir, "build", "lib")
         out = self.python("rundemo", "--version", workdir=build_lib)
         data = dict([line.split(":",1) for line in out.splitlines()])
-        self.compare(data["__version__"], exp_short, state, tree, "RB",
-                     pep440=True)
-        self.compare(data["shortversion"], exp_short, state, tree, "RB",
-                     pep440=True)
-        self.compare(data["longversion"], exp_long, state, tree, "RB",
-                     pep440=False)
+        self.compare(data["__version__"], exp_short, state, tree, "RB")
+        self.assertPEP440(data["__version__"], state, tree, "RB")
+        self.compare(data["shortversion"], exp_short, state, tree, "RB")
+        self.assertPEP440(data["shortversion"], state, tree ,"RB")
+        self.compare(data["longversion"], exp_long, state, tree, "RB")
 
+    def compare(self, got, expected, state, tree, runtime):
+        where = "/".join([state, tree, runtime])
+        self.assertEqual(got, expected, "%s: got '%s' != expected '%s'"
+                         % (where, got, expected))
+        if VERBOSE: print(" good %s" % where)
+
+    def assertPEP440(self, got, state, tree, runtime):
+        where = "/".join([state, tree, runtime])
+        pv = parse_version(got)
+        self.assertFalse(isinstance(pv, SetuptoolsLegacyVersion),
+                         "%s: '%s' was not pep440-compatible"
+                         % (where, got))
+        self.assertEqual(str(pv), got,
+                         "%s: '%s' pep440-normalized to '%s'"
+                         % (where, got, str(pv)))
 
 if __name__ == '__main__':
     ver = run_command(GITS, ["--version"], ".", True)
