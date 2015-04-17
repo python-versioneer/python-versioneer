@@ -26,9 +26,7 @@ class cmd_build(_build):
             target_versionfile = os.path.join(self.build_lib,
                                               versionfile_build)
             print("UPDATING %s" % target_versionfile)
-            os.unlink(target_versionfile)
-            with open(target_versionfile, "w") as f:
-                f.write(SHORT_VERSION_PY % versions)
+            write_to_version_file(target_versionfile, versions)
 
 if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
     from cx_Freeze.dist import build_exe as _build_exe
@@ -38,9 +36,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
             versions = get_versions(verbose=True)
             target_versionfile = versionfile_source
             print("UPDATING %s" % target_versionfile)
-            os.unlink(target_versionfile)
-            with open(target_versionfile, "w") as f:
-                f.write(SHORT_VERSION_PY % versions)
+            write_to_version_file(target_versionfile, versions)
 
             _build_exe.run(self)
             os.unlink(target_versionfile)
@@ -68,9 +64,8 @@ class cmd_sdist(_sdist):
         # that it may be a hardlink) and replace it with an updated value
         target_versionfile = os.path.join(base_dir, versionfile_source)
         print("UPDATING %s" % target_versionfile)
-        os.unlink(target_versionfile)
-        with open(target_versionfile, "w") as f:
-            f.write(SHORT_VERSION_PY % self._versioneer_generated_versions)
+        write_to_version_file(target_versionfile,
+                              self._versioneer_generated_versions)
 
 INIT_PY_SNIPPET = """
 from ._version import get_versions
