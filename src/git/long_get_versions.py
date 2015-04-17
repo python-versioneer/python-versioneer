@@ -18,10 +18,10 @@ def get_versions(verbose=False):
         for i in versionfile_source.split('/'):
             root = os.path.dirname(root)
     except NameError:
-        return {"version": "unknown", "long": None, "dirty": None,
+        return {"version": "unknown", "full-revisionid": None, "dirty": None,
                 "error": "unable to find root of source tree"}
 
     return (git_versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
-            or {"version": "unknown", "long": None, "dirty": None,
+            or {"version": "unknown", "full-revisionid": None, "dirty": None,
                 "error": "unable to get version"})

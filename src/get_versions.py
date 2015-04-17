@@ -65,7 +65,7 @@ def get_versions(verbose=False):
 
     if verbose:
         print("unable to get version")
-    return {"version": "unknown", "long": None, "dirty": None,
+    return {"version": "unknown", "full-revisionid": None, "dirty": None,
             "error": "unable to get version"}
 
 
