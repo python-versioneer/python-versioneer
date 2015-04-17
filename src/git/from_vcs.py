@@ -1,57 +1,5 @@
 import re # --STRIP DURING BUILD
 
-def git_parse_vcs_describe(git_describe, full_out, tag_prefix, verbose=False):
-    pieces = {}
-    pieces["full-revisionid"] = full_out
-    pieces["short-revisionid"] = full_out[:7] # maybe improved later
-
-    # parse git_describe. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]
-    # TAG might have hyphens.
-
-    # look for -dirty suffix
-    dirty = git_describe.endswith("-dirty")
-    pieces["dirty"] = dirty
-    if dirty:
-        git_describe = git_describe[:git_describe.rindex("-dirty")]
-
-    # now we have TAG-NUM-gHEX or HEX
-
-    if "-" not in git_describe:
-        # just HEX: no tags
-        pieces["closest-tag"] = None
-        pieces["distance"] = 0 # TODO: total number of commits
-        # TODO: git-log --oneline|wc -l
-        #return "0+untagged.g"+git_describe+dirty_suffix, dirty
-        return pieces
-
-    # just TAG-NUM-gHEX
-    mo = re.search(r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe)
-    if not mo:
-        # unparseable. Maybe git-describe is misbehaving?
-        pieces["closest-tag"] = None
-        pieces["distance"] = ??
-        #return "0+unparseable"+dirty_suffix, dirty
-        return pieces
-
-    # tag
-    full_tag = mo.group(1)
-    if not full_tag.startswith(tag_prefix):
-        if verbose:
-            fmt = "tag '%s' doesn't start with prefix '%s'"
-            print(fmt % (full_tag, tag_prefix))
-        pieces["closest-tag"] = None
-        pieces["distance"] = ??
-        #return None, dirty
-    pieces["closest-tag"] = full_tag[len(tag_prefix):]
-
-    # distance: number of commits since tag
-    pieces["distance"] = int(mo.group(2))
-
-    # commit: short hex revision ID
-    pieces["short-revisionid"] = mo.group(3)
-
-    return pieces
-
 def git_versions_from_vcs(tag_prefix, root, verbose=False):
     # this runs 'git' from the root of the source tree. This only gets called
     # if the git-archive 'subst' keywords were *not* expanded, and
@@ -74,11 +22,65 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
     # --long was added in git-1.5.5
     if describe_out is None:
         return {}  # try next method
+    describe_out = describe_out.strip()
     full_out = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if full_out is None:
         return {}
-    pieces = git_parse_vcs_describe(describe_out.strip(), full_out.strip(),
-                                    tag_prefix, verbose)
+    full_out = full_out.strip()
+
+    pieces = {}
+    pieces["full-revisionid"] = full_out
+    pieces["short-revisionid"] = full_out[:7] # maybe improved later
+
+    # parse describe_out. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]
+    # TAG might have hyphens.
+    git_describe = describe_out
+
+    # look for -dirty suffix
+    dirty = git_describe.endswith("-dirty")
+    pieces["dirty"] = dirty
+    if dirty:
+        git_describe = git_describe[:git_describe.rindex("-dirty")]
+
+    # now we have TAG-NUM-gHEX or HEX
+
+    if "-" in git_describe:
+        # TAG-NUM-gHEX
+        mo = re.search(r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe)
+        if not mo:
+            # unparseable. Maybe git-describe is misbehaving?
+            return {"version": "unknown",
+                    "full-revisionid": full_out,
+                    "dirty": None,
+                    "error": VersioneerError("unable to parse git-describe output: '%s'" % describe_out),
+                    }
+
+        # tag
+        full_tag = mo.group(1)
+        if not full_tag.startswith(tag_prefix):
+            if verbose:
+                fmt = "tag '%s' doesn't start with prefix '%s'"
+                print(fmt % (full_tag, tag_prefix))
+            return {"version": "unknown",
+                    "full-revisionid": full_out,
+                    "dirty": None,
+                    "error": VersioneerError("tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix)),
+                    }
+        pieces["closest-tag"] = full_tag[len(tag_prefix):]
+
+        # distance: number of commits since tag
+        pieces["distance"] = int(mo.group(2))
+
+        # commit: short hex revision ID
+        pieces["short-revisionid"] = mo.group(3)
+
+    else:
+        # HEX: no tags
+        pieces["closest-tag"] = None
+        count_out = run_command(GITS, ["rev-list", "HEAD", "--count"],
+                                cwd=root)
+        pieces["distance"] = int(count_out) # total number of commits
+
     return render(pieces)
 
 
@@ -89,8 +91,6 @@ def render(pieces): # style=pep440
 
     # exceptions:
     # 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
-    # 2: unparseable. 0+unparseable[.dirty]
-    # 3: tag doesn't start with right prefix. None
 
     if pieces["closest-tag"]:
         version = pieces["closest-tag"]
@@ -106,4 +106,5 @@ def render(pieces): # style=pep440
         if pieces["dirty"]
             version += ".dirty"
 
-    full = pieces["full-revisionid"]
+    return {"version": version, "full": pieces["full-revisionid"],
+            dirty: pieces["dirty"], error: None}
