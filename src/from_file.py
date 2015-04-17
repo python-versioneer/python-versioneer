@@ -9,12 +9,10 @@ SHORT_VERSION_PY = """
 
 version_version = '%(version)s'
 version_full = '%(full)s'
-def get_versions(default={}, verbose=False):
+def get_versions(verbose=False):
     return {'version': version_version, 'full': version_full}
 
 """
-
-DEFAULT = {"version": "0+unknown", "full": "unknown"}
 
 
 def versions_from_file(filename):

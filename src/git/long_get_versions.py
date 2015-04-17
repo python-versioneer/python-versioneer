@@ -1,5 +1,5 @@
 
-def get_versions(default={"version": "0+unknown", "full": ""}, verbose=False):
+def get_versions(verbose=False):
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
     # __file__, we can work backwards from there to the root. Some
     # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which
@@ -18,8 +18,10 @@ def get_versions(default={"version": "0+unknown", "full": ""}, verbose=False):
         for i in versionfile_source.split('/'):
             root = os.path.dirname(root)
     except NameError:
-        return default
+        return {"version": "unknown", "long": None, "dirty": None,
+                "error": VersioneerError("unable to find root of source tree")}
 
     return (git_versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
-            or default)
+            or {"version": "unknown", "long": None, "dirty": None,
+                "error": VersioneerError("unable to get version")})
