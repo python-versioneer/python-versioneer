@@ -97,13 +97,13 @@ def render(pieces): # style=pep440
         if pieces["distance"] or pieces["dirty"]:
             version += "+%d.g%s" % (pieces["distance"],
                                     pieces["short-revisionid"])
-            if pieces["dirty"]
+            if pieces["dirty"]:
                 version += ".dirty"
     else:
         # exception #1
         version = "0+untagged.%d.g%s" % (pieces["distance"],
                                          pieces["short-revisionid"])
-        if pieces["dirty"]
+        if pieces["dirty"]:
             version += ".dirty"
 
     return {"version": version, "full": pieces["full-revisionid"],
