@@ -106,5 +106,5 @@ def render(pieces): # style=pep440
         if pieces["dirty"]:
             version += ".dirty"
 
-    return {"version": version, "full": pieces["full-revisionid"],
-            dirty: pieces["dirty"], error: None}
+    return {"version": version, "full-revisionid": pieces["full-revisionid"],
+            "dirty": pieces["dirty"], "error": None}
