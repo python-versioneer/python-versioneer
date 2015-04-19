@@ -1,15 +1,52 @@
+import os # --STRIP DURING BUILD
+import sys # --STRIP DURING BUILD
 import re # --STRIP DURING BUILD
 
-def git_versions_from_vcs(tag_prefix, root, verbose=False):
-    # this runs 'git' from the root of the source tree. This only gets called
-    # if the git-archive 'subst' keywords were *not* expanded, and
-    # _version.py hasn't already been rewritten with a short version string,
-    # meaning we're inside a checked out source tree.
+def render(pieces): # style=pep440
+    # now build up version string, with post-release "local version
+    # identifier". Our goal: TAG[+NUM.gHEX[.dirty]] . Note that if you get a
+    # tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
 
+    # exceptions:
+    # 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
+
+    if pieces["closest-tag"]:
+        version = pieces["closest-tag"]
+        if pieces["distance"] or pieces["dirty"]:
+            version += "+%d.g%s" % (pieces["distance"], pieces["short"])
+            if pieces["dirty"]:
+                version += ".dirty"
+    else:
+        # exception #1
+        version = "0+untagged.%d.g%s" % (pieces["distance"], pieces["short"])
+        if pieces["dirty"]:
+            version += ".dirty"
+
+    return {"version": version, "full-revisionid": pieces["long"],
+            "dirty": pieces["dirty"], "error": None}
+
+def git_versions_from_vcs(tag_prefix, root, verbose=False):
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
         return {}  # get_versions() will try next method
+    got = get_git_versions_from_vcs(tag_prefix, root, verbose, run_command)
+    if got == {}:
+        # git didn't return anything useful, try next method
+        return {}
+    pieces = got
+    if pieces["error"]:
+        return {"version": "unknown",
+                "full-revisionid": pieces["long"],
+                "dirty": None,
+                "error": pieces["error"]}
+    return render(pieces)
+
+def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
+    # this runs 'git' from the root of the source tree. This only gets called
+    # if the git-archive 'subst' keywords were *not* expanded, and
+    # _version.py hasn't already been rewritten with a short version string,
+    # meaning we're inside a checked out source tree.
 
     GITS = ["git"]
     if sys.platform == "win32":
@@ -29,8 +66,9 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
     full_out = full_out.strip()
 
     pieces = {}
-    pieces["full-revisionid"] = full_out
-    pieces["short-revisionid"] = full_out[:7] # maybe improved later
+    pieces["long"] = full_out
+    pieces["short"] = full_out[:7] # maybe improved later
+    pieces["error"] = None
 
     # parse describe_out. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]
     # TAG might have hyphens.
@@ -49,11 +87,8 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
         mo = re.search(r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe)
         if not mo:
             # unparseable. Maybe git-describe is misbehaving?
-            return {"version": "unknown",
-                    "full-revisionid": full_out,
-                    "dirty": None,
-                    "error": "unable to parse git-describe output: '%s'" % describe_out,
-                    }
+            pieces["error"] = "unable to parse git-describe output: '%s'" % describe_out
+            return pieces
 
         # tag
         full_tag = mo.group(1)
@@ -61,18 +96,15 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
             if verbose:
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
-            return {"version": "unknown",
-                    "full-revisionid": full_out,
-                    "dirty": None,
-                    "error": "tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix),
-                    }
+            pieces["error"] = "tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix)
+            return pieces
         pieces["closest-tag"] = full_tag[len(tag_prefix):]
 
         # distance: number of commits since tag
         pieces["distance"] = int(mo.group(2))
 
         # commit: short hex revision ID
-        pieces["short-revisionid"] = mo.group(3)
+        pieces["short"] = mo.group(3)
 
     else:
         # HEX: no tags
@@ -81,30 +113,4 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
                                 cwd=root)
         pieces["distance"] = int(count_out) # total number of commits
 
-    return render(pieces)
-
-
-def render(pieces): # style=pep440
-    # now build up version string, with post-release "local version
-    # identifier". Our goal: TAG[+NUM.gHEX[.dirty]] . Note that if you get a
-    # tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
-
-    # exceptions:
-    # 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
-
-    if pieces["closest-tag"]:
-        version = pieces["closest-tag"]
-        if pieces["distance"] or pieces["dirty"]:
-            version += "+%d.g%s" % (pieces["distance"],
-                                    pieces["short-revisionid"])
-            if pieces["dirty"]:
-                version += ".dirty"
-    else:
-        # exception #1
-        version = "0+untagged.%d.g%s" % (pieces["distance"],
-                                         pieces["short-revisionid"])
-        if pieces["dirty"]:
-            version += ".dirty"
-
-    return {"version": version, "full-revisionid": pieces["full-revisionid"],
-            "dirty": pieces["dirty"], "error": None}
+    return pieces

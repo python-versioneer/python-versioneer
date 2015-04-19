@@ -4,4 +4,4 @@
 
 print("__version__:%s" % versions['version'])
 print("shortversion:%s" % versions["version"])
-print("longversion:%s" % versions["full"])
+print("longversion:%s" % versions["full-revisionid"])
