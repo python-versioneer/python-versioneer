@@ -54,7 +54,7 @@ It returns `get_versions()["version"]`. See below for what that means.
 | `dirty` | A boolean, True if the source tree has local changes. None if unknown. |
 | `error` | None, or a error description string |
 
-`version` will always be a string (`str` on py3, `unicode` on py2): if Versioneer is unable to compute a version, it will be set to `"unknown"`. `full-revisionid` and `dirty` will be a str/unicode, or None if that information is not available. `error` will be None, or a str/unicode if there was an error.
+`version` will always be a string (`str` on py3, `unicode` on py2): if Versioneer is unable to compute a version, it will be set to `"0+unknown"`. `full-revisionid` and `dirty` will be a str/unicode, or None if that information is not available. `error` will be None, or a str/unicode if there was an error.
 
 If the `error` key is non-None, that indicates that Versioneer was unable to obtain a satisfactory version string. There are several possibilities:
 
