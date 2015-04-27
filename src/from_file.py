@@ -35,6 +35,7 @@ def versions_from_file(filename):
         return {}
     return json.loads(mo.group(1))
 
+
 def write_to_version_file(filename, versions):
     os.unlink(filename)
     contents = json.dumps(versions, sort_keys=True,

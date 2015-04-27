@@ -2,7 +2,7 @@ import os # --STRIP DURING BUILD
 import sys # --STRIP DURING BUILD
 import re # --STRIP DURING BUILD
 
-def render(pieces): # style=pep440
+def render(pieces):  # style=pep440
     # now build up version string, with post-release "local version
     # identifier". Our goal: TAG[+NUM.gHEX[.dirty]] . Note that if you get a
     # tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
@@ -18,12 +18,14 @@ def render(pieces): # style=pep440
                 version += ".dirty"
     else:
         # exception #1
-        version = "0+untagged.%d.g%s" % (pieces["distance"], pieces["short"])
+        version = "0+untagged.%d.g%s" % (pieces["distance"],
+                                         pieces["short"])
         if pieces["dirty"]:
             version += ".dirty"
 
     return {"version": version, "full-revisionid": pieces["long"],
             "dirty": pieces["dirty"], "error": None}
+
 
 def git_versions_from_vcs(tag_prefix, root, verbose=False):
     if not os.path.exists(os.path.join(root, ".git")):
@@ -41,6 +43,7 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
                 "dirty": None,
                 "error": pieces["error"]}
     return render(pieces)
+
 
 def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
     # this runs 'git' from the root of the source tree. This only gets called
@@ -67,7 +70,7 @@ def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
 
     pieces = {}
     pieces["long"] = full_out
-    pieces["short"] = full_out[:7] # maybe improved later
+    pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
 
     # parse describe_out. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]
@@ -87,7 +90,8 @@ def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
         mo = re.search(r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe)
         if not mo:
             # unparseable. Maybe git-describe is misbehaving?
-            pieces["error"] = "unable to parse git-describe output: '%s'" % describe_out
+            pieces["error"] = ("unable to parse git-describe output: '%s'"
+                               % describe_out)
             return pieces
 
         # tag
@@ -96,7 +100,8 @@ def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
             if verbose:
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
-            pieces["error"] = "tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix)
+            pieces["error"] = ("tag '%s' doesn't start with prefix '%s'"
+                               % (full_tag, tag_prefix))
             return pieces
         pieces["closest-tag"] = full_tag[len(tag_prefix):]
 
@@ -111,6 +116,7 @@ def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
         pieces["closest-tag"] = None
         count_out = run_command(GITS, ["rev-list", "HEAD", "--count"],
                                 cwd=root)
-        pieces["distance"] = int(count_out) # total number of commits
+        pieces["distance"] = int(count_out)  # total number of commits
 
     return pieces
+
