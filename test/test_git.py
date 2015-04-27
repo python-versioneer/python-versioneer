@@ -309,13 +309,13 @@ class Repo(unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, "unknown", "unknown", False, state, tree="TB")
+        self.check_version(target, "0+unknown", "None", False, state, tree="TB")
 
         # TC: source tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, "1.1", "", False, state, tree="TC")
+        self.check_version(target, "1.1", "None", False, state, tree="TC")
 
         # TD: unpacked git-archive tarball
         target = self.subpath("out/TD/demoapp-TD")
@@ -330,8 +330,8 @@ class Repo(unittest.TestCase):
             # expanded keywords only tell us about tags and full revisionids,
             # not how many patches we are beyond a tag. So we can't expect
             # the short version to be like 1.0-1-gHEXID. The code falls back
-            # to short="unknown"
-            exp_version_TD = "unknown"
+            # to short="0+unknown"
+            exp_version_TD = "0+unknown"
         self.check_version(target, exp_version_TD, exp_full, False, state, tree="TD")
 
         # TE: unpacked setup.py sdist tarball
@@ -388,8 +388,8 @@ class Repo(unittest.TestCase):
 
     def compare(self, got, expected, state, tree, runtime):
         where = "/".join([state, tree, runtime])
-        self.assertEqual(got, expected, "%s: got '%s' != expected '%s'"
-                         % (where, got, expected))
+        self.assertEqual(got, expected, "%s: got (%s)'%s' != expected (%s)'%s'"
+                         % (where, type(got), got, type(expected), expected))
         if VERBOSE: print(" good %s" % where)
 
     def assertPEP440(self, got, state, tree, runtime):
