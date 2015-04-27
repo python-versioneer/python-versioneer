@@ -247,6 +247,14 @@ systems (SVN, etc) in the future.
 
 Nothing special.
 
+## Upgrading to 0.14
+
+0.14 changes the format of the version string. 0.13 and earlier used
+hyphen-separated strings like "0.11-2-g1076c97-dirty". 0.14 and beyond use a
+plus-separated "local version" section strings, with dot-separated
+components, like "0.11+2.g1076c97". PEP440-strict tools did not like the old
+format, but should be ok with the new one.
+
 ## Future Directions
 
 This tool is designed to make it easily extended to other version-control
