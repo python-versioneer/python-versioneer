@@ -66,7 +66,7 @@ def get_versions(verbose=False):
     if verbose:
         print("unable to get version")
     return {"version": "unknown", "long": None, "dirty": None,
-            "error": VersioneerError("unable to get version")}
+            "error": "unable to get version"}
 
 
 def get_version(verbose=False):

@@ -19,9 +19,9 @@ def get_versions(verbose=False):
             root = os.path.dirname(root)
     except NameError:
         return {"version": "unknown", "long": None, "dirty": None,
-                "error": VersioneerError("unable to find root of source tree")}
+                "error": "unable to find root of source tree"}
 
     return (git_versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
             or {"version": "unknown", "long": None, "dirty": None,
-                "error": VersioneerError("unable to get version")})
+                "error": "unable to get version"})

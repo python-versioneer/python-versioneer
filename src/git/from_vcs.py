@@ -52,7 +52,7 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
             return {"version": "unknown",
                     "full-revisionid": full_out,
                     "dirty": None,
-                    "error": VersioneerError("unable to parse git-describe output: '%s'" % describe_out),
+                    "error": "unable to parse git-describe output: '%s'" % describe_out,
                     }
 
         # tag
@@ -64,7 +64,7 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
             return {"version": "unknown",
                     "full-revisionid": full_out,
                     "dirty": None,
-                    "error": VersioneerError("tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix)),
+                    "error": "tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix),
                     }
         pieces["closest-tag"] = full_tag[len(tag_prefix):]
 
