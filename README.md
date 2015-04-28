@@ -194,8 +194,8 @@ importing `_version` from your main `__init__.py` file and running the
 `get_versions()` function. From the "outside" (e.g. in `setup.py`), you can
 import the top-level `versioneer.py` and run `get_versions()`.
 
-Both functions return a dictionary with different keys for different flavors
-of the version string:
+Both functions return a dictionary with different flavors of version
+information:
 
 * `['version']`: A condensed PEP440-compliant string, equal to the
   un-prefixed tag name for actual releases, and containing an additional
@@ -207,13 +207,21 @@ of the version string:
   tag. For released software (exactly equal to a known tag), the identifier
   will only contain the stripped tag, e.g. "0.11".
 
-* `['full']`: detailed revision identifier. For Git, this is the full SHA1
-  commit id, followed by ".dirty" if the tree contains uncommitted changes,
-  e.g. "1076c978a8d3cfc70f408fe5974aa6c092c949ac.dirty".
+* `['full-revisionid']`: detailed revision identifier. For Git, this is the
+  full SHA1 commit id, e.g. "1076c978a8d3cfc70f408fe5974aa6c092c949ac".
 
-Some variants are more useful than others. Including `full` in a bug report
-should allow developers to reconstruct the exact code being tested (or
-indicate the presence of local changes that should be shared with the
+* `['dirty']`: a boolean, True if the tree has uncommitted changes. Note that
+  this is only accurate if run in a VCS checkout, otherwise it is likely to
+  be False or None
+
+* `['error']`: if the version string could not be computed, this will be set
+  to a string describing the problem, otherwise it will be None. It may be
+  useful to throw an exception in setup.py if this is set, to avoid e.g.
+  creating tarballs with a version string of "unknown".
+
+Some variants are more useful than others. Including `full-revisionid` in a
+bug report should allow developers to reconstruct the exact code being tested
+(or indicate the presence of local changes that should be shared with the
 developers). `version` is suitable for display in an "about" box or a CLI
 `--version` output: it can be easily compared against release notes and lists
 of bugs fixed in various releases.
