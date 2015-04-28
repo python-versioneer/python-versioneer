@@ -207,15 +207,14 @@ class Repo(unittest.TestCase):
                         "--version", workdir=self.testdir)
         self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
 
-        out = self.python("setup.py", "setup_versioneer").splitlines()
-        self.assertEqual(out[0], "running setup_versioneer")
-        self.assertEqual(out[1], " creating src/demo/_version.py")
+        out = self.python("versioneer.py", "setup").splitlines()
+        self.assertEqual(out[0], "creating src/demo/_version.py")
         if script_only:
-            self.assertEqual(out[2], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
         else:
-            self.assertEqual(out[2], " appending to src/demo/__init__.py")
-        self.assertEqual(out[3], " appending 'versioneer.py' to MANIFEST.in")
-        self.assertEqual(out[4], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
+            self.assertEqual(out[1], " appending to src/demo/__init__.py")
+        self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
+        self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
         out = set(self.git("status", "--porcelain").splitlines())
         # Many folks have a ~/.gitignore with ignores .pyc files, but if they
         # don't, it will show up in the status here. Ignore it.
@@ -236,16 +235,15 @@ class Repo(unittest.TestCase):
             self.assertEqual(i[-1], "del get_versions")
         self.git("commit", "-m", "add _version stuff")
 
-        # "setup.py versioneer" should be idempotent
-        out = self.python("setup.py", "setup_versioneer").splitlines()
-        self.assertEqual(out[0], "running setup_versioneer")
-        self.assertEqual(out[1], " creating src/demo/_version.py")
+        # "versioneer.py setup" should be idempotent
+        out = self.python("versioneer.py", "setup").splitlines()
+        self.assertEqual(out[0], "creating src/demo/_version.py")
         if script_only:
-            self.assertEqual(out[2], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
         else:
-            self.assertEqual(out[2], " src/demo/__init__.py unmodified")
-        self.assertEqual(out[3], " 'versioneer.py' already in MANIFEST.in")
-        self.assertEqual(out[4], " versionfile_source already in MANIFEST.in")
+            self.assertEqual(out[1], " src/demo/__init__.py unmodified")
+        self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
+        self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
         out = set(self.git("status", "--porcelain").splitlines())
         out.discard("?? versioneer.pyc")
         out.discard("?? __pycache__/")
