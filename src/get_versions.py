@@ -10,11 +10,7 @@ def vcs_function(vcs, suffix):
     return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 
-DEFAULT = {"version": "0+unknown", "full": "unknown",
-           "dirty": None, "error": "unable to compute version"}
-
-
-def get_versions(default=DEFAULT, verbose=False):
+def get_versions(verbose=False):
     # returns dict with two keys: 'version' and 'full'
     assert versionfile_source is not None, \
         "please set versioneer.versionfile_source"
@@ -68,8 +64,10 @@ def get_versions(default=DEFAULT, verbose=False):
         return ver
 
     if verbose:
-        print("got version from default %s" % default)
-    return default
+        print("unable to compute version")
+
+    return {"version": "0+unknown", "full": "unknown",
+            "dirty": None, "error": "unable to compute version"}
 
 
 def get_version(verbose=False):
