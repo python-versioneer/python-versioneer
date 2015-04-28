@@ -5,7 +5,10 @@
 @README@
 """
 
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import errno
 import json
 import os
@@ -16,7 +19,7 @@ from distutils.command.build import build as _build
 from distutils.command.sdist import sdist as _sdist
 from distutils.core import Command
 
-config = ConfigParser.SafeConfigParser()
+config = configparser.SafeConfigParser()
 try:
     setup_cfg = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "setup.cfg")
@@ -27,7 +30,7 @@ try:
         config.readfp(f)
     VCS = config.get("versioneer", "VCS")
 except (EnvironmentError,
-        ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        configparser.NoSectionError, configparser.NoOptionError):
     raise Exception("Versioneer is now configured with setup.cfg,"
                     " not setup.py. Please see the README or"
                     " versioneer.py for details.")
