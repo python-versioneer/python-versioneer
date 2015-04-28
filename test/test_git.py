@@ -189,12 +189,12 @@ class Repo(unittest.TestCase):
         self.git("tag", "demo-4.0", workdir=self.testdir)
 
         shutil.copytree(demoapp_dir, self.subpath("demoapp"))
-        setup_py_fn = os.path.join(self.subpath("demoapp"), "setup.py")
-        with open(setup_py_fn, "r") as f:
-            setup_py = f.read()
-        setup_py = setup_py.replace("@VCS@", "git")
-        with open(setup_py_fn, "w") as f:
-            f.write(setup_py)
+        setup_cfg_fn = os.path.join(self.subpath("demoapp"), "setup.cfg")
+        with open(setup_cfg_fn, "r") as f:
+            setup_cfg = f.read()
+        setup_cfg = setup_cfg.replace("@VCS@", "git")
+        with open(setup_cfg_fn, "w") as f:
+            f.write(setup_cfg)
         shutil.copyfile("versioneer.py", self.subpath("demoapp/versioneer.py"))
         self.git("init")
         self.git("add", "--all")

@@ -139,16 +139,16 @@ To versioneer-enable your project:
 * 1: Run `versioneer-installer` to copy `versioneer.py` into the top of your
   source tree.
 
-* 2: add the following lines to the top of your `setup.py`, with the
-  configuration values you decided earlier:
+* 2: modify your `setup.cfg`, adding a section named `[versioneer]` and
+  populating it with the configuration values you decided earlier:
 
   ````
-  import versioneer
-  versioneer.VCS = 'git'
-  versioneer.versionfile_source = 'src/myproject/_version.py'
-  versioneer.versionfile_build = 'myproject/_version.py'
-  versioneer.tag_prefix = '' # tags are like 1.2.0
-  versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+  [versioneer]
+  VCS = git
+  versionfile_source = src/myproject/_version.py
+  versionfile_build = myproject/_version.py
+  tag_prefix = ""
+  parentdir_prefix = myproject-
   ````
 
 * 3: add the following arguments to the setup() call in your setup.py:
