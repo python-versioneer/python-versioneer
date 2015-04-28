@@ -70,13 +70,11 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
         return {}  # try next method
     version, dirty = git_parse_vcs_describe(stdout, tag_prefix, verbose)
 
-    # build "full", which is FULLHEX[.dirty]
+    # build "full", which is just FULLHEX
     stdout = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if stdout is None:
         return {}
     full = stdout.strip()
-    if dirty:
-        full += ".dirty"
 
     return {"version": version, "full-revisionid": full,
             "dirty": dirty, "error": None}

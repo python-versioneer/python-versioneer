@@ -245,11 +245,11 @@ class Repo(unittest.TestCase):
         f.close()
         full = self.git("rev-parse", "HEAD")
         short = "0+untagged.g%s.dirty" % full[:7]
-        self.do_checks("S2", {"TA": [short, full+".dirty", True, None],
+        self.do_checks("S2", {"TA": [short, full, True, None],
                               "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full+".dirty", True, None],
+                              "TC": [short, full, True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full+".dirty", True, None]})
+                              "TE": [short, full, True, None]})
 
         # S3: we commit that change, then make the first tag (1.0)
         self.git("add", "setup.py")
@@ -271,11 +271,11 @@ class Repo(unittest.TestCase):
         f.close()
         full = self.git("rev-parse", "HEAD")
         short = "1.0+0.g%s.dirty" % full[:7]
-        self.do_checks("S4", {"TA": [short, full+".dirty", True, None],
+        self.do_checks("S4", {"TA": [short, full, True, None],
                               "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full+".dirty", True, None],
+                              "TC": [short, full, True, None],
                               "TD": ["1.0", full, False, None],
-                              "TE": [short, full+".dirty", True, None]})
+                              "TE": [short, full, True, None]})
 
         # S5: now we make one commit past the tag
         self.git("add", "setup.py")
@@ -294,11 +294,11 @@ class Repo(unittest.TestCase):
         f.close()
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s.dirty" % full[:7]
-        self.do_checks("S6", {"TA": [short, full+".dirty", True, None],
+        self.do_checks("S6", {"TA": [short, full, True, None],
                               "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full+".dirty", True, None],
+                              "TC": [short, full, True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full+".dirty", True, None]})
+                              "TE": [short, full, True, None]})
 
 
     def do_checks(self, state, exps):
