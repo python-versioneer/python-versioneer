@@ -7,7 +7,6 @@ SHORT_VERSION_PY = """
 
 import json
 import sys
-import types
 
 version_json = '''
 %s
@@ -19,7 +18,6 @@ def get_versions(verbose=False):
 """
 
 import sys # --STRIP DURING BUILD
-import types # --STRIP DURING BUILD
 import json # --STRIP DURING BUILD
 import re # --STRIP DURING BUILD
 
