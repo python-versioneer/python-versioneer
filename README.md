@@ -91,7 +91,7 @@ First, decide on values for the following configuration variables:
   `__init__.py` file, so it can be imported at runtime. If your project uses
   `src/myproject/__init__.py`, this should be `src/myproject/_version.py`.
   This file should be checked in to your VCS as usual: the copy created below
-  by `setup.py versioneer` will include code that parses expanded VCS
+  by `setup.py setup_versioneer` will include code that parses expanded VCS
   keywords in generated tarballs. The 'build' and 'sdist' commands will
   replace it with a copy that has just the calculated version string.
 
@@ -99,8 +99,8 @@ First, decide on values for the following configuration variables:
   therefore never import `_version.py`), since "setup.py sdist" -based trees
   still need somewhere to record the pre-calculated version strings. Anywhere
   in the source tree should do. If there is a `__init__.py` next to your
-  `_version.py`, the `setup.py versioneer` command (described below) will
-  append some `__version__`-setting assignments, if they aren't already
+  `_version.py`, the `setup.py setup_versioneer` command (described below)
+  will append some `__version__`-setting assignments, if they aren't already
   present.
 
 * `versionfile_build`:
@@ -156,14 +156,14 @@ To versioneer-enable your project:
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
 
-* 4: now run `setup.py versioneer`, which will create `_version.py`, and will
-  modify your `__init__.py` (if one exists next to `_version.py`) to define
-  `__version__` (by calling a function from `_version.py`). It will also
-  modify your `MANIFEST.in` to include both `versioneer.py` and the generated
-  `_version.py` in sdist tarballs.
+* 4: now run `setup.py setup_versioneer`, which will create `_version.py`,
+  and will modify your `__init__.py` (if one exists next to `_version.py`) to
+  define `__version__` (by calling a function from `_version.py`). It will
+  also modify your `MANIFEST.in` to include both `versioneer.py` and the
+  generated `_version.py` in sdist tarballs.
 
 * 5: commit these changes to your VCS. To make sure you won't forget,
-  `setup.py versioneer` will mark everything it touched for addition.
+  `setup.py setup_versioneer` will mark everything it touched for addition.
 
 ## Post-Installation Usage
 
@@ -226,7 +226,7 @@ developers). `version` is suitable for display in an "about" box or a CLI
 `--version` output: it can be easily compared against release notes and lists
 of bugs fixed in various releases.
 
-The `setup.py versioneer` command adds the following text to your
+The `setup.py setup_versioneer` command adds the following text to your
 `__init__.py` to place a basic version in `YOURPROJECT.__version__`:
 
     from ._version import get_versions
@@ -242,14 +242,14 @@ To upgrade your project to a new release of Versioneer, do the following:
   `versioneer.py`
 * edit `setup.py`, if necessary, to include any new configuration settings
   indicated by the release notes
-* re-run `setup.py versioneer` to replace `SRC/_version.py`
+* re-run `setup.py setup_versioneer` to replace `SRC/_version.py`
 * commit any changed files
 
 ### Upgrading from 0.10 to 0.11
 
 You must add a `versioneer.VCS = "git"` to your `setup.py` before re-running
-`setup.py versioneer`. This will enable the use of additional version-control
-systems (SVN, etc) in the future.
+`setup.py setup_versioneer`. This will enable the use of additional
+version-control systems (SVN, etc) in the future.
 
 ### Upgrading from 0.11 to 0.12
 

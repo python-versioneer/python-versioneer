@@ -154,7 +154,7 @@ class cmd_update_files(Command):
 
 def get_cmdclass():
     cmds = {'version': cmd_version,
-            'versioneer': cmd_update_files,
+            'setup_versioneer': cmd_update_files,
             'build': cmd_build,
             'sdist': cmd_sdist,
             }

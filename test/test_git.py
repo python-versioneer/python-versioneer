@@ -207,8 +207,8 @@ class Repo(unittest.TestCase):
                         "--version", workdir=self.testdir)
         self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
 
-        out = self.python("setup.py", "versioneer").splitlines()
-        self.assertEqual(out[0], "running versioneer")
+        out = self.python("setup.py", "setup_versioneer").splitlines()
+        self.assertEqual(out[0], "running setup_versioneer")
         self.assertEqual(out[1], " creating src/demo/_version.py")
         if script_only:
             self.assertEqual(out[2], " src/demo/__init__.py doesn't exist, ok")
@@ -237,8 +237,8 @@ class Repo(unittest.TestCase):
         self.git("commit", "-m", "add _version stuff")
 
         # "setup.py versioneer" should be idempotent
-        out = self.python("setup.py", "versioneer").splitlines()
-        self.assertEqual(out[0], "running versioneer")
+        out = self.python("setup.py", "setup_versioneer").splitlines()
+        self.assertEqual(out[0], "running setup_versioneer")
         self.assertEqual(out[1], " creating src/demo/_version.py")
         if script_only:
             self.assertEqual(out[2], " src/demo/__init__.py doesn't exist, ok")
