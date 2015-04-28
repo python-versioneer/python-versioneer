@@ -10,9 +10,6 @@ def get_versions(verbose=False):
     if ver:
         return ver
 
-    default = {"version": "0+unknown", "full-revisionid": None,
-               "dirty": None, "error": "unable to compute version"}
-
     try:
         root = os.path.realpath(__file__)
         # versionfile_source is the relative path from the top of the source
@@ -21,8 +18,12 @@ def get_versions(verbose=False):
         for i in versionfile_source.split('/'):
             root = os.path.dirname(root)
     except NameError:
-        return default
+        return {"version": "0+unknown", "full-revisionid": None,
+                "dirty": None,
+                "error": "unable to find root of source tree"}
 
     return (git_versions_from_vcs(tag_prefix, root, verbose)
             or versions_from_parentdir(parentdir_prefix, root, verbose)
-            or default)
+            or {"version": "0+unknown", "full-revisionid": None,
+                "dirty": None,
+                "error": "unable to compute version"})
