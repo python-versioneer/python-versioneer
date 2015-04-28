@@ -53,6 +53,17 @@ def get_vcs_list():
             in os.listdir(project_path)
             if path.isdir(path.join(project_path, filename))]
 
+def generate_long_version_py(VCS):
+    s = io.StringIO()
+    s.write(get("src/%s/long_header.py" % VCS, add_ver=True, do_strip=True))
+    for piece in ["src/subprocess_helper.py",
+                  "src/from_parentdir.py",
+                  "src/%s/from_keywords.py" % VCS,
+                  "src/%s/from_vcs.py" % VCS,
+                  "src/%s/long_get_versions.py" % VCS]:
+        s.write(get(piece, unquote=True, do_strip=True))
+    return s.getvalue()
+
 def generate_versioneer():
     s = io.StringIO()
     s.write(get("src/header.py", add_ver=True, do_readme=True))
@@ -60,14 +71,7 @@ def generate_versioneer():
 
     for VCS in get_vcs_list():
         s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
-        s.write(get("src/%s/long_header.py" % VCS, add_ver=True, do_strip=True))
-        s.write(get("src/subprocess_helper.py", unquote=True, do_strip=True))
-        s.write(get("src/from_parentdir.py", unquote=True, do_strip=True))
-        s.write(get("src/%s/from_keywords.py" % VCS,
-                    unquote=True, do_strip=True))
-        s.write(get("src/%s/from_vcs.py" % VCS, unquote=True, do_strip=True))
-        s.write(get("src/%s/long_get_versions.py" % VCS,
-                    unquote=True, do_strip=True))
+        s.write(generate_long_version_py(VCS))
         s.write(u("'''\n"))
 
         s.write(get("src/%s/from_keywords.py" % VCS, do_strip=True))
@@ -106,9 +110,9 @@ class make_long_version_py_git(Command):
         pass
     def run(self):
         assert os.path.exists("versioneer.py")
-        from versioneer import LONG_VERSION_PY
+        long_version = generate_long_version_py("git")
         with open("git_version.py", "w") as f:
-            f.write(LONG_VERSION_PY["git"] %
+            f.write(long_version %
                     {"DOLLAR": "$",
                      "TAG_PREFIX": "tag-",
                      "PARENTDIR_PREFIX": "parentdir_prefix",
