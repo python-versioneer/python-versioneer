@@ -10,6 +10,9 @@ def vcs_function(vcs, suffix):
     return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 
+DEFAULT = {"version": "0+unknown", "full": "unknown"}
+
+
 def get_versions(default=DEFAULT, verbose=False):
     # returns dict with two keys: 'version' and 'full'
     assert versionfile_source is not None, \
