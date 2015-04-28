@@ -8,7 +8,7 @@ import tempfile
 from pkg_resources import parse_version, SetuptoolsLegacyVersion
 
 sys.path.insert(0, "src")
-from git.from_vcs import git_parse_vcs_describe
+from git.from_vcs import get_git_versions_from_vcs
 from git.from_keywords import git_versions_from_keywords
 from subprocess_helper import run_command
 
@@ -17,24 +17,54 @@ if sys.platform == "win32":
     GITS = ["git.cmd", "git.exe"]
 
 class ParseGitDescribe(unittest.TestCase):
-    def test_parse(self):
-        def pv(git_describe):
-            return git_parse_vcs_describe(git_describe, "v")
-        self.assertEqual(pv("1f"), ("0+untagged.g1f", False))
-        self.assertEqual(pv("1f-dirty"), ("0+untagged.g1f.dirty", True))
-        self.assertEqual(pv("v1.0-0-g1f"), ("1.0", False))
-        self.assertEqual(pv("v1.0-0-g1f-dirty"), ("1.0+0.g1f.dirty", True))
-        self.assertEqual(pv("v1.0-1-g1f"), ("1.0+1.g1f", False))
-        self.assertEqual(pv("v1.0-1-g1f-dirty"), ("1.0+1.g1f.dirty", True))
-
-        def p(git_describe):
-            return git_parse_vcs_describe(git_describe, "")
-        self.assertEqual(p("1f"), ("0+untagged.g1f", False))
-        self.assertEqual(p("1f-dirty"), ("0+untagged.g1f.dirty", True))
-        self.assertEqual(p("1.0-0-g1f"), ("1.0", False))
-        self.assertEqual(p("1.0-0-g1f-dirty"), ("1.0+0.g1f.dirty", True))
-        self.assertEqual(p("1.0-1-g1f"), ("1.0+1.g1f", False))
-        self.assertEqual(p("1.0-1-g1f-dirty"), ("1.0+1.g1f.dirty", True))
+    def test_pieces(self):
+        def pv(git_describe, do_error=False, expect_pieces=False):
+            def fake_run_command(exes, args, cwd=None):
+                if args[0] == "describe":
+                    if do_error == "describe":
+                        return None
+                    return git_describe+"\n"
+                if args[0] == "rev-parse":
+                    if do_error == "rev-parse":
+                        return None
+                    return "longlong\n"
+                if args[0] == "rev-list":
+                    return "42\n"
+                self.fail("git called in weird way: %s" % (args,))
+            return get_git_versions_from_vcs("v", None, verbose=False,
+                                             run_command=fake_run_command)
+        self.assertEqual(pv("ignored", do_error="describe"), {})
+        self.assertEqual(pv("ignored", do_error="rev-parse"), {})
+        self.assertEqual(pv("1f"),
+                         {"closest-tag": None, "dirty": False, "error": None,
+                          "distance": 42,
+                          "long": "longlong",
+                          "short": "longlon"})
+        self.assertEqual(pv("1f-dirty"),
+                         {"closest-tag": None, "dirty": True, "error": None,
+                          "distance": 42,
+                          "long": "longlong",
+                          "short": "longlon"})
+        self.assertEqual(pv("v1.0-0-g1f"),
+                         {"closest-tag": "1.0", "dirty": False, "error": None,
+                          "distance": 0,
+                          "long": "longlong",
+                          "short": "1f"})
+        self.assertEqual(pv("v1.0-0-g1f-dirty"),
+                         {"closest-tag": "1.0", "dirty": True, "error": None,
+                          "distance": 0,
+                          "long": "longlong",
+                          "short": "1f"})
+        self.assertEqual(pv("v1.0-1-g1f"),
+                         {"closest-tag": "1.0", "dirty": False, "error": None,
+                          "distance": 1,
+                          "long": "longlong",
+                          "short": "1f"})
+        self.assertEqual(pv("v1.0-1-g1f-dirty"),
+                         {"closest-tag": "1.0", "dirty": True, "error": None,
+                          "distance": 1,
+                          "long": "longlong",
+                          "short": "1f"})
 
 
 class Keywords(unittest.TestCase):
@@ -172,10 +202,10 @@ class Repo(unittest.TestCase):
 
         full = self.git("rev-parse", "HEAD")
         v = self.python("setup.py", "--version")
-        self.assertEqual(v, "0+untagged.g%s" % full[:7])
+        self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
         v = self.python(os.path.join(self.subpath("demoapp"), "setup.py"),
                         "--version", workdir=self.testdir)
-        self.assertEqual(v, "0+untagged.g%s" % full[:7])
+        self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
 
         out = self.python("setup.py", "versioneer").splitlines()
         self.assertEqual(out[0], "running versioneer")
@@ -226,7 +256,7 @@ class Repo(unittest.TestCase):
 
         # S1: the tree is sitting on a pre-tagged commit
         full = self.git("rev-parse", "HEAD")
-        short = "0+untagged.g%s" % full[:7]
+        short = "0+untagged.2.g%s" % full[:7]
         self.do_checks("S1", {"TA": [short, full, False, None],
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
@@ -244,7 +274,7 @@ class Repo(unittest.TestCase):
         f.write("# dirty\n")
         f.close()
         full = self.git("rev-parse", "HEAD")
-        short = "0+untagged.g%s.dirty" % full[:7]
+        short = "0+untagged.2.g%s.dirty" % full[:7]
         self.do_checks("S2", {"TA": [short, full, True, None],
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, True, None],
@@ -317,7 +347,7 @@ class Repo(unittest.TestCase):
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, state, "TC", ["1.1", None, False, None])
+        self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
 
         # TD: unpacked git-archive tarball
         target = self.subpath("out/TD/demoapp-TD")
