@@ -54,11 +54,12 @@ It returns `get_versions()["version"]`. See below for what that means.
 | `dirty` | A boolean, True if the source tree has local changes. None if unknown. |
 | `error` | None, or a error description string |
 
-`version` will always be a string (`str` on py3, `unicode` on py2): if Versioneer is unable to compute a version, it will be set to `"0+unknown"`. `full-revisionid` and `dirty` will be a str/unicode, or None if that information is not available. `error` will be None, or a str/unicode if there was an error.
+`version` will always be a string (`str` on py3, `unicode` on py2): if Versioneer is unable to compute a version, it will be set to `"0+unknown"`. `full-revisionid` will be a str/unicode, or None if that information is not available. `dirty` will be a boolean, or None if unavailable. `error` will be None, or a str/unicode if there was an error.
 
 If the `error` key is non-None, that indicates that Versioneer was unable to obtain a satisfactory version string. There are several possibilities:
 
 * the closest tag found did not start with the configured `tag_prefix`
+* from-keyword mode did not find any tags (e.g. an archive created from a bare SHA1, instead of from a tag)
 * the output of `git describe` was unparseable
 * all modes failed: the source tree has no `.git` directory, expanded keywords, pre-built version data ("from-file"), or useful parent directory name.
 

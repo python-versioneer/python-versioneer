@@ -65,5 +65,5 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
         print("no suitable tags, using unknown + full revision id")
     return {"version": "0+unknown",
             "full-revisionid": keywords["full"].strip(),
-            "dirty": False, "error": None}
+            "dirty": False, "error": "no suitable tags"}
 
