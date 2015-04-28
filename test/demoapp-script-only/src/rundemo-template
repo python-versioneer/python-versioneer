@@ -3,5 +3,5 @@
 #versions
 
 print("__version__:%s" % versions['version'])
-print("shortversion:%s" % versions["version"])
-print("longversion:%s" % versions["full-revisionid"])
+for k in sorted(versions.keys()):
+    print("%s:%s" % (k,versions[k]))

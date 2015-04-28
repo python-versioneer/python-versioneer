@@ -382,9 +382,8 @@ class Repo(unittest.TestCase):
         data = dict([line.split(":",1) for line in out.splitlines()])
         self.compare(data["__version__"], exp_version, state, tree, "RB")
         self.assertPEP440(data["__version__"], state, tree, "RB")
-        self.compare(data["shortversion"], exp_version, state, tree, "RB")
-        self.assertPEP440(data["shortversion"], state, tree ,"RB")
-        self.compare(data["longversion"], exp_full, state, tree, "RB")
+        self.compare(data["version"], exp_version, state, tree, "RB")
+        self.compare(data["full-revisionid"], exp_full, state, tree, "RB")
 
     def compare(self, got, expected, state, tree, runtime):
         where = "/".join([state, tree, runtime])
