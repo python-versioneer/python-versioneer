@@ -45,21 +45,21 @@ class Keywords(unittest.TestCase):
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
         self.assertEqual(v["version"], "2.0")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], None)
 
     def test_prefer_short(self):
         v = self.parse(" (HEAD, 2.0rc1, 2.0, 2.0rc2) ", " full ")
         self.assertEqual(v["version"], "2.0")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], None)
 
     def test_prefix(self):
         v = self.parse(" (HEAD, projectname-2.0) ", " full ", "projectname-")
         self.assertEqual(v["version"], "2.0")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], None)
 
@@ -70,14 +70,14 @@ class Keywords(unittest.TestCase):
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
         self.assertEqual(v["version"], "0+unknown")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
         self.assertEqual(v["version"], "0+unknown")
-        self.assertEqual(v["full"], "full")
+        self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
 
@@ -228,7 +228,7 @@ class Repo(unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         short = "0+untagged.g%s" % full[:7]
         self.do_checks("S1", {"TA": [short, full, False, None],
-                              "TB": ["0+unknown", "unknown", None, UNABLE],
+                              "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full, False, None]})
@@ -246,7 +246,7 @@ class Repo(unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         short = "0+untagged.g%s.dirty" % full[:7]
         self.do_checks("S2", {"TA": [short, full+".dirty", True, None],
-                              "TB": ["0+unknown", "unknown", None, UNABLE],
+                              "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full+".dirty", True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full+".dirty", True, None]})
@@ -260,7 +260,7 @@ class Repo(unittest.TestCase):
         if VERBOSE: print("FULL %s" % full)
         # the tree is now sitting on the 1.0 tag
         self.do_checks("S3", {"TA": [short, full, False, None],
-                              "TB": ["0+unknown", "unknown", None, UNABLE],
+                              "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
                               "TD": [short, full, False, None],
                               "TE": [short, full, False, None]})
@@ -272,7 +272,7 @@ class Repo(unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         short = "1.0+0.g%s.dirty" % full[:7]
         self.do_checks("S4", {"TA": [short, full+".dirty", True, None],
-                              "TB": ["0+unknown", "unknown", None, UNABLE],
+                              "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full+".dirty", True, None],
                               "TD": ["1.0", full, False, None],
                               "TE": [short, full+".dirty", True, None]})
@@ -283,7 +283,7 @@ class Repo(unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s" % full[:7]
         self.do_checks("S5", {"TA": [short, full, False, None],
-                              "TB": ["0+unknown", "unknown", None, UNABLE],
+                              "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full, False, None]})
@@ -295,7 +295,7 @@ class Repo(unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s.dirty" % full[:7]
         self.do_checks("S6", {"TA": [short, full+".dirty", True, None],
-                              "TB": ["0+unknown", "unknown", None, UNABLE],
+                              "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full+".dirty", True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full+".dirty", True, None]})
@@ -317,7 +317,7 @@ class Repo(unittest.TestCase):
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.subpath("demoapp"), target)
         shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, state, "TC", ["1.1", "", False, None])
+        self.check_version(target, state, "TC", ["1.1", None, False, None])
 
         # TD: unpacked git-archive tarball
         target = self.subpath("out/TD/demoapp-TD")
@@ -377,7 +377,7 @@ class Repo(unittest.TestCase):
         self.assertPEP440(data["__version__"], state, tree, "RB")
         self.compare(data["version"], exp_version, state, tree, "RB")
         self.compare(data["dirty"], str(exp_dirty), state, tree, "RB")
-        self.compare(data["full"], str(exp_full), state, tree, "RB")
+        self.compare(data["full-revisionid"], str(exp_full), state, tree, "RB")
         self.compare(data["error"], str(exp_error), state, tree, "RB")
 
     def compare(self, got, expected, state, tree, runtime):

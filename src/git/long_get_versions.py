@@ -10,7 +10,7 @@ def get_versions(verbose=False):
     if ver:
         return ver
 
-    default = {"version": "0+unknown", "full": "unknown",
+    default = {"version": "0+unknown", "full-revisionid": None,
                "dirty": None, "error": "unable to compute version"}
 
     try:
