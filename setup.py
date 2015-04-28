@@ -81,8 +81,9 @@ def generate_versioneer():
 
     s.write(get("src/from_parentdir.py", do_strip=True))
     s.write(get("src/from_file.py", add_ver=True, do_strip=True))
-    s.write(get("src/get_versions.py", add_ver=True, do_strip=True))
-    s.write(get("src/cmdclass.py", add_ver=True, do_strip=True))
+    s.write(get("src/get_versions.py", do_strip=True))
+    s.write(get("src/cmdclass.py", do_strip=True))
+    s.write(get("src/setupfunc.py", do_strip=True))
 
     return s.getvalue().encode("utf-8")
 
