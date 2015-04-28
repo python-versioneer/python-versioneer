@@ -10,7 +10,8 @@ def vcs_function(vcs, suffix):
     return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 
-DEFAULT = {"version": "0+unknown", "full": "unknown"}
+DEFAULT = {"version": "0+unknown", "full": "unknown",
+           "dirty": None, "error": "unable to compute version"}
 
 
 def get_versions(default=DEFAULT, verbose=False):

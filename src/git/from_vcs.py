@@ -78,5 +78,5 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
     if dirty:
         full += ".dirty"
 
-    return {"version": version, "full": full}
+    return {"version": version, "full": full, "dirty": dirty, "error": None}
 
