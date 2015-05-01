@@ -55,6 +55,7 @@ SAMPLE_CONFIG = """
 
 """
 
+
 class VersioneerConfig:
     pass
 
