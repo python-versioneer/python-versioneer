@@ -8,8 +8,7 @@ import tempfile
 from pkg_resources import parse_version, SetuptoolsLegacyVersion
 
 sys.path.insert(0, "src")
-from git.from_vcs import get_git_versions_from_vcs
-from git.from_keywords import git_versions_from_keywords
+from git import from_vcs, from_keywords
 from subprocess_helper import run_command
 
 GITS = ["git"]
@@ -31,10 +30,12 @@ class ParseGitDescribe(unittest.TestCase):
                 if args[0] == "rev-list":
                     return "42\n"
                 self.fail("git called in weird way: %s" % (args,))
-            return get_git_versions_from_vcs("v", None, verbose=False,
-                                             run_command=fake_run_command)
-        self.assertEqual(pv("ignored", do_error="describe"), {})
-        self.assertEqual(pv("ignored", do_error="rev-parse"), {})
+            return from_vcs.get_git_versions_from_vcs(
+                "v", None, verbose=False, run_command=fake_run_command)
+        self.assertRaises(from_vcs.NotThisMethod,
+                          pv, "ignored", do_error="describe")
+        self.assertRaises(from_vcs.NotThisMethod,
+                          pv, "ignored", do_error="rev-parse")
         self.assertEqual(pv("1f"),
                          {"closest-tag": None, "dirty": False, "error": None,
                           "distance": 42,
@@ -69,8 +70,8 @@ class ParseGitDescribe(unittest.TestCase):
 
 class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
-        return git_versions_from_keywords({"refnames": refnames, "full": full},
-                                          prefix, False)
+        return from_keywords.git_versions_from_keywords(
+            {"refnames": refnames, "full": full}, prefix, False)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
@@ -94,8 +95,8 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["error"], None)
 
     def test_unexpanded(self):
-        v = self.parse(" $Format$ ", " full ", "projectname-")
-        self.assertEqual(v, {})
+        self.assertRaises(from_keywords.NotThisMethod,
+                          self.parse, " $Format$ ", " full ", "projectname-")
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")

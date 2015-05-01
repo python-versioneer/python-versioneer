@@ -1,6 +1,7 @@
 import os, sys, re # --STRIP DURING BUILD
 def run_command(): pass # --STRIP DURING BUILD
 def render(): pass # --STRIP DURING BUILD
+class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
     # this runs 'git' from the root of the source tree. This only gets called
@@ -18,11 +19,11 @@ def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
                                cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
-        return {}  # try next method
+        raise NotThisMethod("'git describe' failed")
     describe_out = describe_out.strip()
     full_out = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if full_out is None:
-        return {}
+        raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
 
     pieces = {}
@@ -82,12 +83,9 @@ def git_versions_from_vcs(tag_prefix, root, verbose):
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
-        return {}  # get_versions() will try next method
-    got = get_git_versions_from_vcs(tag_prefix, root, verbose, run_command)
-    if got == {}:
-        # git didn't return anything useful, try next method
-        return {}
-    pieces = got
+        raise NotThisMethod("no .git directory")
+    pieces = get_git_versions_from_vcs(tag_prefix, root, verbose, run_command)
+    assert pieces
     if pieces["error"]:
         return {"version": "unknown",
                 "full-revisionid": pieces["long"],

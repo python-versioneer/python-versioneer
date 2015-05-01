@@ -2,6 +2,7 @@ import os, sys # --STRIP DURING BUILD
 def get_config(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
+class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 def get_root():
     try:
@@ -33,41 +34,51 @@ def get_versions():
     root = get_root()
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
 
-    # extract version from first of _version.py, VCS command (e.g. 'git
+    get_keywords_f = vcs_function(cfg.VCS, "get_keywords")
+    versions_from_keywords_f = vcs_function(cfg.VCS, "versions_from_keywords")
+    versions_from_vcs_f = vcs_function(cfg.VCS, "versions_from_vcs")
+
+    # extract version from first of: _version.py, VCS command (e.g. 'git
     # describe'), parentdir. This is meant to work for developers using a
     # source checkout, for users of a tarball created by 'setup.py sdist',
     # and for users of a tarball/zipball created by 'git archive' or github's
     # download-from-tag feature or the equivalent in other VCSes.
 
-    get_keywords_f = vcs_function(cfg.VCS, "get_keywords")
-    versions_from_keywords_f = vcs_function(cfg.VCS, "versions_from_keywords")
     if get_keywords_f and versions_from_keywords_f:
-        vcs_keywords = get_keywords_f(versionfile_abs)
-        ver = versions_from_keywords_f(vcs_keywords, cfg.tag_prefix, verbose)
-        if ver:
+        try:
+            vcs_keywords = get_keywords_f(versionfile_abs)
+            ver = versions_from_keywords_f(vcs_keywords, cfg.tag_prefix,
+                                           verbose)
             if verbose:
                 print("got version from expanded keyword %s" % ver)
             return ver
+        except NotThisMethod:
+            pass
 
-    ver = versions_from_file(versionfile_abs)
-    if ver:
+    try:
+        ver = versions_from_file(versionfile_abs)
         if verbose:
             print("got version from file %s %s" % (versionfile_abs, ver))
         return ver
+    except NotThisMethod:
+        pass
 
-    versions_from_vcs_f = vcs_function(cfg.VCS, "versions_from_vcs")
     if versions_from_vcs_f:
-        ver = versions_from_vcs_f(cfg.tag_prefix, root, verbose)
-        if ver:
+        try:
+            ver = versions_from_vcs_f(cfg.tag_prefix, root, verbose)
             if verbose:
                 print("got version from VCS %s" % ver)
             return ver
+        except NotThisMethod:
+            pass
 
-    ver = versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
-    if ver:
+    try:
+        ver = versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
         if verbose:
             print("got version from parentdir %s" % ver)
         return ver
+    except NotThisMethod:
+        pass
 
     if verbose:
         print("unable to compute version")

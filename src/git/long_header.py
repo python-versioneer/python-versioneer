@@ -39,3 +39,7 @@ def get_config():
     cfg.versionfile_source = "%(VERSIONFILE_SOURCE)s"
     cfg.verbose = False
     return cfg
+
+
+class NotThisMethod(Exception):
+    pass

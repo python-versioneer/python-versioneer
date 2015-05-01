@@ -1,4 +1,5 @@
 import os # --STRIP DURING BUILD
+class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 
 def versions_from_parentdir(parentdir_prefix, root, verbose):
@@ -9,7 +10,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
         if verbose:
             print("guessing rootdir is '%s', but '%s' doesn't start with "
                   "prefix '%s'" % (root, dirname, parentdir_prefix))
-        return None
+        raise NotThisMethod("rootdir doesn't start with parentdir_prefix")
     return {"version": dirname[len(parentdir_prefix):],
             "full-revisionid": None,
             "dirty": False, "error": None}

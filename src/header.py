@@ -59,5 +59,8 @@ def get_config():
     return cfg
 
 
+class NotThisMethod(Exception):
+    pass
+
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}

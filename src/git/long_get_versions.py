@@ -4,6 +4,7 @@ def get_keywords(): pass # --STRIP DURING BUILD
 def git_versions_from_keywords(): pass # --STRIP DURING BUILD
 def git_versions_from_vcs(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
+class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 def get_versions():
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
@@ -13,9 +14,12 @@ def get_versions():
 
     cfg = get_config()
     verbose = cfg.verbose
-    ver = git_versions_from_keywords(get_keywords(), cfg.tag_prefix, verbose)
-    if ver:
-        return ver
+
+    try:
+        return git_versions_from_keywords(get_keywords(), cfg.tag_prefix,
+                                          verbose)
+    except NotThisMethod:
+        pass
 
     try:
         root = os.path.realpath(__file__)
@@ -29,8 +33,16 @@ def get_versions():
                 "dirty": None,
                 "error": "unable to find root of source tree"}
 
-    return (git_versions_from_vcs(cfg.tag_prefix, root, verbose)
-            or versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
-            or {"version": "0+unknown", "full-revisionid": None,
-                "dirty": None,
-                "error": "unable to compute version"})
+    try:
+        return git_versions_from_vcs(cfg.tag_prefix, root, verbose)
+    except NotThisMethod:
+        pass
+
+    try:
+        return versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
+    except NotThisMethod:
+        pass
+
+    return {"version": "0+unknown", "full-revisionid": None,
+            "dirty": None,
+            "error": "unable to compute version"}
