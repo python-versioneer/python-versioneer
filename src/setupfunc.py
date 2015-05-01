@@ -10,17 +10,19 @@ del get_versions
 
 
 def do_setup():
-    print(" creating %s" % versionfile_source)
-    with open(versionfile_source, "w") as f:
-        assert VCS is not None, "please set versioneer.VCS"
-        LONG = LONG_VERSION_PY[VCS]
+    config = get_config()
+    print(" creating %s" % config.versionfile_source)
+    with open(config.versionfile_source, "w") as f:
+        assert config.VCS is not None, "please set versioneer.VCS"
+        LONG = LONG_VERSION_PY[config.VCS]
         f.write(LONG % {"DOLLAR": "$",
-                        "TAG_PREFIX": tag_prefix,
-                        "PARENTDIR_PREFIX": parentdir_prefix,
-                        "VERSIONFILE_SOURCE": versionfile_source,
+                        "TAG_PREFIX": config.tag_prefix,
+                        "PARENTDIR_PREFIX": config.parentdir_prefix,
+                        "VERSIONFILE_SOURCE": config.versionfile_source,
                         })
 
-    ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
+    ipy = os.path.join(os.path.dirname(config.versionfile_source),
+                       "__init__.py")
     if os.path.exists(ipy):
         try:
             with open(ipy, "r") as f:
@@ -61,18 +63,18 @@ def do_setup():
             f.write("include versioneer.py\n")
     else:
         print(" 'versioneer.py' already in MANIFEST.in")
-    if versionfile_source not in simple_includes:
+    if config.versionfile_source not in simple_includes:
         print(" appending versionfile_source ('%s') to MANIFEST.in" %
-              versionfile_source)
+              config.versionfile_source)
         with open(manifest_in, "a") as f:
-            f.write("include %s\n" % versionfile_source)
+            f.write("include %s\n" % config.versionfile_source)
     else:
         print(" versionfile_source already in MANIFEST.in")
 
     # Make VCS-specific changes. For git, this means creating/changing
     # .gitattributes to mark _version.py for export-time keyword
     # substitution.
-    do_vcs_install(manifest_in, versionfile_source, ipy)
+    do_vcs_install(manifest_in, config.versionfile_source, ipy)
 
 
 def scan_setup_py():
