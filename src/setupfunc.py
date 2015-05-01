@@ -5,6 +5,41 @@ def get_root(): pass # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
 def do_vcs_install(): pass # --STRIP DURING BUILD
 
+CONFIG_ERROR = """
+setup.cfg is missing the necessary Versioneer configuration. You need
+a section like:
+
+ [versioneer]
+ VCS = git
+ versionfile_source = src/myproject/_version.py
+ versionfile_build = myproject/_version.py
+ tag_prefix = ""
+ parentdir_prefix = myproject-
+
+You will also need to edit your setup.py to use the results:
+
+ import versioneer
+ setup(version=versioneer.get_version(),
+       cmdclass=versioneer.get_cmdclass(), ...)
+
+Please read the docstring in ./versioneer.py for configuration instructions,
+edit setup.cfg, and re-run the installer or 'python versioneer.py setup'.
+"""
+
+SAMPLE_CONFIG = """
+# See the docstring in versioneer.py for instructions. Note that you must
+# re-run 'versioneer.py setup' after changing this section, and commit the
+# resulting files.
+
+[versioneer]
+#VCS = git
+#versionfile_source =
+#versionfile_build =
+#tag_prefix =
+#parentdir_prefix =
+
+"""
+
 INIT_PY_SNIPPET = """
 from ._version import get_versions
 __version__ = get_versions()['version']
@@ -13,7 +48,18 @@ del get_versions
 
 
 def do_setup():
-    cfg = get_config()
+    try:
+        cfg = get_config()
+    except (EnvironmentError, configparser.NoSectionError,
+            configparser.NoOptionError) as e:
+        if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
+            print("Adding sample versioneer config to setup.cfg",
+                  file=sys.stderr)
+            with open(find_setup_cfg(), "a") as f:
+                f.write(SAMPLE_CONFIG)
+        print(CONFIG_ERROR, file=sys.stderr)
+        return 1
+
     print(" creating %s" % cfg.versionfile_source)
     with open(cfg.versionfile_source, "w") as f:
         assert cfg.VCS is not None, "please set versioneer.VCS"
@@ -78,10 +124,13 @@ def do_setup():
     # .gitattributes to mark _version.py for export-time keyword
     # substitution.
     do_vcs_install(manifest_in, cfg.versionfile_source, ipy)
+    return 0
 
 
 def scan_setup_py():
     found = set()
+    setters = False
+    errors = 0
     with open("setup.py", "r") as f:
         for line in f.readlines():
             if "import versioneer" in line:
@@ -90,6 +139,10 @@ def scan_setup_py():
                 found.add("cmdclass")
             if "versioneer.get_version()" in line:
                 found.add("get_version")
+            if "versioneer.VCS" in line:
+                setters = True
+            if "versioneer.versionfile_source" in line:
+                setters = True
     if len(found) != 3:
         print("")
         print("Your setup.py appears to be missing some important items")
@@ -100,9 +153,19 @@ def scan_setup_py():
         print(" setup( version=versioneer.get_version(),")
         print("        cmdclass=versioneer.get_cmdclass(),  ...)")
         print("")
+        errors += 1
+    if setters:
+        print("You should remove lines like 'versioneer.vcs = ' and")
+        print("'versioneer.versionfile_source = ' . This configuration")
+        print("now lives in setup.cfg, and should be removed from setup.py")
+        print("")
+        errors += 1
+    return errors
 
 if __name__ == "__main__":
     cmd = sys.argv[1]
     if cmd == "setup":
-        do_setup()
-        scan_setup_py()
+        errors = do_setup()
+        errors += scan_setup_py()
+        if errors:
+            sys.exit(1)
