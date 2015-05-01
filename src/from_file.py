@@ -13,7 +13,7 @@ version_json = '''
 '''  # END VERSION_JSON
 
 
-def get_versions(verbose=False):
+def get_versions():
     return json.loads(version_json)
 """
 

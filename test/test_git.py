@@ -70,7 +70,7 @@ class ParseGitDescribe(unittest.TestCase):
 class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
         return git_versions_from_keywords({"refnames": refnames, "full": full},
-                                          prefix)
+                                          prefix, False)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")

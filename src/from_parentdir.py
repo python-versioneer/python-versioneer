@@ -1,6 +1,6 @@
 
 
-def versions_from_parentdir(parentdir_prefix, root, verbose=False):
+def versions_from_parentdir(parentdir_prefix, root, verbose):
     # Source tarballs conventionally unpack into a directory that includes
     # both the project name and a version string.
     dirname = os.path.basename(root)

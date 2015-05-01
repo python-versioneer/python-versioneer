@@ -24,7 +24,7 @@ def git_get_keywords(versionfile_abs):
     return keywords
 
 
-def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
+def git_versions_from_keywords(keywords, tag_prefix, verbose):
     if not keywords:
         return {}  # keyword-finding function failed to find keywords
     refnames = keywords["refnames"].strip()

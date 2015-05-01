@@ -10,9 +10,10 @@ def vcs_function(vcs, suffix):
     return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 
-def get_versions(verbose=False):
+def get_versions():
     # returns dict with two keys: 'version' and 'full'
     cfg = get_config()
+    verbose = cfg.verbose
     assert cfg.versionfile_source is not None, \
         "please set versioneer.versionfile_source"
     assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
@@ -38,7 +39,7 @@ def get_versions(verbose=False):
     versions_from_keywords_f = vcs_function(cfg.VCS, "versions_from_keywords")
     if get_keywords_f and versions_from_keywords_f:
         vcs_keywords = get_keywords_f(versionfile_abs)
-        ver = versions_from_keywords_f(vcs_keywords, cfg.tag_prefix)
+        ver = versions_from_keywords_f(vcs_keywords, cfg.tag_prefix, verbose)
         if ver:
             if verbose:
                 print("got version from expanded keyword %s" % ver)
@@ -71,5 +72,5 @@ def get_versions(verbose=False):
             "dirty": None, "error": "unable to compute version"}
 
 
-def get_version(verbose=False):
-    return get_versions(verbose=verbose)["version"]
+def get_version():
+    return get_versions()["version"]

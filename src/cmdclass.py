@@ -12,14 +12,14 @@ class cmd_version(Command):
         pass
 
     def run(self):
-        ver = get_version(verbose=True)
+        ver = get_version()
         print("Version is currently: %s" % ver)
 
 
 class cmd_build(_build):
     def run(self):
         cfg = get_config()
-        versions = get_versions(verbose=True)
+        versions = get_versions()
         _build.run(self)
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
@@ -35,7 +35,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
     class cmd_build_exe(_build_exe):
         def run(self):
             cfg = get_config()
-            versions = get_versions(verbose=True)
+            versions = get_versions()
             target_versionfile = cfg.versionfile_source
             print("UPDATING %s" % target_versionfile)
             write_to_version_file(target_versionfile, versions)
@@ -54,7 +54,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
 
 class cmd_sdist(_sdist):
     def run(self):
-        versions = get_versions(verbose=True)
+        versions = get_versions()
         self._versioneer_generated_versions = versions
         # unless we update this, the command will keep using the old version
         self.distribution.metadata.version = versions["version"]

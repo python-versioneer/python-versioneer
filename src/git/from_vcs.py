@@ -103,7 +103,7 @@ def render(pieces):  # style=pep440
             "dirty": pieces["dirty"], "error": None}
 
 
-def git_versions_from_vcs(tag_prefix, root, verbose=False):
+def git_versions_from_vcs(tag_prefix, root, verbose):
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
