@@ -55,35 +55,44 @@ SAMPLE_CONFIG = """
 
 """
 
-config = configparser.SafeConfigParser()
-try:
-    setup_cfg = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "setup.cfg")
-except NameError:
-    setup_cfg = "setup.cfg"
-try:
-    with open(setup_cfg, "r") as f:
-        config.readfp(f)
-    VCS = config.get("versioneer", "VCS")
-except (EnvironmentError, configparser.NoSectionError,
-        configparser.NoOptionError) as e:
-    if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
-        print("Adding sample versioneer config to setup.cfg", file=sys.stderr)
-        with open(setup_cfg, "a") as f:
-            f.write(SAMPLE_CONFIG)
-    print(CONFIG_ERROR, file=sys.stderr)
-    sys.exit(1)
+class VersioneerConfig:
+    pass
 
 
-def get_config_or_none(config, name):
-    if config.has_option("versioneer", name):
-        return config.get("versioneer", name)
-    return None
-versionfile_source = get_config_or_none(config, "versionfile_source")
-versionfile_build = get_config_or_none(config, "versionfile_build")
-tag_prefix = get_config_or_none(config, "tag_prefix")
-parentdir_prefix = get_config_or_none(config, "parentdir_prefix")
-del setup_cfg, config, get_config_or_none
+def get_config():
+    parser = configparser.SafeConfigParser()
+    try:
+        setup_cfg = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "setup.cfg")
+    except NameError:
+        setup_cfg = "setup.cfg"
+    try:
+        with open(setup_cfg, "r") as f:
+            parser.readfp(f)
+        VCS = parser.get("versioneer", "VCS")
+    except (EnvironmentError, configparser.NoSectionError,
+            configparser.NoOptionError) as e:
+        if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
+            print("Adding sample versioneer config to setup.cfg",
+                  file=sys.stderr)
+            with open(setup_cfg, "a") as f:
+                f.write(SAMPLE_CONFIG)
+        print(CONFIG_ERROR, file=sys.stderr)
+        sys.exit(1)
+
+    def get(parser, name):
+        if parser.has_option("versioneer", name):
+            return parser.get("versioneer", name)
+        return None
+    config = VersioneerConfig()
+    config.VCS = VCS
+    config.versionfile_source = get(parser, "versionfile_source")
+    config.versionfile_build = get(parser, "versionfile_build")
+    config.tag_prefix = get(parser, "tag_prefix")
+    config.parentdir_prefix = get(parser, "parentdir_prefix")
+    config.verbose = get(parser, "verbose")
+    return config
+
 
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}
