@@ -5,8 +5,21 @@ import os, sys, base64
 VERSIONEER_b64 = """
 @VERSIONEER-INSTALLER@
 """
-
 newver = "@VERSIONEER-VERSION@"
+
+if len(sys.argv) < 2:
+    print("Usage: versioneer install")
+    sys.exit(1)
+
+command = sys.argv[1]
+if command == "version":
+    print("versioneer (installer) %s" % newver)
+    sys.exit(0)
+
+if command != "install":
+    print("Usage: versioneer install")
+    sys.exit(1)
+
 v = base64.b64decode(VERSIONEER_b64)
 if os.path.exists("versioneer.py"):
     for line in open("versioneer.py").readlines()[:5]:

@@ -64,7 +64,7 @@ def generate_long_version_py(VCS):
         s.write(get(piece, unquote=True, do_strip=True))
     return s.getvalue()
 
-def generate_versioneer():
+def generate_versioneer_py():
     s = io.StringIO()
     s.write(get("src/header.py", add_ver=True, do_readme=True))
     s.write(get("src/subprocess_helper.py", do_strip=True))
@@ -98,7 +98,7 @@ class make_versioneer(Command):
         pass
     def run(self):
         with open("versioneer.py", "w") as f:
-            f.write(generate_versioneer().decode("utf8"))
+            f.write(generate_versioneer_py().decode("utf8"))
         return 0
 
 class make_long_version_py_git(Command):
@@ -123,7 +123,7 @@ class make_long_version_py_git(Command):
 
 class my_build_scripts(build_scripts):
     def run(self):
-        v = generate_versioneer()
+        v = generate_versioneer_py()
         v_b64 = base64.b64encode(v).decode("ascii")
         lines = [v_b64[i:i+60] for i in range(0, len(v_b64), 60)]
         v_b64 = "\n".join(lines)+"\n"
@@ -133,7 +133,7 @@ class my_build_scripts(build_scripts):
         s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
 
         tempdir = tempfile.mkdtemp()
-        installer = os.path.join(tempdir, "versioneer-installer")
+        installer = os.path.join(tempdir, "versioneer")
         with open(installer, "w") as f:
             f.write(s)
 

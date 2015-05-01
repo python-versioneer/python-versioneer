@@ -24,7 +24,7 @@ system, and maybe making new tarballs.
 
 * `pip install versioneer` to somewhere to your $PATH
 * add a `[versioneer]` section to your setup.cfg (see below)
-* run `versioneer-installer` in your source tree, commit the results
+* run `versioneer install` in your source tree, commit the results
 
 ## Version Identifiers
 
@@ -131,8 +131,9 @@ First, decide on values for the following configuration variables:
   all unpacked tarball filenames. If your tarball unpacks into
   'myproject-1.2.0', this should be 'myproject-'.
 
-This tool provides one script, named `versioneer-installer`. That script does
-one thing: write a copy of `versioneer.py` into the current directory.
+This tool provides one script, named `versioneer`. That script has one mode,
+"install", which writes a copy of `versioneer.py` into the current directory
+and runs `versioneer.py setup` to finish the installation.
 
 To versioneer-enable your project:
 
@@ -148,7 +149,7 @@ To versioneer-enable your project:
   parentdir_prefix = myproject-
   ````
 
-* 2: Run `versioneer-installer`. This will do the following:
+* 2: Run `versioneer install`. This will do the following:
 
   * copy `versioneer.py` into the top of your source tree
   * create `_version.py` in the right place (`versionfile_source`)
@@ -164,8 +165,8 @@ To versioneer-enable your project:
         cmdclass=versioneer.get_cmdclass(),
 
 * 4: commit these changes to your VCS. To make sure you won't forget,
-  `versioneer-installer` will mark everything it touched for addition using
-  `git add`.
+  `versioneer install` will mark everything it touched for addition using
+  `git add`. Don't forget to add `setup.py` and `setup.cfg` too.
 
 ## Post-Installation Usage
 
@@ -242,7 +243,7 @@ To upgrade your project to a new release of Versioneer, do the following:
 * install the new Versioneer (`pip install -U versioneer` or equivalent)
 * edit `setup.cfg`, if necessary, to include any new configuration settings
   indicated by the release notes
-* re-run `versioneer-installer` in your source tree, to replace
+* re-run `versioneer install` in your source tree, to replace
   `SRC/_version.py`
 * commit any changed files
 
