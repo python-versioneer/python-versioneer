@@ -6,8 +6,7 @@ def get_versions(verbose=False):
     # case we can only use expanded keywords.
 
     cfg = get_config()
-    keywords = {"refnames": git_refnames, "full": git_full}
-    ver = git_versions_from_keywords(keywords, cfg.tag_prefix, verbose)
+    ver = git_versions_from_keywords(get_keywords(), cfg.tag_prefix, verbose)
     if ver:
         return ver
 

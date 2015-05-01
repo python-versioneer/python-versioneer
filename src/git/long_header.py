@@ -13,9 +13,16 @@ import re
 import subprocess
 import sys
 
-# these strings will be replaced by git during git-archive
-git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
-git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
+
+def get_keywords():
+    # these strings will be replaced by git during git-archive.
+    # setup.py/versioneer.py will grep for the variable names, so they must
+    # each be defined on a line of their own. _version.py will just call
+    # get_keywords().
+    git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
+    git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
+    keywords = {"refnames": git_refnames, "full": git_full}
+    return keywords
 
 
 class VersioneerConfig:
