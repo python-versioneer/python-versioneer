@@ -16,6 +16,11 @@ if sys.platform == "win32":
     GITS = ["git.cmd", "git.exe"]
 
 class ParseGitDescribe(unittest.TestCase):
+    def setUp(self):
+        self.fakeroot = tempfile.mkdtemp()
+        self.fakegit = os.path.join(self.fakeroot, ".git")
+        os.mkdir(self.fakegit)
+
     def test_pieces(self):
         def pv(git_describe, do_error=False, expect_pieces=False):
             def fake_run_command(exes, args, cwd=None):
@@ -30,8 +35,9 @@ class ParseGitDescribe(unittest.TestCase):
                 if args[0] == "rev-list":
                     return "42\n"
                 self.fail("git called in weird way: %s" % (args,))
-            return from_vcs.get_git_versions_from_vcs(
-                "v", None, verbose=False, run_command=fake_run_command)
+            return from_vcs.git_pieces_from_vcs(
+                "v", self.fakeroot, verbose=False,
+                run_command=fake_run_command)
         self.assertRaises(from_vcs.NotThisMethod,
                           pv, "ignored", do_error="describe")
         self.assertRaises(from_vcs.NotThisMethod,
@@ -66,6 +72,10 @@ class ParseGitDescribe(unittest.TestCase):
                           "distance": 1,
                           "long": "longlong",
                           "short": "1f"})
+
+    def tearDown(self):
+        os.rmdir(self.fakegit)
+        os.rmdir(self.fakeroot)
 
 
 class Keywords(unittest.TestCase):

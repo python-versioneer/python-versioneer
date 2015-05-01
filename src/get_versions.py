@@ -2,6 +2,7 @@ import os, sys # --STRIP DURING BUILD
 def get_config(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
+def render(): pass # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 def get_root():
@@ -36,7 +37,7 @@ def get_versions():
 
     get_keywords_f = vcs_function(cfg.VCS, "get_keywords")
     versions_from_keywords_f = vcs_function(cfg.VCS, "versions_from_keywords")
-    versions_from_vcs_f = vcs_function(cfg.VCS, "versions_from_vcs")
+    pieces_from_vcs_f = vcs_function(cfg.VCS, "pieces_from_vcs")
 
     # extract version from first of: _version.py, VCS command (e.g. 'git
     # describe'), parentdir. This is meant to work for developers using a
@@ -63,9 +64,10 @@ def get_versions():
     except NotThisMethod:
         pass
 
-    if versions_from_vcs_f:
+    if pieces_from_vcs_f:
         try:
-            ver = versions_from_vcs_f(cfg.tag_prefix, root, verbose)
+            pieces = pieces_from_vcs_f(cfg.tag_prefix, root, verbose)
+            ver = render(pieces)
             if verbose:
                 print("got version from VCS %s" % ver)
             return ver

@@ -1,13 +1,17 @@
 import os, sys, re # --STRIP DURING BUILD
 def run_command(): pass # --STRIP DURING BUILD
-def render(): pass # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
-def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
+def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     # this runs 'git' from the root of the source tree. This only gets called
     # if the git-archive 'subst' keywords were *not* expanded, and
     # _version.py hasn't already been rewritten with a short version string,
     # meaning we're inside a checked out source tree.
+
+    if not os.path.exists(os.path.join(root, ".git")):
+        if verbose:
+            print("no .git in %s" % root)
+        raise NotThisMethod("no .git directory")
 
     GITS = ["git"]
     if sys.platform == "win32":
@@ -77,14 +81,4 @@ def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
         pieces["distance"] = int(count_out)  # total number of commits
 
     return pieces
-
-
-def git_versions_from_vcs(tag_prefix, root, verbose):
-    if not os.path.exists(os.path.join(root, ".git")):
-        if verbose:
-            print("no .git in %s" % root)
-        raise NotThisMethod("no .git directory")
-    pieces = get_git_versions_from_vcs(tag_prefix, root, verbose, run_command)
-    assert pieces
-    return render(pieces)
 

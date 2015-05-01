@@ -2,9 +2,10 @@ import os # --STRIP DURING BUILD
 def get_config(): pass # --STRIP DURING BUILD
 def get_keywords(): pass # --STRIP DURING BUILD
 def git_versions_from_keywords(): pass # --STRIP DURING BUILD
-def git_versions_from_vcs(): pass # --STRIP DURING BUILD
+def git_pieces_from_vcs(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+def render(): pass # --STRIP DURING BUILD
 
 def get_versions():
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
@@ -34,7 +35,8 @@ def get_versions():
                 "error": "unable to find root of source tree"}
 
     try:
-        return git_versions_from_vcs(cfg.tag_prefix, root, verbose)
+        pieces = git_pieces_from_vcs(cfg.tag_prefix, root, verbose)
+        return render(pieces)
     except NotThisMethod:
         pass
 
