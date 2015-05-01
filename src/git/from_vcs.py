@@ -1,6 +1,5 @@
-import os # --STRIP DURING BUILD
-import sys # --STRIP DURING BUILD
-import re # --STRIP DURING BUILD
+import os, sys, re # --STRIP DURING BUILD
+def run_command(): pass # --STRIP DURING BUILD
 
 def get_git_versions_from_vcs(tag_prefix, root, verbose, run_command):
     # this runs 'git' from the root of the source tree. This only gets called

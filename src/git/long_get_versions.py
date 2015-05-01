@@ -1,3 +1,9 @@
+import os # --STRIP DURING BUILD
+def get_config(): pass # --STRIP DURING BUILD
+def get_keywords(): pass # --STRIP DURING BUILD
+def git_versions_from_keywords(): pass # --STRIP DURING BUILD
+def git_versions_from_vcs(): pass # --STRIP DURING BUILD
+def versions_from_parentdir(): pass # --STRIP DURING BUILD
 
 def get_versions():
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have

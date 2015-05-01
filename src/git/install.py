@@ -1,3 +1,5 @@
+import sys # --STRIP DURING BUILD
+def run_command(): pass # --STRIP DURING BUILD
 
 def do_vcs_install(manifest_in, versionfile_source, ipy):
     GITS = ["git"]

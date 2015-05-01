@@ -1,3 +1,7 @@
+import os, sys # --STRIP DURING BUILD
+def get_config(): pass # --STRIP DURING BUILD
+def versions_from_file(): pass # --STRIP DURING BUILD
+def versions_from_parentdir(): pass # --STRIP DURING BUILD
 
 def get_root():
     try:

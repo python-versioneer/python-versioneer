@@ -1,6 +1,9 @@
 
-import os  # --STRIP DURING BUILD
-import sys  # --STRIP DURING BUILD
+import os, sys  # --STRIP DURING BUILD
+def get_config(): pass # --STRIP DURING BUILD
+def get_root(): pass # --STRIP DURING BUILD
+LONG_VERSION_PY = {} # --STRIP DURING BUILD
+def do_vcs_install(): pass # --STRIP DURING BUILD
 
 INIT_PY_SNIPPET = """
 from ._version import get_versions

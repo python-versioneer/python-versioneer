@@ -1,3 +1,4 @@
+import os # --STRIP DURING BUILD
 
 
 def versions_from_parentdir(parentdir_prefix, root, verbose):

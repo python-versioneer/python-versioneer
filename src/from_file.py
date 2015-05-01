@@ -17,7 +17,7 @@ def get_versions():
     return json.loads(version_json)
 """
 
-import sys # --STRIP DURING BUILD
+import os # --STRIP DURING BUILD
 import json # --STRIP DURING BUILD
 import re # --STRIP DURING BUILD
 
