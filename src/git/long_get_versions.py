@@ -36,7 +36,7 @@ def get_versions():
 
     try:
         pieces = git_pieces_from_vcs(cfg.tag_prefix, root, verbose)
-        return render(pieces)
+        return render(pieces, cfg.style)
     except NotThisMethod:
         pass
 

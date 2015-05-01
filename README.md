@@ -84,6 +84,10 @@ First, decide on values for the following configuration variables:
 
 * `VCS`: the version control system you use. Currently accepts "git".
 
+* `style`: the style of version string to be produced. See "Styles" below for
+  details. Defaults to "pep440", which looks like
+  `TAG[+DISTANCE.gSHORTHASH[.dirty]]`.
+
 * `versionfile_source`:
 
   A project-relative pathname into which the generated version strings should
@@ -143,6 +147,7 @@ To versioneer-enable your project:
   ````
   [versioneer]
   VCS = git
+  style = pep440
   versionfile_source = src/myproject/_version.py
   versionfile_build = myproject/_version.py
   tag_prefix = ""
@@ -200,15 +205,11 @@ import the top-level `versioneer.py` and run `get_versions()`.
 Both functions return a dictionary with different flavors of version
 information:
 
-* `['version']`: A condensed PEP440-compliant string, equal to the
-  un-prefixed tag name for actual releases, and containing an additional
-  "local version" section with more detail for in-between builds. For Git,
-  this is TAG[+DISTANCE.gHEX[.dirty]] , using information from `git describe
-  --tags --dirty --always`. For example "0.11+2.g1076c97.dirty" indicates
-  that the tree is like the "1076c97" commit but has uncommitted changes
-  (".dirty"), and that this commit is two revisions ("+2") beyond the "0.11"
-  tag. For released software (exactly equal to a known tag), the identifier
-  will only contain the stripped tag, e.g. "0.11".
+* `['version']`: A condensed version string, rendered using the selected
+  style. This is the most commonly used value for the project's version
+  string. The default "pep440" style yields strings like `0.11`,
+  `0.11+2.g1076c97`, or `0.11+2.g1076c97.dirty`. See the "Styles" section
+  below for alternative styles.
 
 * `['full-revisionid']`: detailed revision identifier. For Git, this is the
   full SHA1 commit id, e.g. "1076c978a8d3cfc70f408fe5974aa6c092c949ac".
@@ -235,6 +236,25 @@ version in `YOURPROJECT.__version__`:
     from ._version import get_versions
     __version__ = get_versions()['version']
     del get_versions
+
+## Styles
+
+The setup.cfg `style=` configuration controls how the VCS information is
+rendered into a version string.
+
+The default style, "pep440", produces a PEP440-compliant string, equal to the
+un-prefixed tag name for actual releases, and containing an additional "local
+version" section with more detail for in-between builds. For Git, this is
+TAG[+DISTANCE.gHEX[.dirty]] , using information from `git describe --tags
+--dirty --always`. For example "0.11+2.g1076c97.dirty" indicates that the
+tree is like the "1076c97" commit but has uncommitted changes (".dirty"), and
+that this commit is two revisions ("+2") beyond the "0.11" tag. For released
+software (exactly equal to a known tag), the identifier will only contain the
+stripped tag, e.g. "0.11".
+
+Other styles are available. See details.md in the Versioneer source tree for
+descriptions.
+
 
 ## Updating Versioneer
 

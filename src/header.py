@@ -51,6 +51,7 @@ def get_config():
         return None
     cfg = VersioneerConfig()
     cfg.VCS = VCS
+    cfg.style = get(parser, "style") or ""
     cfg.versionfile_source = get(parser, "versionfile_source")
     cfg.versionfile_build = get(parser, "versionfile_build")
     cfg.tag_prefix = get(parser, "tag_prefix")

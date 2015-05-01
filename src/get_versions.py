@@ -67,7 +67,7 @@ def get_versions():
     if pieces_from_vcs_f:
         try:
             pieces = pieces_from_vcs_f(cfg.tag_prefix, root, verbose)
-            ver = render(pieces)
+            ver = render(pieces, cfg.style)
             if verbose:
                 print("got version from VCS %s" % ver)
             return ver

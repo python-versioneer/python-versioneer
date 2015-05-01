@@ -55,6 +55,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
                 assert cfg.VCS is not None, "please set versioneer.VCS"
                 LONG = LONG_VERSION_PY[cfg.VCS]
                 f.write(LONG % {"DOLLAR": "$",
+                                "STYLE": cfg.style,
                                 "TAG_PREFIX": cfg.tag_prefix,
                                 "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                                 "VERSIONFILE_SOURCE": cfg.versionfile_source,

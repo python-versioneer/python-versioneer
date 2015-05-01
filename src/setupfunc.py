@@ -11,6 +11,7 @@ a section like:
 
  [versioneer]
  VCS = git
+ style = pep440
  versionfile_source = src/myproject/_version.py
  versionfile_build = myproject/_version.py
  tag_prefix = ""
@@ -33,6 +34,7 @@ SAMPLE_CONFIG = """
 
 [versioneer]
 #VCS = git
+#style = pep440
 #versionfile_source =
 #versionfile_build =
 #tag_prefix =
@@ -65,6 +67,7 @@ def do_setup():
         assert cfg.VCS is not None, "please set versioneer.VCS"
         LONG = LONG_VERSION_PY[cfg.VCS]
         f.write(LONG % {"DOLLAR": "$",
+                        "STYLE": cfg.style,
                         "TAG_PREFIX": cfg.tag_prefix,
                         "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                         "VERSIONFILE_SOURCE": cfg.versionfile_source,

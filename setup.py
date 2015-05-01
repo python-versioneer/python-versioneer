@@ -117,6 +117,7 @@ class make_long_version_py_git(Command):
         with open("git_version.py", "w") as f:
             f.write(long_version %
                     {"DOLLAR": "$",
+                     "STYLE": "pep440",
                      "TAG_PREFIX": "tag-",
                      "PARENTDIR_PREFIX": "parentdir_prefix",
                      "VERSIONFILE_SOURCE": "versionfile_source",

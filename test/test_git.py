@@ -1,5 +1,6 @@
 #! /usr/bin/python
 
+from __future__ import print_function
 import os, sys
 import shutil
 import tarfile
@@ -8,6 +9,7 @@ import tempfile
 from pkg_resources import parse_version, SetuptoolsLegacyVersion
 
 sys.path.insert(0, "src")
+from render import render
 from git import from_vcs, from_keywords
 from subprocess_helper import run_command
 
@@ -121,6 +123,144 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
+
+expected_renders = """
+closest-tag: 1.0
+distance: 0
+dirty: False
+pep440: 1.0
+pep440-pre: 1.0
+pep440-post: 1.0
+pep440-old: 1.0
+git-describe: 1.0
+git-describe-long: 1.0-0-g250b7ca
+
+closest-tag: 1.0
+distance: 0
+dirty: True
+pep440: 1.0+0.g250b7ca.dirty
+pep440-pre: 1.0
+pep440-post: 1.0.post0.dev0+g250b7ca
+pep440-old: 1.0.post0.dev0
+git-describe: 1.0-dirty
+git-describe-long: 1.0-0-g250b7ca-dirty
+
+closest-tag: 1.0
+distance: 1
+dirty: False
+pep440: 1.0+1.g250b7ca
+pep440-pre: 1.0.post.dev1
+pep440-post: 1.0.post1+g250b7ca
+pep440-old: 1.0.post1
+git-describe: 1.0-1-g250b7ca
+git-describe-long: 1.0-1-g250b7ca
+
+closest-tag: 1.0
+distance: 1
+dirty: True
+pep440: 1.0+1.g250b7ca.dirty
+pep440-pre: 1.0.post.dev1
+pep440-post: 1.0.post1.dev0+g250b7ca
+pep440-old: 1.0.post1.dev0
+git-describe: 1.0-1-g250b7ca-dirty
+git-describe-long: 1.0-1-g250b7ca-dirty
+
+
+closest-tag: 1.0+plus
+distance: 1
+dirty: False
+pep440: 1.0+plus.1.g250b7ca
+pep440-pre: 1.0+plus.post.dev1
+pep440-post: 1.0+plus.post1.g250b7ca
+pep440-old: 1.0+plus.post1
+git-describe: 1.0+plus-1-g250b7ca
+git-describe-long: 1.0+plus-1-g250b7ca
+
+closest-tag: 1.0+plus
+distance: 1
+dirty: True
+pep440: 1.0+plus.1.g250b7ca.dirty
+pep440-pre: 1.0+plus.post.dev1
+pep440-post: 1.0+plus.post1.dev0.g250b7ca
+pep440-old: 1.0+plus.post1.dev0
+git-describe: 1.0+plus-1-g250b7ca-dirty
+git-describe-long: 1.0+plus-1-g250b7ca-dirty
+
+
+closest-tag: None
+distance: 1
+dirty: False
+pep440: 0+untagged.1.g250b7ca
+pep440-pre: 0.post.dev1
+pep440-post: 0.post1+g250b7ca
+pep440-old: 0.post1
+git-describe: 250b7ca
+git-describe-long: 250b7ca
+
+closest-tag: None
+distance: 1
+dirty: True
+pep440: 0+untagged.1.g250b7ca.dirty
+pep440-pre: 0.post.dev1
+pep440-post: 0.post1.dev0+g250b7ca
+pep440-old: 0.post1.dev0
+git-describe: 250b7ca-dirty
+git-describe-long: 250b7ca-dirty
+
+"""
+
+class RenderPieces(unittest.TestCase):
+    def do_render(self, pieces):
+        out = {}
+        for style in ["pep440", "pep440-pre", "pep440-post", "pep440-old",
+                      "git-describe", "git-describe-long"]:
+            out[style] = render(pieces, style)["version"]
+        DEFAULT = "pep440"
+        self.assertEqual(render(pieces, ""), render(pieces, DEFAULT))
+        self.assertEqual(render(pieces, "default"), render(pieces, DEFAULT))
+        return out
+
+    def parse_expected(self):
+        base_pieces = {"long": "250b7ca731388d8f016db2e06ab1d6289486424b",
+                       "short": "250b7ca",
+                       "error": None}
+        more_pieces = {}
+        expected = {}
+        for line in expected_renders.splitlines():
+            line = line.strip()
+            if not line:
+                if more_pieces and expected:
+                    pieces = base_pieces.copy()
+                    pieces.update(more_pieces)
+                    yield (pieces, expected)
+                more_pieces = {}
+                expected = {}
+                continue
+            name, value = line.split(":")
+            name = name.strip()
+            value = value.strip()
+            if name == "distance":
+                more_pieces["distance"] = int(value)
+            elif name == "dirty":
+                more_pieces["dirty"] = bool(value.lower() == "true")
+            elif name == "closest-tag":
+                more_pieces["closest-tag"] = value
+                if value == "None":
+                    more_pieces["closest-tag"] = None
+            else:
+                expected[name] = value
+        if more_pieces and expected:
+            pieces = base_pieces.copy()
+            pieces.update(more_pieces)
+            yield (pieces, expected)
+
+    def test_render(self):
+        for (pieces, expected) in self.parse_expected():
+            got = self.do_render(pieces)
+            for key in expected:
+                self.assertEqual(got[key], expected[key],
+                                 (pieces, key, got[key], expected[key]))
+
 
 VERBOSE = False
 
