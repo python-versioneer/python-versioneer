@@ -23,5 +23,21 @@ tag_prefix = None
 parentdir_prefix = None
 VCS = None
 
+
+class VersioneerConfig:
+    pass
+
+
+def get_config():
+    cfg = VersioneerConfig()
+    cfg.VCS = VCS
+    cfg.versionfile_source = versionfile_source
+    cfg.versionfile_build = versionfile_build
+    cfg.tag_prefix = tag_prefix
+    cfg.parentdir_prefix = parentdir_prefix
+    cfg.verbose = False
+    return cfg
+
+
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}

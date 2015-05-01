@@ -17,7 +17,18 @@ import sys
 git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
 git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
 
-# these strings are filled in when 'setup.py versioneer' creates _version.py
-tag_prefix = "%(TAG_PREFIX)s"
-parentdir_prefix = "%(PARENTDIR_PREFIX)s"
-versionfile_source = "%(VERSIONFILE_SOURCE)s"
+
+class VersioneerConfig:
+    pass
+
+
+def get_config():
+    # these strings are filled in when 'setup.py versioneer' creates
+    # _version.py
+    cfg = VersioneerConfig()
+    cfg.VCS = "git"
+    cfg.tag_prefix = "%(TAG_PREFIX)s"
+    cfg.parentdir_prefix = "%(PARENTDIR_PREFIX)s"
+    cfg.versionfile_source = "%(VERSIONFILE_SOURCE)s"
+    cfg.verbose = False
+    return cfg

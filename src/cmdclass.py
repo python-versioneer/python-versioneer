@@ -18,13 +18,14 @@ class cmd_version(Command):
 
 class cmd_build(_build):
     def run(self):
+        cfg = get_config()
         versions = get_versions(verbose=True)
         _build.run(self)
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
-        if versionfile_build:
+        if cfg.versionfile_build:
             target_versionfile = os.path.join(self.build_lib,
-                                              versionfile_build)
+                                              cfg.versionfile_build)
             print("UPDATING %s" % target_versionfile)
             write_to_version_file(target_versionfile, versions)
 
@@ -33,20 +34,21 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
 
     class cmd_build_exe(_build_exe):
         def run(self):
+            cfg = get_config()
             versions = get_versions(verbose=True)
-            target_versionfile = versionfile_source
+            target_versionfile = cfg.versionfile_source
             print("UPDATING %s" % target_versionfile)
             write_to_version_file(target_versionfile, versions)
 
             _build_exe.run(self)
             os.unlink(target_versionfile)
-            with open(versionfile_source, "w") as f:
-                assert VCS is not None, "please set versioneer.VCS"
-                LONG = LONG_VERSION_PY[VCS]
+            with open(cfg.versionfile_source, "w") as f:
+                assert cfg.VCS is not None, "please set versioneer.VCS"
+                LONG = LONG_VERSION_PY[cfg.VCS]
                 f.write(LONG % {"DOLLAR": "$",
-                                "TAG_PREFIX": tag_prefix,
-                                "PARENTDIR_PREFIX": parentdir_prefix,
-                                "VERSIONFILE_SOURCE": versionfile_source,
+                                "TAG_PREFIX": cfg.tag_prefix,
+                                "PARENTDIR_PREFIX": cfg.parentdir_prefix,
+                                "VERSIONFILE_SOURCE": cfg.versionfile_source,
                                 })
 
 
@@ -59,10 +61,11 @@ class cmd_sdist(_sdist):
         return _sdist.run(self)
 
     def make_release_tree(self, base_dir, files):
+        cfg = get_config()
         _sdist.make_release_tree(self, base_dir, files)
         # now locate _version.py in the new base_dir directory (remembering
         # that it may be a hardlink) and replace it with an updated value
-        target_versionfile = os.path.join(base_dir, versionfile_source)
+        target_versionfile = os.path.join(base_dir, cfg.versionfile_source)
         print("UPDATING %s" % target_versionfile)
         write_to_version_file(target_versionfile,
                               self._versioneer_generated_versions)
@@ -87,17 +90,19 @@ class cmd_update_files(Command):
         pass
 
     def run(self):
-        print(" creating %s" % versionfile_source)
-        with open(versionfile_source, "w") as f:
-            assert VCS is not None, "please set versioneer.VCS"
-            LONG = LONG_VERSION_PY[VCS]
+        cfg = get_config()
+        print(" creating %s" % cfg.versionfile_source)
+        with open(cfg.versionfile_source, "w") as f:
+            assert cfg.VCS is not None, "please set versioneer.VCS"
+            LONG = LONG_VERSION_PY[cfg.VCS]
             f.write(LONG % {"DOLLAR": "$",
-                            "TAG_PREFIX": tag_prefix,
-                            "PARENTDIR_PREFIX": parentdir_prefix,
-                            "VERSIONFILE_SOURCE": versionfile_source,
+                            "TAG_PREFIX": cfg.tag_prefix,
+                            "PARENTDIR_PREFIX": cfg.parentdir_prefix,
+                            "VERSIONFILE_SOURCE": cfg.versionfile_source,
                             })
 
-        ipy = os.path.join(os.path.dirname(versionfile_source), "__init__.py")
+        ipy = os.path.join(os.path.dirname(cfg.versionfile_source),
+                           "__init__.py")
         if os.path.exists(ipy):
             try:
                 with open(ipy, "r") as f:
@@ -138,18 +143,18 @@ class cmd_update_files(Command):
                 f.write("include versioneer.py\n")
         else:
             print(" 'versioneer.py' already in MANIFEST.in")
-        if versionfile_source not in simple_includes:
+        if cfg.versionfile_source not in simple_includes:
             print(" appending versionfile_source ('%s') to MANIFEST.in" %
-                  versionfile_source)
+                  cfg.versionfile_source)
             with open(manifest_in, "a") as f:
-                f.write("include %s\n" % versionfile_source)
+                f.write("include %s\n" % cfg.versionfile_source)
         else:
             print(" versionfile_source already in MANIFEST.in")
 
         # Make VCS-specific changes. For git, this means creating/changing
         # .gitattributes to mark _version.py for export-time keyword
         # substitution.
-        do_vcs_install(manifest_in, versionfile_source, ipy)
+        do_vcs_install(manifest_in, cfg.versionfile_source, ipy)
 
 
 def get_cmdclass():
