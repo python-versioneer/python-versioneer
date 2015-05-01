@@ -23,8 +23,8 @@ system, and maybe making new tarballs.
 ## Quick Install
 
 * `pip install versioneer` to somewhere to your $PATH
-* run `versioneer-installer` in your source tree: this installs `versioneer.py`
-* follow the instructions below (also in the `versioneer.py` docstring)
+* add a `[versioneer]` section to your setup.cfg (see below)
+* run `versioneer-installer` in your source tree, commit the results
 
 ## Version Identifiers
 
@@ -91,7 +91,7 @@ First, decide on values for the following configuration variables:
   `__init__.py` file, so it can be imported at runtime. If your project uses
   `src/myproject/__init__.py`, this should be `src/myproject/_version.py`.
   This file should be checked in to your VCS as usual: the copy created below
-  by `setup.py versioneer` will include code that parses expanded VCS
+  by `setup.py setup_versioneer` will include code that parses expanded VCS
   keywords in generated tarballs. The 'build' and 'sdist' commands will
   replace it with a copy that has just the calculated version string.
 
@@ -99,8 +99,8 @@ First, decide on values for the following configuration variables:
   therefore never import `_version.py`), since "setup.py sdist" -based trees
   still need somewhere to record the pre-calculated version strings. Anywhere
   in the source tree should do. If there is a `__init__.py` next to your
-  `_version.py`, the `setup.py versioneer` command (described below) will
-  append some `__version__`-setting assignments, if they aren't already
+  `_version.py`, the `setup.py setup_versioneer` command (described below)
+  will append some `__version__`-setting assignments, if they aren't already
   present.
 
 * `versionfile_build`:
@@ -136,34 +136,36 @@ one thing: write a copy of `versioneer.py` into the current directory.
 
 To versioneer-enable your project:
 
-* 1: Run `versioneer-installer` to copy `versioneer.py` into the top of your
-  source tree.
-
-* 2: add the following lines to the top of your `setup.py`, with the
-  configuration values you decided earlier:
+* 1: Modify your `setup.cfg`, adding a section named `[versioneer]` and
+  populating it with the configuration values you decided earlier:
 
   ````
-  import versioneer
-  versioneer.VCS = 'git'
-  versioneer.versionfile_source = 'src/myproject/_version.py'
-  versioneer.versionfile_build = 'myproject/_version.py'
-  versioneer.tag_prefix = '' # tags are like 1.2.0
-  versioneer.parentdir_prefix = 'myproject-' # dirname like 'myproject-1.2.0'
+  [versioneer]
+  VCS = git
+  versionfile_source = src/myproject/_version.py
+  versionfile_build = myproject/_version.py
+  tag_prefix = ""
+  parentdir_prefix = myproject-
   ````
 
-* 3: add the following arguments to the setup() call in your setup.py:
+* 2: Run `versioneer-installer`. This will do the following:
+
+  * copy `versioneer.py` into the top of your source tree
+  * create `_version.py` in the right place (`versionfile_source`)
+  * modify your `__init__.py` (if one exists next to `_version.py`) to define
+    `__version__` (by calling a function from `_version.py`)
+  * modify your `MANIFEST.in` to include both `versioneer.py` and the
+    generated `_version.py` in sdist tarballs
+
+* 3: add a `import versioneer` to your setup.py, and add the following
+  arguments to the setup() call:
 
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
 
-* 4: now run `setup.py versioneer`, which will create `_version.py`, and will
-  modify your `__init__.py` (if one exists next to `_version.py`) to define
-  `__version__` (by calling a function from `_version.py`). It will also
-  modify your `MANIFEST.in` to include both `versioneer.py` and the generated
-  `_version.py` in sdist tarballs.
-
-* 5: commit these changes to your VCS. To make sure you won't forget,
-  `setup.py versioneer` will mark everything it touched for addition.
+* 4: commit these changes to your VCS. To make sure you won't forget,
+  `versioneer-installer` will mark everything it touched for addition using
+  `git add`.
 
 ## Post-Installation Usage
 
@@ -226,8 +228,8 @@ developers). `version` is suitable for display in an "about" box or a CLI
 `--version` output: it can be easily compared against release notes and lists
 of bugs fixed in various releases.
 
-The `setup.py versioneer` command adds the following text to your
-`__init__.py` to place a basic version in `YOURPROJECT.__version__`:
+The installer adds the following text to your `__init__.py` to place a basic
+version in `YOURPROJECT.__version__`:
 
     from ._version import get_versions
     __version__ = get_versions()['version']
@@ -238,18 +240,17 @@ The `setup.py versioneer` command adds the following text to your
 To upgrade your project to a new release of Versioneer, do the following:
 
 * install the new Versioneer (`pip install -U versioneer` or equivalent)
-* re-run `versioneer-installer` in your source tree to replace your copy of
-  `versioneer.py`
-* edit `setup.py`, if necessary, to include any new configuration settings
+* edit `setup.cfg`, if necessary, to include any new configuration settings
   indicated by the release notes
-* re-run `setup.py versioneer` to replace `SRC/_version.py`
+* re-run `versioneer-installer` in your source tree, to replace
+  `SRC/_version.py`
 * commit any changed files
 
 ### Upgrading from 0.10 to 0.11
 
 You must add a `versioneer.VCS = "git"` to your `setup.py` before re-running
-`setup.py versioneer`. This will enable the use of additional version-control
-systems (SVN, etc) in the future.
+`setup.py setup_versioneer`. This will enable the use of additional
+version-control systems (SVN, etc) in the future.
 
 ### Upgrading from 0.11 to 0.12
 
@@ -262,6 +263,14 @@ hyphen-separated strings like "0.11-2-g1076c97-dirty". 0.14 and beyond use a
 plus-separated "local version" section strings, with dot-separated
 components, like "0.11+2.g1076c97". PEP440-strict tools did not like the old
 format, but should be ok with the new one.
+
+## Upgrading to XXX
+
+Starting with this version, Versioneer is configured with a `[versioneer]`
+section in your `setup.cfg` file. Earlier versions required the `setup.py` to
+set attributes on the `versioneer` module immediately after import. The new
+version will refuse to run (exception during import) until you have provided
+the necessary `setup.cfg` section.
 
 ## Future Directions
 

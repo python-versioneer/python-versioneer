@@ -20,4 +20,5 @@ if os.path.exists("versioneer.py"):
 with open("versioneer.py", "wb") as f:
     f.write(v)
 print("versioneer.py (%s) installed into local tree" % newver)
-print("Now please follow instructions in the docstring.")
+print("Now running 'versioneer.py setup' to install the generated files..")
+os.execl(sys.executable, sys.executable, "versioneer.py", "setup")

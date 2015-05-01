@@ -70,96 +70,9 @@ class cmd_sdist(_sdist):
         write_to_version_file(target_versionfile,
                               self._versioneer_generated_versions)
 
-INIT_PY_SNIPPET = """
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
-"""
-
-
-class cmd_update_files(Command):
-    description = ("install/upgrade Versioneer files: "
-                   "__init__.py SRC/_version.py")
-    user_options = []
-    boolean_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        cfg = get_config()
-        print(" creating %s" % cfg.versionfile_source)
-        with open(cfg.versionfile_source, "w") as f:
-            assert cfg.VCS is not None, "please set versioneer.VCS"
-            LONG = LONG_VERSION_PY[cfg.VCS]
-            f.write(LONG % {"DOLLAR": "$",
-                            "TAG_PREFIX": cfg.tag_prefix,
-                            "PARENTDIR_PREFIX": cfg.parentdir_prefix,
-                            "VERSIONFILE_SOURCE": cfg.versionfile_source,
-                            })
-
-        ipy = os.path.join(os.path.dirname(cfg.versionfile_source),
-                           "__init__.py")
-        if os.path.exists(ipy):
-            try:
-                with open(ipy, "r") as f:
-                    old = f.read()
-            except EnvironmentError:
-                old = ""
-            if INIT_PY_SNIPPET not in old:
-                print(" appending to %s" % ipy)
-                with open(ipy, "a") as f:
-                    f.write(INIT_PY_SNIPPET)
-            else:
-                print(" %s unmodified" % ipy)
-        else:
-            print(" %s doesn't exist, ok" % ipy)
-            ipy = None
-
-        # Make sure both the top-level "versioneer.py" and versionfile_source
-        # (PKG/_version.py, used by runtime code) are in MANIFEST.in, so
-        # they'll be copied into source distributions. Pip won't be able to
-        # install the package without this.
-        manifest_in = os.path.join(get_root(), "MANIFEST.in")
-        simple_includes = set()
-        try:
-            with open(manifest_in, "r") as f:
-                for line in f:
-                    if line.startswith("include "):
-                        for include in line.split()[1:]:
-                            simple_includes.add(include)
-        except EnvironmentError:
-            pass
-        # That doesn't cover everything MANIFEST.in can do
-        # (http://docs.python.org/2/distutils/sourcedist.html#commands), so
-        # it might give some false negatives. Appending redundant 'include'
-        # lines is safe, though.
-        if "versioneer.py" not in simple_includes:
-            print(" appending 'versioneer.py' to MANIFEST.in")
-            with open(manifest_in, "a") as f:
-                f.write("include versioneer.py\n")
-        else:
-            print(" 'versioneer.py' already in MANIFEST.in")
-        if cfg.versionfile_source not in simple_includes:
-            print(" appending versionfile_source ('%s') to MANIFEST.in" %
-                  cfg.versionfile_source)
-            with open(manifest_in, "a") as f:
-                f.write("include %s\n" % cfg.versionfile_source)
-        else:
-            print(" versionfile_source already in MANIFEST.in")
-
-        # Make VCS-specific changes. For git, this means creating/changing
-        # .gitattributes to mark _version.py for export-time keyword
-        # substitution.
-        do_vcs_install(manifest_in, cfg.versionfile_source, ipy)
-
 
 def get_cmdclass():
     cmds = {'version': cmd_version,
-            'versioneer': cmd_update_files,
             'build': cmd_build,
             'sdist': cmd_sdist,
             }
