@@ -86,10 +86,5 @@ def git_versions_from_vcs(tag_prefix, root, verbose):
         raise NotThisMethod("no .git directory")
     pieces = get_git_versions_from_vcs(tag_prefix, root, verbose, run_command)
     assert pieces
-    if pieces["error"]:
-        return {"version": "unknown",
-                "full-revisionid": pieces["long"],
-                "dirty": None,
-                "error": pieces["error"]}
     return render(pieces)
 

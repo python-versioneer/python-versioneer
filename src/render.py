@@ -4,6 +4,12 @@ def render(pieces):  # style=pep440
     # identifier". Our goal: TAG[+NUM.gHEX[.dirty]] . Note that if you get a
     # tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
 
+    if pieces["error"]:
+        return {"version": "unknown",
+                "full-revisionid": pieces["long"],
+                "dirty": None,
+                "error": pieces["error"]}
+
     # exceptions:
     # 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
 
