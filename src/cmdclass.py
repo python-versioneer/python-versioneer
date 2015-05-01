@@ -1,3 +1,12 @@
+import os, sys # --STRIP DURING BUILD
+from distutils.command.build import build as _build # --STRIP DURING BUILD
+from distutils.command.sdist import sdist as _sdist # --STRIP DURING BUILD
+from distutils.core import Command # --STRIP DURING BUILD
+LONG_VERSION_PY = {} # --STRIP DURING BUILD
+def get_version(): pass # --STRIP DURING BUILD
+def get_versions(): pass # --STRIP DURING BUILD
+def get_config(): pass # --STRIP DURING BUILD
+def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
 class cmd_version(Command):
