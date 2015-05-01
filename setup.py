@@ -60,6 +60,7 @@ def generate_long_version_py(VCS):
                   "src/from_parentdir.py",
                   "src/%s/from_keywords.py" % VCS,
                   "src/%s/from_vcs.py" % VCS,
+                  "src/render.py",
                   "src/%s/long_get_versions.py" % VCS]:
         s.write(get(piece, unquote=True, do_strip=True))
     return s.getvalue()
@@ -81,6 +82,7 @@ def generate_versioneer_py():
 
     s.write(get("src/from_parentdir.py", do_strip=True))
     s.write(get("src/from_file.py", add_ver=True, do_strip=True))
+    s.write(get("src/render.py", do_strip=True))
     s.write(get("src/get_versions.py", do_strip=True))
     s.write(get("src/cmdclass.py", do_strip=True))
     s.write(get("src/setupfunc.py", do_strip=True))
