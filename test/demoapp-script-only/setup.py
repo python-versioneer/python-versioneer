@@ -1,6 +1,6 @@
 
 import os, tempfile
-from distutils.core import setup
+from setuptools import setup
 from distutils.command.build_scripts import build_scripts
 import versioneer
 commands = versioneer.get_cmdclass().copy()
@@ -30,5 +30,9 @@ setup(name="demo",
       author="author",
       author_email="email",
       scripts=["src/dummy"], # this will be replaced by my_build_scripts
+      # without py_modules= or packages=, distutils thinks this module is not
+      # "pure", and will put a platform indicator in the .whl name even
+      # though we call bdist_wheel with --universal.
+      py_modules=["fake"],
       cmdclass=commands,
       )

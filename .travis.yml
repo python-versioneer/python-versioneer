@@ -8,7 +8,7 @@ python:
   - "pypy"
   - "pypy3"
 install:
-  - travis_retry pip install pyflakes flake8
+  - travis_retry pip install pyflakes flake8 wheel
 before_script:
   - git config --global user.email "foo@example.com"
   - git config --global user.name "foo"

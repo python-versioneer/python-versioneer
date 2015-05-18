@@ -265,6 +265,13 @@ class RenderPieces(unittest.TestCase):
 VERBOSE = False
 
 class Repo(unittest.TestCase):
+    def command(self, cmd, *args, **kwargs):
+        workdir = kwargs.pop("workdir", self.subpath("demoapp"))
+        assert not kwargs, kwargs.keys()
+        output = run_command([cmd], list(args), workdir, True)
+        if output is None:
+            self.fail("problem running command %s" % cmd)
+        return output
     def git(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.subpath("demoapp"))
         assert not kwargs, kwargs.keys()
@@ -274,8 +281,9 @@ class Repo(unittest.TestCase):
         return output
     def python(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.subpath("demoapp"))
+        exe = kwargs.pop("python", sys.executable)
         assert not kwargs, kwargs.keys()
-        output = run_command([sys.executable], list(args), workdir, True)
+        output = run_command([exe], list(args), workdir, True)
         if output is None:
             self.fail("problem running python")
         return output
@@ -290,12 +298,14 @@ class Repo(unittest.TestCase):
     #  S5: making a new commit after 1.0, clean tree
     #  S6: dirtying the tree after the post-1.0 commit
     #
-    # Then we're interested in 5 kinds of trees:
+    # Then we're interested in 7 kinds of trees:
     #  TA: source tree (with .git)
     #  TB: source tree without .git (should get 'unknown')
     #  TC: source tree without .git unpacked into prefixdir
     #  TD: git-archive tarball
     #  TE: unpacked sdist tarball
+    #  TF: installed sdist tarball (RB only)
+    #  TG: installed bdist_wheel (RB only)
     #
     # In three runtime situations:
     #  RA1: setup.py --version
@@ -410,7 +420,9 @@ class Repo(unittest.TestCase):
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
                               "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, False, None]})
+                              "TE": [short, full, False, None],
+                              "TF": [short, full, False, None],
+                              })
 
         # TD: expanded keywords only tell us about tags and full revisionids,
         # not how many patches we are beyond a tag. So any TD git-archive
@@ -428,7 +440,9 @@ class Repo(unittest.TestCase):
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, True, None]})
+                              "TE": [short, full, True, None],
+                              "TF": [short, full, True, None],
+                              })
 
         # S3: we commit that change, then make the first tag (1.0)
         self.git("add", "setup.py")
@@ -442,7 +456,9 @@ class Repo(unittest.TestCase):
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
                               "TD": [short, full, False, None],
-                              "TE": [short, full, False, None]})
+                              "TE": [short, full, False, None],
+                              "TF": [short, full, False, None],
+                              })
 
         # S4: now we dirty the tree
         f = open(self.subpath("demoapp/setup.py"),"a")
@@ -454,7 +470,9 @@ class Repo(unittest.TestCase):
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, True, None],
                               "TD": ["1.0", full, False, None],
-                              "TE": [short, full, True, None]})
+                              "TE": [short, full, True, None],
+                              "TF": [short, full, True, None],
+                              })
 
         # S5: now we make one commit past the tag
         self.git("add", "setup.py")
@@ -465,7 +483,9 @@ class Repo(unittest.TestCase):
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, False, None],
                               "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, False, None]})
+                              "TE": [short, full, False, None],
+                              "TF": [short, full, False, None],
+                              })
 
         # S6: dirty the post-tag tree
         f = open(self.subpath("demoapp/setup.py"),"a")
@@ -477,7 +497,9 @@ class Repo(unittest.TestCase):
                               "TB": ["0+unknown", None, None, UNABLE],
                               "TC": [short, full, True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, True, None]})
+                              "TE": [short, full, True, None],
+                              "TF": [short, full, True, None],
+                              })
 
 
     def do_checks(self, state, exps):
@@ -525,6 +547,23 @@ class Repo(unittest.TestCase):
         self.assertTrue(os.path.isdir(target))
         self.check_version(target, state, "TE", exps["TE"])
 
+        # TF: installed sdist tarball
+        self.check_installed(fn, state, "TF", exps["TF"])
+
+        # TG: installed wheel (same versions as TF)
+        expected = exps["TF"]
+        if os.path.exists(self.subpath("demoapp/dist")):
+            shutil.rmtree(self.subpath("demoapp/dist"))
+        self.python("setup.py", "bdist_wheel", "--universal")
+        files = os.listdir(self.subpath("demoapp/dist"))
+        self.assertTrue(len(files)==1, files)
+        short_wheelfile = files[0]
+        wheelfile = os.path.join(self.subpath("demoapp/dist"), short_wheelfile)
+        self.assertEqual(short_wheelfile,
+                         "demo-%s-py2.py3-none-any.whl" % expected[0])
+        # installed wheel
+        self.check_installed(wheelfile, state, "TG", expected)
+
     def check_version(self, workdir, state, tree, exps):
         exp_version, exp_full, exp_dirty, exp_error = exps
         if VERBOSE: print("== starting %s %s" % (state, tree))
@@ -551,6 +590,24 @@ class Repo(unittest.TestCase):
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
         out = self.python("rundemo", "--version", workdir=build_lib)
+        data = dict([line.split(":",1) for line in out.splitlines()])
+        self.compare(data["__version__"], exp_version, state, tree, "RB")
+        self.assertPEP440(data["__version__"], state, tree, "RB")
+        self.compare(data["version"], exp_version, state, tree, "RB")
+        self.compare(data["dirty"], str(exp_dirty), state, tree, "RB")
+        self.compare(data["full-revisionid"], str(exp_full), state, tree, "RB")
+        self.compare(data["error"], str(exp_error), state, tree, "RB")
+
+    def check_installed(self, bdist, state, tree, exps):
+        exp_version, exp_full, exp_dirty, exp_error = exps
+        if VERBOSE: print("== starting %s %s" % (state, tree))
+        self.command("virtualenv", self.subpath("out/%s-ve" % tree))
+        subpip = self.subpath("out/%s-ve/bin/pip" % tree)
+        self.command(subpip, "install", bdist)
+        demoapp = self.subpath("out/%s-ve/bin/rundemo" % tree)
+
+        # RB: setup.py build; rundemo --version
+        out = self.command(demoapp, "--version")
         data = dict([line.split(":",1) for line in out.splitlines()])
         self.compare(data["__version__"], exp_version, state, tree, "RB")
         self.assertPEP440(data["__version__"], state, tree, "RB")
