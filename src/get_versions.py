@@ -19,13 +19,11 @@ def vcs_function(vcs, suffix):
 def get_versions():
     # returns dict with two keys: 'version' and 'full'
     cfg = get_config()
+    assert cfg.VCS is not None, "please set versioneer.VCS"
     verbose = cfg.verbose
     assert cfg.versionfile_source is not None, \
         "please set versioneer.versionfile_source"
     assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
-    assert cfg.parentdir_prefix is not None, \
-        "please set versioneer.parentdir_prefix"
-    assert cfg.VCS is not None, "please set versioneer.VCS"
 
     # I am in versioneer.py, which must live at the top of the source tree,
     # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
@@ -75,10 +73,11 @@ def get_versions():
             pass
 
     try:
-        ver = versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
-        if verbose:
-            print("got version from parentdir %s" % ver)
-        return ver
+        if cfg.parentdir_prefix:
+            ver = versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
+            if verbose:
+                print("got version from parentdir %s" % ver)
+            return ver
     except NotThisMethod:
         pass
 

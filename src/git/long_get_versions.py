@@ -41,7 +41,8 @@ def get_versions():
         pass
 
     try:
-        return versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
+        if cfg.parentdir_prefix:
+            return versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
     except NotThisMethod:
         pass
 

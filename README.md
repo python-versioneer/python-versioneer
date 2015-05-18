@@ -131,9 +131,10 @@ First, decide on values for the following configuration variables:
 
 * `parentdir_prefix`:
 
-  a string, frequently the same as tag_prefix, which appears at the start of
-  all unpacked tarball filenames. If your tarball unpacks into
-  'myproject-1.2.0', this should be 'myproject-'.
+  a optional string, frequently the same as tag_prefix, which appears at the
+  start of all unpacked tarball filenames. If your tarball unpacks into
+  'myproject-1.2.0', this should be 'myproject-'. To disable this feature,
+  just omit the field from your `setup.cfg`.
 
 This tool provides one script, named `versioneer`. That script has one mode,
 "install", which writes a copy of `versioneer.py` into the current directory
