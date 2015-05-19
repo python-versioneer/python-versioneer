@@ -29,6 +29,7 @@ setup(name="demo",
       url="url",
       author="author",
       author_email="email",
+      zip_safe=True,
       scripts=["src/dummy"], # this will be replaced by my_build_scripts
       # without py_modules= or packages=, distutils thinks this module is not
       # "pure", and will put a platform indicator in the .whl name even

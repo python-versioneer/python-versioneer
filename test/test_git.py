@@ -306,6 +306,7 @@ class Repo(unittest.TestCase):
     #  TE: unpacked sdist tarball
     #  TF: installed sdist tarball (RB only)
     #  TG: installed bdist_wheel (RB only)
+    #  TH: installed egg (RB only)
     #
     # In three runtime situations:
     #  RA1: setup.py --version
@@ -564,6 +565,21 @@ class Repo(unittest.TestCase):
         # installed wheel
         self.check_installed(wheelfile, state, "TG", expected)
 
+        # TH: installed egg (same versions as TF)
+        expected = exps["TF"]
+        if os.path.exists(self.subpath("demoapp/dist")):
+            shutil.rmtree(self.subpath("demoapp/dist"))
+        self.python("setup.py", "bdist_egg")
+        files = os.listdir(self.subpath("demoapp/dist"))
+        self.assertTrue(len(files)==1, files)
+        short_eggfile = files[0]
+        eggfile = os.path.join(self.subpath("demoapp/dist"), short_eggfile)
+        pyver = "py%d.%d" % sys.version_info[:2]
+        self.assertEqual(short_eggfile, "demo-%s-%s.egg" % (expected[0], pyver))
+        # installed egg
+        self.check_installed(eggfile, state, "TH", expected,
+                             installer="easy_install")
+
     def check_version(self, workdir, state, tree, exps):
         exp_version, exp_full, exp_dirty, exp_error = exps
         if VERBOSE: print("== starting %s %s" % (state, tree))
@@ -598,12 +614,18 @@ class Repo(unittest.TestCase):
         self.compare(data["full-revisionid"], str(exp_full), state, tree, "RB")
         self.compare(data["error"], str(exp_error), state, tree, "RB")
 
-    def check_installed(self, bdist, state, tree, exps):
+    def check_installed(self, bdist, state, tree, exps, installer="pip"):
         exp_version, exp_full, exp_dirty, exp_error = exps
         if VERBOSE: print("== starting %s %s" % (state, tree))
         self.command("virtualenv", self.subpath("out/%s-ve" % tree))
-        subpip = self.subpath("out/%s-ve/bin/pip" % tree)
-        self.command(subpip, "install", bdist)
+        if installer == "pip":
+            self.command(self.subpath("out/%s-ve/bin/pip" % tree), "install",
+                         bdist)
+        elif installer == "easy_install":
+            self.command(self.subpath("out/%s-ve/bin/easy_install" % tree),
+                         bdist)
+        else:
+            assert False, "bad installer name '%s'" % installer
         demoapp = self.subpath("out/%s-ve/bin/rundemo" % tree)
 
         # RB: setup.py build; rundemo --version
