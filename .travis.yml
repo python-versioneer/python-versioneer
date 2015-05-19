@@ -8,11 +8,13 @@ python:
   - "pypy"
   - "pypy3"
 install:
-  - travis_retry pip install pyflakes flake8 wheel
+  - travis_retry pip install pyflakes flake8 wheel setuptools virtualenv
 before_script:
   - git config --global user.email "foo@example.com"
   - git config --global user.name "foo"
 script:
+  - easy_install --version
+  - virtualenv --version
   - python setup.py make_versioneer
   - python test/test_git.py
   - python setup.py make_long_version_py_git
