@@ -28,5 +28,5 @@ class Common:
         if output is None:
             self.fail("problem running python")
         return output
-    def subpath(self, path):
-        return os.path.join(self.testdir, path)
+    def subpath(self, *path):
+        return os.path.join(self.testdir, *path)
