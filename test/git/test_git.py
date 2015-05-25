@@ -6,16 +6,15 @@ import shutil
 import tarfile
 import unittest
 import tempfile
+
+
 from pkg_resources import parse_version, SetuptoolsLegacyVersion
 
 sys.path.insert(0, "src")
+import common
 from render import render
 from git import from_vcs, from_keywords
 from subprocess_helper import run_command
-
-GITS = ["git"]
-if sys.platform == "win32":
-    GITS = ["git.cmd", "git.exe"]
 
 class ParseGitDescribe(unittest.TestCase):
     def setUp(self):
@@ -264,31 +263,7 @@ class RenderPieces(unittest.TestCase):
 
 VERBOSE = False
 
-class Repo(unittest.TestCase):
-    def command(self, cmd, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.subpath("demoapp"))
-        assert not kwargs, kwargs.keys()
-        output = run_command([cmd], list(args), workdir, True)
-        if output is None:
-            self.fail("problem running command %s" % cmd)
-        return output
-    def git(self, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.subpath("demoapp"))
-        assert not kwargs, kwargs.keys()
-        output = run_command(GITS, list(args), workdir, True)
-        if output is None:
-            self.fail("problem running git")
-        return output
-    def python(self, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.subpath("demoapp"))
-        exe = kwargs.pop("python", sys.executable)
-        assert not kwargs, kwargs.keys()
-        output = run_command([exe], list(args), workdir, True)
-        if output is None:
-            self.fail("problem running python")
-        return output
-    def subpath(self, path):
-        return os.path.join(self.testdir, path)
+class Repo(common.Common, unittest.TestCase):
 
     # There are three tree states we're interested in:
     #  S1: sitting on the initial commit, no tags
@@ -655,6 +630,6 @@ class Repo(unittest.TestCase):
                          % (where, got, str(pv)))
 
 if __name__ == '__main__':
-    ver = run_command(GITS, ["--version"], ".", True)
+    ver = run_command(common.GITS, ["--version"], ".", True)
     print("git --version: %s" % ver.strip())
     unittest.main()
