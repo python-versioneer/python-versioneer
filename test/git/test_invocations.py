@@ -55,7 +55,9 @@ class _Invocations(common.Common):
     def run_in_venv(self, venv, workdir, command, *args):
         bins = {"python": os.path.join(venv, "bin", "python"),
                 "pip": os.path.join(venv, "bin", "pip"),
-                "rundemo": os.path.join(venv, "bin", "rundemo")}
+                "rundemo": os.path.join(venv, "bin", "rundemo"),
+                "easy_install": os.path.join(venv, "bin", "easy_install"),
+                }
         return self.command(bins[command], *args, workdir=workdir)
 
     def check_in_venv(self, venv):
@@ -311,6 +313,18 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
 
+    def test_easy_install(self):
+        linkdir = self.make_linkdir()
+        indexdir = self.make_empty_indexdir()
+        repodir = self.make_setuptools_repo()
+        venv = self.make_venv("setuptools-repo-easy-install")
+        self.run_in_venv(venv, repodir,
+                         "python", "setup.py", "easy_install",
+                         "--index-url", indexdir, "--find-links", linkdir,
+                         "."
+                         )
+        self.check_in_venv_withlib(venv)
+
     def test_develop(self):
         linkdir = self.make_linkdir()
         indexdir = self.make_empty_indexdir()
@@ -372,6 +386,17 @@ class DistutilsSdist(_Invocations, unittest.TestCase):
                          sdist)
         self.check_in_venv(venv)
 
+    def test_easy_install(self):
+        linkdir = self.make_linkdir()
+        indexdir = self.make_empty_indexdir()
+        sdist = self.make_distutils_sdist()
+        venv = self.make_venv("distutils-sdist-easy-install")
+        self.run_in_venv(venv, venv,
+                         "easy_install",
+                         "--index-url", indexdir, "--find-links", linkdir,
+                         sdist)
+        self.check_in_venv(venv)
+
 class SetuptoolsSdist(_Invocations, unittest.TestCase):
     def test_pip_install(self):
         linkdir = self.make_linkdir()
@@ -380,6 +405,17 @@ class SetuptoolsSdist(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv,
                          "pip", "--isolated", "install",
                          "--no-index", "--find-links", linkdir,
+                         sdist)
+        self.check_in_venv_withlib(venv)
+
+    def test_easy_install(self):
+        linkdir = self.make_linkdir()
+        indexdir = self.make_empty_indexdir()
+        sdist = self.make_setuptools_sdist()
+        venv = self.make_venv("setuptools-sdist-easy-install")
+        self.run_in_venv(venv, venv,
+                         "easy_install",
+                         "--index-url", indexdir, "--find-links", linkdir,
                          sdist)
         self.check_in_venv_withlib(venv)
 
@@ -392,6 +428,18 @@ class SetuptoolsWheel(_Invocations, unittest.TestCase):
                          "pip", "--isolated", "install",
                          "--no-index", "--find-links", linkdir,
                          wheel)
+        self.check_in_venv_withlib(venv)
+
+class Egg(_Invocations, unittest.TestCase):
+    def test_easy_install(self):
+        linkdir = self.make_linkdir()
+        indexdir = self.make_empty_indexdir()
+        egg = self.make_setuptools_egg()
+        venv = self.make_venv("setuptools-egg-easy-install")
+        self.run_in_venv(venv, venv,
+                         "easy_install",
+                         "--index-url", indexdir, "--find-links", linkdir,
+                         egg)
         self.check_in_venv_withlib(venv)
 
 class DistutilsUnpacked(_Invocations, unittest.TestCase):
@@ -444,6 +492,18 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "--isolated", "install", demolib)
         self.run_in_venv(venv, unpacked,
                          "python", "setup.py", "install")
+        self.check_in_venv_withlib(venv)
+
+    def test_easy_install(self):
+        linkdir = self.make_linkdir()
+        indexdir = self.make_empty_indexdir()
+        unpacked = self.make_setuptools_unpacked()
+        venv = self.make_venv("setuptools-unpacked-easy-install")
+        self.run_in_venv(venv, unpacked,
+                         "python", "setup.py", "easy_install",
+                         "--index-url", indexdir, "--find-links", linkdir,
+                         "."
+                         )
         self.check_in_venv_withlib(venv)
 
     def test_wheel(self):
