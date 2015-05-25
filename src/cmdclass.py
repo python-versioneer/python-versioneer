@@ -21,8 +21,10 @@ class cmd_version(Command):
         pass
 
     def run(self):
-        ver = get_version()
-        print("Version is currently: %s" % ver)
+        vers = get_versions()
+        print("Version is currently: %s" % vers["version"])
+        if vers["error"]:
+            print("error: %s" % vers["error"])
 
 
 class cmd_build(_build):
