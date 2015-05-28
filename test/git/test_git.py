@@ -273,15 +273,12 @@ class Repo(common.Common, unittest.TestCase):
     #  S5: making a new commit after 1.0, clean tree
     #  S6: dirtying the tree after the post-1.0 commit
     #
-    # Then we're interested in 7 kinds of trees:
+    # Then we're interested in 5 kinds of trees:
     #  TA: source tree (with .git)
     #  TB: source tree without .git (should get 'unknown')
     #  TC: source tree without .git unpacked into prefixdir
     #  TD: git-archive tarball
     #  TE: unpacked sdist tarball
-    #  TF: installed sdist tarball (RB only)
-    #  TG: installed bdist_wheel (RB only)
-    #  TH: installed egg (RB only)
     #
     # In three runtime situations:
     #  RA1: setup.py --version
@@ -397,7 +394,6 @@ class Repo(common.Common, unittest.TestCase):
                               "TC": [short, full, False, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full, False, None],
-                              "TF": [short, full, False, None],
                               })
 
         # TD: expanded keywords only tell us about tags and full revisionids,
@@ -417,7 +413,6 @@ class Repo(common.Common, unittest.TestCase):
                               "TC": [short, full, True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full, True, None],
-                              "TF": [short, full, True, None],
                               })
 
         # S3: we commit that change, then make the first tag (1.0)
@@ -433,7 +428,6 @@ class Repo(common.Common, unittest.TestCase):
                               "TC": [short, full, False, None],
                               "TD": [short, full, False, None],
                               "TE": [short, full, False, None],
-                              "TF": [short, full, False, None],
                               })
 
         # S4: now we dirty the tree
@@ -447,7 +441,6 @@ class Repo(common.Common, unittest.TestCase):
                               "TC": [short, full, True, None],
                               "TD": ["1.0", full, False, None],
                               "TE": [short, full, True, None],
-                              "TF": [short, full, True, None],
                               })
 
         # S5: now we make one commit past the tag
@@ -460,7 +453,6 @@ class Repo(common.Common, unittest.TestCase):
                               "TC": [short, full, False, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full, False, None],
-                              "TF": [short, full, False, None],
                               })
 
         # S6: dirty the post-tag tree
@@ -474,7 +466,6 @@ class Repo(common.Common, unittest.TestCase):
                               "TC": [short, full, True, None],
                               "TD": ["0+unknown", full, False, NOTAG],
                               "TE": [short, full, True, None],
-                              "TF": [short, full, True, None],
                               })
 
 
@@ -523,38 +514,6 @@ class Repo(common.Common, unittest.TestCase):
         self.assertTrue(os.path.isdir(target))
         self.check_version(target, state, "TE", exps["TE"])
 
-        # TF: installed sdist tarball
-        self.check_installed(fn, state, "TF", exps["TF"])
-
-        # TG: installed wheel (same versions as TF)
-        expected = exps["TF"]
-        if os.path.exists(self.subpath("demoapp/dist")):
-            shutil.rmtree(self.subpath("demoapp/dist"))
-        self.python("setup.py", "bdist_wheel", "--universal")
-        files = os.listdir(self.subpath("demoapp/dist"))
-        self.assertTrue(len(files)==1, files)
-        short_wheelfile = files[0]
-        wheelfile = os.path.join(self.subpath("demoapp/dist"), short_wheelfile)
-        self.assertEqual(short_wheelfile,
-                         "demo-%s-py2.py3-none-any.whl" % expected[0])
-        # installed wheel
-        self.check_installed(wheelfile, state, "TG", expected)
-
-        # TH: installed egg (same versions as TF)
-        expected = exps["TF"]
-        if os.path.exists(self.subpath("demoapp/dist")):
-            shutil.rmtree(self.subpath("demoapp/dist"))
-        self.python("setup.py", "bdist_egg")
-        files = os.listdir(self.subpath("demoapp/dist"))
-        self.assertTrue(len(files)==1, files)
-        short_eggfile = files[0]
-        eggfile = os.path.join(self.subpath("demoapp/dist"), short_eggfile)
-        pyver = "py%d.%d" % sys.version_info[:2]
-        self.assertEqual(short_eggfile, "demo-%s-%s.egg" % (expected[0], pyver))
-        # installed egg
-        self.check_installed(eggfile, state, "TH", expected,
-                             installer="easy_install")
-
     def check_version(self, workdir, state, tree, exps):
         exp_version, exp_full, exp_dirty, exp_error = exps
         if VERBOSE: print("== starting %s %s" % (state, tree))
@@ -581,30 +540,6 @@ class Repo(common.Common, unittest.TestCase):
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
         out = self.python("rundemo", "--version", workdir=build_lib)
-        data = dict([line.split(":",1) for line in out.splitlines()])
-        self.compare(data["__version__"], exp_version, state, tree, "RB")
-        self.assertPEP440(data["__version__"], state, tree, "RB")
-        self.compare(data["version"], exp_version, state, tree, "RB")
-        self.compare(data["dirty"], str(exp_dirty), state, tree, "RB")
-        self.compare(data["full-revisionid"], str(exp_full), state, tree, "RB")
-        self.compare(data["error"], str(exp_error), state, tree, "RB")
-
-    def check_installed(self, bdist, state, tree, exps, installer="pip"):
-        exp_version, exp_full, exp_dirty, exp_error = exps
-        if VERBOSE: print("== starting %s %s" % (state, tree))
-        self.command("virtualenv", self.subpath("out/%s-ve" % tree))
-        if installer == "pip":
-            self.command(self.subpath("out/%s-ve/bin/pip" % tree), "install",
-                         bdist)
-        elif installer == "easy_install":
-            self.command(self.subpath("out/%s-ve/bin/easy_install" % tree),
-                         bdist)
-        else:
-            assert False, "bad installer name '%s'" % installer
-        demoapp = self.subpath("out/%s-ve/bin/rundemo" % tree)
-
-        # RB: setup.py build; rundemo --version
-        out = self.command(demoapp, "--version")
         data = dict([line.split(":",1) for line in out.splitlines()])
         self.compare(data["__version__"], exp_version, state, tree, "RB")
         self.assertPEP440(data["__version__"], state, tree, "RB")
