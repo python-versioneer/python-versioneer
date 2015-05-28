@@ -11,7 +11,7 @@ setup(name="demo",
       author_email="email",
       zip_safe=True,
       packages=["demo"],
-      package_dir={"demo": "src/demo"},
+      package_dir={"": "src"},
       scripts=["bin/rundemo"],
       cmdclass=commands,
       )
