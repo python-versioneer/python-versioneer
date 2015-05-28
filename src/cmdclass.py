@@ -5,7 +5,7 @@ from distutils.core import Command # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
 def get_version(): pass # --STRIP DURING BUILD
 def get_versions(): pass # --STRIP DURING BUILD
-def get_config(): pass # --STRIP DURING BUILD
+def get_config_and_root(): pass # --STRIP DURING BUILD
 def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
@@ -29,7 +29,7 @@ class cmd_version(Command):
 
 class cmd_build(_build):
     def run(self):
-        cfg = get_config()
+        cfg, root = get_config_and_root()
         versions = get_versions()
         _build.run(self)
         # now locate _version.py in the new build/ directory and replace it
@@ -45,7 +45,7 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
 
     class cmd_build_exe(_build_exe):
         def run(self):
-            cfg = get_config()
+            cfg, root = get_config_and_root()
             versions = get_versions()
             target_versionfile = cfg.versionfile_source
             print("UPDATING %s" % target_versionfile)
@@ -73,7 +73,7 @@ class cmd_sdist(_sdist):
         return _sdist.run(self)
 
     def make_release_tree(self, base_dir, files):
-        cfg = get_config()
+        cfg, root = get_config_and_root()
         _sdist.make_release_tree(self, base_dir, files)
         # now locate _version.py in the new base_dir directory (remembering
         # that it may be a hardlink) and replace it with an updated value
