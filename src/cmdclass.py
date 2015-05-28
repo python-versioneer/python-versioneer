@@ -1,5 +1,5 @@
 import os, sys # --STRIP DURING BUILD
-from distutils.command.build import build as _build # --STRIP DURING BUILD
+from distutils.command.build_py import build_py as _build_py # --STRIP DURING BUILD
 from distutils.command.sdist import sdist as _sdist # --STRIP DURING BUILD
 from distutils.core import Command # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
@@ -27,11 +27,13 @@ class cmd_version(Command):
             print("error: %s" % vers["error"])
 
 
-class cmd_build(_build):
+# TODO: override build_py instead of build, to handle setuptools/bdist_egg
+# (which is used by setuptools/install)
+class cmd_build_py(_build_py):
     def run(self):
         cfg, root = get_config_and_root()
         versions = get_versions()
-        _build.run(self)
+        _build_py.run(self)
         # now locate _version.py in the new build/ directory and replace it
         # with an updated value
         if cfg.versionfile_build:
@@ -64,6 +66,10 @@ if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
                                 })
 
 
+# TODO: to tolerate sdist in a setuptools-using project, this needs to detect
+# whether setuptools is present or not (really, we care about where the
+# setup() function is going to look for cmdclass defaults), and provide
+# either the distutils-upcalling or setuptools-upcalling version.
 class cmd_sdist(_sdist):
     def run(self):
         versions = get_versions()
@@ -85,11 +91,11 @@ class cmd_sdist(_sdist):
 
 def get_cmdclass():
     cmds = {'version': cmd_version,
-            'build': cmd_build,
+            'build_py': cmd_build_py,
             'sdist': cmd_sdist,
             }
     if 'cx_Freeze' in sys.modules:  # cx_freeze enabled?
         cmds['build_exe'] = cmd_build_exe
-        del cmds['build']
+        del cmds['build_py']
 
     return cmds

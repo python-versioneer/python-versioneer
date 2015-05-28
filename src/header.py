@@ -16,7 +16,7 @@ import os
 import re
 import subprocess
 import sys
-from distutils.command.build import build as _build
+from distutils.command.build_py import build_py as _build_py
 from distutils.command.sdist import sdist as _sdist
 from distutils.core import Command
 
