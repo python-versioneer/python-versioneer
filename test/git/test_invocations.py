@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import os, sys, shutil, unittest, tempfile, tarfile
+import os, sys, shutil, unittest, tempfile, tarfile, virtualenv
 
 sys.path.insert(0, "src")
 from from_file import versions_from_file
@@ -33,23 +33,15 @@ class _Invocations(common.Common):
         # command spawns another sys.executable underneath it, that second
         # child may use the wrong python, and can install things into the
         # real system library instead of the virtualenv. Invoking
-        # virtualenv.create_environment() clears this as a side-effect, and
-        # anyways I've switched to 'import venv' on py3 (which may not be
-        # sensitive to this problem), but to make things safe I'll just clear
-        # this now. See https://github.com/pypa/virtualenv/issues/322 and
-        # https://bugs.python.org/issue22490 for some hints.
+        # virtualenv.create_environment() clears this as a side-effect, but
+        # to make things safe I'll just clear this now. See
+        # https://github.com/pypa/virtualenv/issues/322 and
+        # https://bugs.python.org/issue22490 for some hints. I tried
+        # switching to 'venv' on py3, but only py3.4 includes pip, and even
+        # then it's an ancient version.
         os.environ.pop("__PYVENV_LAUNCHER__", None)
-        if sys.version_info[0:2] < (3,3):
-            import virtualenv
-            virtualenv.logger = virtualenv.Logger([]) # hush
-            virtualenv.create_environment(venv_dir)
-            # virtualenv installs "wheel" into the new environment
-        else:
-            # stdlib "venv" appeared in python 3.3
-            import venv
-            venv.EnvBuilder(with_pip=True).create(venv_dir)
-            # venv doesn't include wheel, which we need for some tests
-            self.run_in_venv(venv_dir, venv_dir, "pip", "install", "wheel")
+        virtualenv.logger = virtualenv.Logger([]) # hush
+        virtualenv.create_environment(venv_dir)
         return venv_dir
 
     def run_in_venv(self, venv, workdir, command, *args):
@@ -58,6 +50,14 @@ class _Invocations(common.Common):
                 "rundemo": os.path.join(venv, "bin", "rundemo"),
                 "easy_install": os.path.join(venv, "bin", "easy_install"),
                 }
+        if command == "pip":
+            maj, min = sys.version_info[0:2]
+            if ((maj == 2 and min >= 7) or
+                (maj == 3 and min >= 4) or
+                maj > 3):
+                # We prefer pip --isolated, but py2.6/py3.2/py3.3 (at least
+                # on travis) can't handle the --no-user-cfg that it uses
+                args = ["--isolated"] + list(args)
         return self.command(bins[command], *args, workdir=workdir)
 
     def check_in_venv(self, venv):
@@ -134,7 +134,7 @@ class _Invocations(common.Common):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("make-distutils-wheel-with-pip")
         self.run_in_venv(venv, repodir,
-                         "pip", "--isolated", "wheel",
+                         "pip", "wheel",
                          "--no-index",# "--find-links", linkdir,
                          ".")
         created = os.path.join(repodir, "wheelhouse", wheelname)
@@ -250,7 +250,7 @@ class _Invocations(common.Common):
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("make-setuptools-wheel-with-pip")
         self.run_in_venv(venv, repodir,
-                         "pip", "--isolated", "wheel",
+                         "pip", "wheel",
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(repodir, "wheelhouse", wheelname)
@@ -282,28 +282,28 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
 
     def test_sdist(self):
         sdist = self.make_distutils_sdist() # asserts version as a side-effect
-        with tarfile.TarFile(sdist) as t:
-            # make sure we used distutils/sdist, not setuptools/sdist
-            self.assertNotIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO",
-                             t.getnames())
+        t = tarfile.TarFile(sdist)
+        # make sure we used distutils/sdist, not setuptools/sdist
+        self.assertNotIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO",
+                         t.getnames())
+        t.close()
 
     def test_pip_install(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install")
-        self.run_in_venv(venv, repodir, "pip", "--isolated", "install", ".")
+        self.run_in_venv(venv, repodir, "pip", "install", ".")
         self.check_in_venv(venv)
 
     def test_pip_install_from_afar(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install-from-afar")
-        self.run_in_venv(venv, venv, "pip", "--isolated", "install", repodir)
+        self.run_in_venv(venv, venv, "pip", "install", repodir)
         self.check_in_venv(venv)
 
     def test_pip_install_editable(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install-editable")
-        self.run_in_venv(venv, repodir, "pip", "--isolated",
-                         "install", "--editable", ".")
+        self.run_in_venv(venv, repodir, "pip", "install", "--editable", ".")
         self.check_in_venv(venv)
 
 class SetuptoolsRepo(_Invocations, unittest.TestCase):
@@ -313,11 +313,10 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         venv = self.make_venv("setuptools-repo-install")
         # "setup.py install" doesn't take --no-index or --find-links, so we
         # pre-install the dependency
-        self.run_in_venv(venv, venv, "pip", "--isolated", "install", demolib)
+        self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
 
-    @unittest.skip("(setuptools) 'easy_install .' is known to be broken")
     def test_easy_install(self):
         # This case still fails: the 'easy_install' command modifies the
         # repo's setup.cfg (copying our --index-url and --find-links
@@ -329,6 +328,8 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         # parent command (which could calculate the version before setup.cfg
         # is modified) and the command which builds the .egg. Leave it broken
         # for now.
+        print("skipping setuptools 'easy_install .': known to be broken")
+        return
         linkdir = self.make_linkdir()
         indexdir = self.make_empty_indexdir()
         repodir = self.make_setuptools_repo()
@@ -366,16 +367,17 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
 
     def test_sdist(self):
         sdist = self.make_setuptools_sdist() # asserts version as a side-effect
-        with tarfile.TarFile(sdist) as t:
-            # make sure we used setuptools/sdist, not distutils/sdist
-            self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO",
-                          t.getnames())
+        t = tarfile.TarFile(sdist)
+        # make sure we used setuptools/sdist, not distutils/sdist
+        self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO",
+                      t.getnames())
+        t.close()
 
     def test_pip_install(self):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("setuptools-repo-pip-install")
-        self.run_in_venv(venv, repodir, "pip", "--isolated", "install", ".",
+        self.run_in_venv(venv, repodir, "pip", "install", ".",
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
@@ -383,7 +385,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("setuptools-repo-pip-install-from-afar")
-        self.run_in_venv(venv, venv, "pip", "--isolated", "install", repodir,
+        self.run_in_venv(venv, venv, "pip", "install", repodir,
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
@@ -391,8 +393,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("setuptools-repo-pip-install-editable")
-        self.run_in_venv(venv, repodir, "pip", "--isolated",
-                         "install", "--editable", ".",
+        self.run_in_venv(venv, repodir, "pip", "install", "--editable", ".",
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
@@ -401,8 +402,7 @@ class DistutilsSdist(_Invocations, unittest.TestCase):
         sdist = self.make_distutils_sdist()
         venv = self.make_venv("distutils-sdist-pip-install")
         self.run_in_venv(venv, venv,
-                         "pip", "--isolated", "install",
-                         sdist)
+                         "pip", "install", sdist)
         self.check_in_venv(venv)
 
     def test_easy_install(self):
@@ -422,7 +422,7 @@ class SetuptoolsSdist(_Invocations, unittest.TestCase):
         sdist = self.make_setuptools_sdist()
         venv = self.make_venv("setuptools-sdist-pip-install")
         self.run_in_venv(venv, venv,
-                         "pip", "--isolated", "install",
+                         "pip", "install",
                          "--no-index", "--find-links", linkdir,
                          sdist)
         self.check_in_venv_withlib(venv)
@@ -444,7 +444,7 @@ class SetuptoolsWheel(_Invocations, unittest.TestCase):
         wheel = self.make_setuptools_wheel_with_setup_py()
         venv = self.make_venv("setuptools-wheel-pip-install")
         self.run_in_venv(venv, venv,
-                         "pip", "--isolated", "install",
+                         "pip", "install",
                          "--no-index", "--find-links", linkdir,
                          wheel)
         self.check_in_venv_withlib(venv)
@@ -483,7 +483,7 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
         venv = self.make_venv("distutils-unpacked-pip-wheel")
         self.run_in_venv(venv, unpacked,
-                         "pip", "--isolated", "wheel",
+                         "pip", "wheel",
                          "--no-index",# "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
@@ -492,13 +492,13 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
     def test_pip_install(self):
         repodir = self.make_distutils_unpacked()
         venv = self.make_venv("distutils-unpacked-pip-install")
-        self.run_in_venv(venv, repodir, "pip", "--isolated", "install", ".")
+        self.run_in_venv(venv, repodir, "pip", "install", ".")
         self.check_in_venv(venv)
 
     def test_pip_install_from_afar(self):
         repodir = self.make_distutils_unpacked()
         venv = self.make_venv("distutils-unpacked-pip-install-from-afar")
-        self.run_in_venv(venv, venv, "pip", "--isolated", "install", repodir)
+        self.run_in_venv(venv, venv, "pip", "install", repodir)
         self.check_in_venv(venv)
 
 class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
@@ -508,7 +508,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         venv = self.make_venv("setuptools-unpacked-install")
         # "setup.py install" doesn't take --no-index or --find-links, so we
         # pre-install the dependency
-        self.run_in_venv(venv, venv, "pip", "--isolated", "install", demolib)
+        self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, unpacked,
                          "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
@@ -538,7 +538,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
         venv = self.make_venv("setuptools-unpacked-pip-wheel")
         self.run_in_venv(venv, unpacked,
-                         "pip", "--isolated", "wheel",
+                         "pip", "wheel",
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
@@ -548,7 +548,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_unpacked()
         venv = self.make_venv("setuptools-unpacked-pip-install")
-        self.run_in_venv(venv, repodir, "pip", "--isolated", "install", ".",
+        self.run_in_venv(venv, repodir, "pip", "install", ".",
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
@@ -556,7 +556,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_unpacked()
         venv = self.make_venv("setuptools-unpacked-pip-install-from-afar")
-        self.run_in_venv(venv, venv, "pip", "--isolated", "install", repodir,
+        self.run_in_venv(venv, venv, "pip", "install", repodir,
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
