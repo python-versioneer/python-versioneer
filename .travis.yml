@@ -16,7 +16,8 @@ script:
   - easy_install --version
   - virtualenv --version
   - python setup.py make_versioneer
-  - python test/git/test_git.py
+  - python test/git/test_git.py -v
+  - python test/git/test_invocations.py -v
   - python setup.py make_long_version_py_git
   - pyflakes setup.py versioneer.py git_version.py
   - pyflakes test src/subprocess_helper.py src/git/from_keywords.py
