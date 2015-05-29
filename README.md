@@ -263,6 +263,13 @@ stripped tag, e.g. "0.11".
 Other styles are available. See details.md in the Versioneer source tree for
 descriptions.
 
+## Debugging
+
+Versioneer tries to avoid fatal errors: if something goes wrong, it will tend
+to return a version of "0+unknown". To investigate the problem, run `setup.py
+version`, which will run the version-lookup code in a verbose mode, and will
+display the full contents of `get_versions()` (including the `error` string,
+which may help identify what went wrong).
 
 ## Updating Versioneer
 
@@ -285,7 +292,7 @@ version-control systems (SVN, etc) in the future.
 
 Nothing special.
 
-## Upgrading to 0.14
+### Upgrading to 0.14
 
 0.14 changes the format of the version string. 0.13 and earlier used
 hyphen-separated strings like "0.11-2-g1076c97-dirty". 0.14 and beyond use a
@@ -293,7 +300,7 @@ plus-separated "local version" section strings, with dot-separated
 components, like "0.11+2.g1076c97". PEP440-strict tools did not like the old
 format, but should be ok with the new one.
 
-## Upgrading to XXX
+### Upgrading to XXX
 
 Starting with this version, Versioneer is configured with a `[versioneer]`
 section in your `setup.cfg` file. Earlier versions required the `setup.py` to
