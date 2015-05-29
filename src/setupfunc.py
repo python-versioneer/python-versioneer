@@ -160,7 +160,7 @@ def scan_setup_py():
         print("")
         errors += 1
     if setters:
-        print("You should remove lines like 'versioneer.vcs = ' and")
+        print("You should remove lines like 'versioneer.VCS = ' and")
         print("'versioneer.versionfile_source = ' . This configuration")
         print("now lives in setup.cfg, and should be removed from setup.py")
         print("")

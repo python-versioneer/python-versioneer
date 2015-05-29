@@ -73,7 +73,8 @@ def get_cmdclass():
                 _build_exe.run(self)
                 os.unlink(target_versionfile)
                 with open(cfg.versionfile_source, "w") as f:
-                    assert cfg.VCS is not None, "please set versioneer.VCS"
+                    assert cfg.VCS is not None, \
+                           "please set [versioneer]VCS= in setup.cfg"
                     LONG = LONG_VERSION_PY[cfg.VCS]
                     f.write(LONG %
                             {"DOLLAR": "$",

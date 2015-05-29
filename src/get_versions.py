@@ -20,7 +20,7 @@ def get_versions():
     root = get_root()
     cfg = get_config_from_root(root)
 
-    assert cfg.VCS is not None, "please set versioneer.VCS"
+    assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
     verbose = cfg.verbose
     assert cfg.versionfile_source is not None, \
         "please set versioneer.versionfile_source"

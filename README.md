@@ -143,7 +143,8 @@ and runs `versioneer.py setup` to finish the installation.
 To versioneer-enable your project:
 
 * 1: Modify your `setup.cfg`, adding a section named `[versioneer]` and
-  populating it with the configuration values you decided earlier:
+  populating it with the configuration values you decided earlier (note that
+  the option names are not case-sensitive):
 
   ````
   [versioneer]
