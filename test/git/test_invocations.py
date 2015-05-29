@@ -39,13 +39,13 @@ class _Invocations(common.Common):
         # this now. See https://github.com/pypa/virtualenv/issues/322 and
         # https://bugs.python.org/issue22490 for some hints.
         os.environ.pop("__PYVENV_LAUNCHER__", None)
-        if sys.version_info[0] == 2:
+        if sys.version_info[0:2] < (3,3):
             import virtualenv
             virtualenv.logger = virtualenv.Logger([]) # hush
             virtualenv.create_environment(venv_dir)
             # virtualenv installs "wheel" into the new environment
         else:
-            assert sys.version_info[0] == 3
+            # stdlib "venv" appeared in python 3.3
             import venv
             venv.EnvBuilder(with_pip=True).create(venv_dir)
             # venv doesn't include wheel, which we need for some tests
