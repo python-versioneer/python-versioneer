@@ -1,15 +1,13 @@
 import os, sys # --STRIP DURING BUILD
-def get_config(): pass # --STRIP DURING BUILD
+def get_root(): pass # --STRIP DURING BUILD
+def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
 def render(): pass # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
-def get_root():
-    try:
-        return os.path.dirname(os.path.abspath(__file__))
-    except NameError:
-        return os.path.dirname(os.path.abspath(sys.argv[0]))
+class VersioneerBadRootError(Exception):
+    pass
 
 
 def vcs_function(vcs, suffix):
@@ -18,19 +16,16 @@ def vcs_function(vcs, suffix):
 
 def get_versions():
     # returns dict with two keys: 'version' and 'full'
-    cfg = get_config()
+
+    root = get_root()
+    cfg = get_config_from_root(root)
+
     assert cfg.VCS is not None, "please set versioneer.VCS"
     verbose = cfg.verbose
     assert cfg.versionfile_source is not None, \
         "please set versioneer.versionfile_source"
     assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
 
-    # I am in versioneer.py, which must live at the top of the source tree,
-    # which we use to compute the root directory. py2exe/bbfreeze/non-CPython
-    # don't have __file__, in which case we fall back to sys.argv[0] (which
-    # ought to be the setup.py script). We prefer __file__ since that's more
-    # robust in cases where setup.py was invoked in some weird way (e.g. pip)
-    root = get_root()
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
 
     get_keywords_f = vcs_function(cfg.VCS, "get_keywords")

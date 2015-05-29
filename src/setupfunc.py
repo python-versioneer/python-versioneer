@@ -1,8 +1,8 @@
 
 from __future__ import print_function # --STRIP DURING BUILD
 import os, sys  # --STRIP DURING BUILD
-def get_config(): pass # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
+def get_config_from_root(): pass # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
 def do_vcs_install(): pass # --STRIP DURING BUILD
 
@@ -51,14 +51,15 @@ del get_versions
 
 
 def do_setup():
+    root = get_root()
     try:
-        cfg = get_config()
+        cfg = get_config_from_root(root)
     except (EnvironmentError, configparser.NoSectionError,
             configparser.NoOptionError) as e:
         if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
             print("Adding sample versioneer config to setup.cfg",
                   file=sys.stderr)
-            with open(find_setup_cfg(), "a") as f:
+            with open(os.path.join(root, "setup.cfg"), "a") as f:
                 f.write(SAMPLE_CONFIG)
         print(CONFIG_ERROR, file=sys.stderr)
         return 1
@@ -96,7 +97,7 @@ def do_setup():
     # (PKG/_version.py, used by runtime code) are in MANIFEST.in, so
     # they'll be copied into source distributions. Pip won't be able to
     # install the package without this.
-    manifest_in = os.path.join(get_root(), "MANIFEST.in")
+    manifest_in = os.path.join(root, "MANIFEST.in")
     simple_includes = set()
     try:
         with open(manifest_in, "r") as f:
