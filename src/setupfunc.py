@@ -66,7 +66,6 @@ def do_setup():
 
     print(" creating %s" % cfg.versionfile_source)
     with open(cfg.versionfile_source, "w") as f:
-        assert cfg.VCS is not None, "please set versioneer.VCS"
         LONG = LONG_VERSION_PY[cfg.VCS]
         f.write(LONG % {"DOLLAR": "$",
                         "STYLE": cfg.style,
