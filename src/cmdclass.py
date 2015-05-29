@@ -25,10 +25,12 @@ def get_cmdclass():
             pass
 
         def run(self):
-            vers = get_versions()
-            print("Version is currently: %s" % vers["version"])
+            vers = get_versions(verbose=True)
+            print("Version: %s" % vers["version"])
+            print(" full-revisionid: %s" % vers.get("full-revisionid"))
+            print(" dirty: %s" % vers.get("dirty"))
             if vers["error"]:
-                print("error: %s" % vers["error"])
+                print(" error: %s" % vers["error"])
     cmds["version"] = cmd_version
 
     # we override "build_py" in both distutils and setuptools
