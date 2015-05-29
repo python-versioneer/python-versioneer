@@ -53,7 +53,7 @@ unreleased software (between tags), the version identifier should provide
 enough information to help developers recreate the same tree, while also
 giving them an idea of roughly how old the tree is (after version 1.2, before
 version 1.3). Many VCS systems can report a description that captures this,
-for example 'git describe --tags --dirty --always' reports things like
+for example `git describe --tags --dirty --always` reports things like
 "0.7-1-g574ab98-dirty" to indicate that the checkout is one revision past the
 0.7 tag, has a unique revision id of "574ab98", and is "dirty" (it has
 uncommitted changes.
@@ -67,16 +67,19 @@ The version identifier is used for multiple purposes:
 
 Versioneer works by adding a special `_version.py` file into your source
 tree, where your `__init__.py` can import it. This `_version.py` knows how to
-dynamically ask the VCS tool for version information at import time. However,
-when you use "setup.py build" or "setup.py sdist", `_version.py` in the new
-copy is replaced by a small static file that contains just the generated
-version data.
+dynamically ask the VCS tool for version information at import time.
 
 `_version.py` also contains `$Revision$` markers, and the installation
 process marks `_version.py` to have this marker rewritten with a tag name
-during the "git archive" command. As a result, generated tarballs will
+during the `git archive` command. As a result, generated tarballs will
 contain enough information to get the proper version.
 
+To allow `setup.py` to compute a version too, a `versioneer.py` is added to
+the top level of your source tree, next to `setup.py` and the `setup.cfg`
+that configures it. This overrides several distutils/setuptools commands to
+compute the version when invoked, and changes `setup.py build` and `setup.py
+sdist` to replace `_version.py` with a small static file that contains just
+the generated version data.
 
 ## Installation
 
@@ -165,6 +168,10 @@ To versioneer-enable your project:
   * modify your `MANIFEST.in` to include both `versioneer.py` and the
     generated `_version.py` in sdist tarballs
 
+  `versioneer install` will complain about any problems it finds with your
+  `setup.py` or `setup.cfg`. You can run it multiple times until you have
+  fixed all the problems.
+
 * 3: add a `import versioneer` to your setup.py, and add the following
   arguments to the setup() call:
 
@@ -193,9 +200,8 @@ tarballs with `git archive`), the process is:
 * 1: git tag 1.0
 * 2: git push; git push --tags
 
-Currently, all version strings must be based upon a tag. Versioneer will
-report "unknown" until your tree has at least one tag in its history. This
-restriction will be fixed eventually (see issue #12).
+Versioneer will report "0+untagged.NUMCOMMITS.gHASH" until your tree has at
+least one tag in its history.
 
 ## Version-String Flavors
 
@@ -294,6 +300,11 @@ section in your `setup.cfg` file. Earlier versions required the `setup.py` to
 set attributes on the `versioneer` module immediately after import. The new
 version will refuse to run (exception during import) until you have provided
 the necessary `setup.cfg` section.
+
+In addition, the Versioneer package provides an executable named
+`versioneer`, and the installation process is driven by running `versioneer
+install`. In 0.14 and earlier, the executable was named
+`versioneer-installer` and was run without an argument.
 
 ## Future Directions
 
