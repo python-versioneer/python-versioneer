@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import os, sys, shutil, unittest, tempfile, tarfile, virtualenv
+import os, sys, shutil, unittest, tempfile, tarfile, virtualenv, warnings
 
 sys.path.insert(0, "src")
 from from_file import versions_from_file
@@ -41,7 +41,10 @@ class _Invocations(common.Common):
         # then it's an ancient version.
         os.environ.pop("__PYVENV_LAUNCHER__", None)
         virtualenv.logger = virtualenv.Logger([]) # hush
-        virtualenv.create_environment(venv_dir)
+        # virtualenv causes DeprecationWarning/ResourceWarning on py3
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            virtualenv.create_environment(venv_dir)
         return venv_dir
 
     def run_in_venv(self, venv, workdir, command, *args):
