@@ -56,12 +56,11 @@ def get_root():
     return root
 
 
-def get_config_and_root():
+def get_config_from_root(root):
     # This might raise EnvironmentError (if setup.cfg is missing), or
     # configparser.NoSectionError (if it lacks a [versioneer] section), or
     # configparser.NoOptionError (if it lacks "VCS="). See the docstring at
     # the top of versioneer.py for instructions on writing your setup.cfg .
-    root = get_root()
     setup_cfg = os.path.join(root, "setup.cfg")
     parser = configparser.SafeConfigParser()
     with open(setup_cfg, "r") as f:
@@ -80,7 +79,7 @@ def get_config_and_root():
     cfg.tag_prefix = get(parser, "tag_prefix")
     cfg.parentdir_prefix = get(parser, "parentdir_prefix")
     cfg.verbose = get(parser, "verbose")
-    return cfg, root
+    return cfg
 
 
 class NotThisMethod(Exception):

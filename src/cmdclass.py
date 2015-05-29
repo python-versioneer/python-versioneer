@@ -2,7 +2,8 @@ import os, sys # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
 def get_version(): pass # --STRIP DURING BUILD
 def get_versions(): pass # --STRIP DURING BUILD
-def get_config_and_root(): pass # --STRIP DURING BUILD
+def get_root(): pass # --STRIP DURING BUILD
+def get_config_from_root(): pass # --STRIP DURING BUILD
 def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
@@ -44,7 +45,8 @@ def get_cmdclass():
 
     class cmd_build_py(_build_py):
         def run(self):
-            cfg, root = get_config_and_root()
+            root = get_root()
+            cfg = get_config_from_root(root)
             versions = get_versions()
             _build_py.run(self)
             # now locate _version.py in the new build/ directory and replace
@@ -61,7 +63,8 @@ def get_cmdclass():
 
         class cmd_build_exe(_build_exe):
             def run(self):
-                cfg, root = get_config_and_root()
+                root = get_root()
+                cfg = get_config_from_root(root)
                 versions = get_versions()
                 target_versionfile = cfg.versionfile_source
                 print("UPDATING %s" % target_versionfile)
@@ -98,7 +101,8 @@ def get_cmdclass():
             return _sdist.run(self)
 
         def make_release_tree(self, base_dir, files):
-            cfg, root = get_config_and_root()
+            root = get_root()
+            cfg = get_config_from_root(root)
             _sdist.make_release_tree(self, base_dir, files)
             # now locate _version.py in the new base_dir directory
             # (remembering that it may be a hardlink) and replace it with an

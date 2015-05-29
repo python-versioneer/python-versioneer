@@ -1,5 +1,6 @@
 import os, sys # --STRIP DURING BUILD
-def get_config_and_root(): pass # --STRIP DURING BUILD
+def get_root(): pass # --STRIP DURING BUILD
+def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
 def render(): pass # --STRIP DURING BUILD
@@ -16,7 +17,8 @@ def vcs_function(vcs, suffix):
 def get_versions():
     # returns dict with two keys: 'version' and 'full'
 
-    cfg, root = get_config_and_root()
+    root = get_root()
+    cfg = get_config_from_root(root)
 
     assert cfg.VCS is not None, "please set versioneer.VCS"
     verbose = cfg.verbose

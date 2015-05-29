@@ -1,7 +1,8 @@
 
 from __future__ import print_function # --STRIP DURING BUILD
 import os, sys  # --STRIP DURING BUILD
-def get_config_and_root(): pass # --STRIP DURING BUILD
+def get_root(): pass # --STRIP DURING BUILD
+def get_config_from_root(): pass # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
 def do_vcs_install(): pass # --STRIP DURING BUILD
 
@@ -50,8 +51,9 @@ del get_versions
 
 
 def do_setup():
+    root = get_root()
     try:
-        cfg, root = get_config_and_root()
+        cfg = get_config_from_root(root)
     except (EnvironmentError, configparser.NoSectionError,
             configparser.NoOptionError) as e:
         if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
