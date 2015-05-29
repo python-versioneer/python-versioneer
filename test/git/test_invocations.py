@@ -287,7 +287,7 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         sdist = self.make_distutils_sdist() # asserts version as a side-effect
         t = tarfile.TarFile(sdist)
         # make sure we used distutils/sdist, not setuptools/sdist
-        self.assertNotIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO",
+        self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
                          t.getnames())
         t.close()
 
@@ -372,8 +372,8 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         sdist = self.make_setuptools_sdist() # asserts version as a side-effect
         t = tarfile.TarFile(sdist)
         # make sure we used setuptools/sdist, not distutils/sdist
-        self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO",
-                      t.getnames())
+        self.assertTrue("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
+                        t.getnames())
         t.close()
 
     def test_pip_install(self):
