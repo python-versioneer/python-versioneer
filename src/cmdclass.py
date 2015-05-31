@@ -8,6 +8,21 @@ def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
 def get_cmdclass():
+    if "versioneer" in sys.modules:
+        del sys.modules["versioneer"]
+        # this fixes the "python setup.py develop" case (also 'install' and
+        # 'easy_install .'), in which subdependencies of the main project are
+        # built (using setup.py bdist_egg) in the same python process. Assume
+        # a main project A and a dependency B, which use different versions
+        # of Versioneer. A's setup.py imports A's Versioneer, leaving it in
+        # sys.modules by the time B's setup.py is executed, causing B to run
+        # with the wrong versioneer. Setuptools wraps the sub-dep builds in a
+        # sandbox that restores sys.modules to it's pre-build state, so the
+        # parent is protected against the child's "import versioneer". By
+        # removing ourselves from sys.modules here, before the child build
+        # happens, we protect the child from the parent's versioneer too.
+        # Also see https://github.com/warner/python-versioneer/issues/52
+
     cmds = {}
 
     # we add "version" to both distutils and setuptools

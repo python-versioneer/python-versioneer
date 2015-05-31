@@ -1,4 +1,4 @@
-import os # --STRIP DURING BUILD
+import os, sys # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
@@ -13,6 +13,10 @@ class VersioneerBadRootError(Exception):
 
 def get_versions(verbose=False):
     # returns dict with two keys: 'version' and 'full'
+
+    if "versioneer" in sys.modules:
+        # see the discussion in cmdclass.py:get_cmdclass()
+        del sys.modules["versioneer"]
 
     root = get_root()
     cfg = get_config_from_root(root)
