@@ -1,7 +1,12 @@
 import re # --STRIP DURING BUILD
+def register_vcs_handler(*args): # --STRIP DURING BUILD
+    def nil(f): # --STRIP DURING BUILD
+        return f # --STRIP DURING BUILD
+    return nil # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 
+@register_vcs_handler("git", "get_keywords")
 def git_get_keywords(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
@@ -25,6 +30,7 @@ def git_get_keywords(versionfile_abs):
     return keywords
 
 
+@register_vcs_handler("git", "keywords")
 def git_versions_from_keywords(keywords, tag_prefix, verbose):
     if not keywords:
         raise NotThisMethod("no keywords at all, weird")

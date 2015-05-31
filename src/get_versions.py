@@ -1,17 +1,14 @@
-import os, sys # --STRIP DURING BUILD
+import os # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
 def render(): pass # --STRIP DURING BUILD
+HANDLERS = {} # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 class VersioneerBadRootError(Exception):
     pass
-
-
-def vcs_function(vcs, suffix):
-    return getattr(sys.modules[__name__], '%s_%s' % (vcs, suffix), None)
 
 
 def get_versions(verbose=False):
@@ -21,6 +18,8 @@ def get_versions(verbose=False):
     cfg = get_config_from_root(root)
 
     assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
+    handlers = HANDLERS.get(cfg.VCS)
+    assert handlers, "unrecognized VCS '%s'" % cfg.VCS
     verbose = verbose or cfg.verbose
     assert cfg.versionfile_source is not None, \
         "please set versioneer.versionfile_source"
@@ -28,21 +27,18 @@ def get_versions(verbose=False):
 
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
 
-    get_keywords_f = vcs_function(cfg.VCS, "get_keywords")
-    versions_from_keywords_f = vcs_function(cfg.VCS, "versions_from_keywords")
-    pieces_from_vcs_f = vcs_function(cfg.VCS, "pieces_from_vcs")
-
     # extract version from first of: _version.py, VCS command (e.g. 'git
     # describe'), parentdir. This is meant to work for developers using a
     # source checkout, for users of a tarball created by 'setup.py sdist',
     # and for users of a tarball/zipball created by 'git archive' or github's
     # download-from-tag feature or the equivalent in other VCSes.
 
-    if get_keywords_f and versions_from_keywords_f:
+    get_keywords_f = handlers.get("get_keywords")
+    from_keywords_f = handlers.get("keywords")
+    if get_keywords_f and from_keywords_f:
         try:
-            vcs_keywords = get_keywords_f(versionfile_abs)
-            ver = versions_from_keywords_f(vcs_keywords, cfg.tag_prefix,
-                                           verbose)
+            keywords = get_keywords_f(versionfile_abs)
+            ver = from_keywords_f(keywords, cfg.tag_prefix, verbose)
             if verbose:
                 print("got version from expanded keyword %s" % ver)
             return ver
@@ -57,9 +53,10 @@ def get_versions(verbose=False):
     except NotThisMethod:
         pass
 
-    if pieces_from_vcs_f:
+    from_vcs_f = handlers.get("pieces_from_vcs")
+    if from_vcs_f:
         try:
-            pieces = pieces_from_vcs_f(cfg.tag_prefix, root, verbose)
+            pieces = from_vcs_f(cfg.tag_prefix, root, verbose)
             ver = render(pieces, cfg.style)
             if verbose:
                 print("got version from VCS %s" % ver)
