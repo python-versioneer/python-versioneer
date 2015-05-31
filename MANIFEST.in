@@ -1,9 +1,9 @@
 # we need to include a lot, because this package isn't really made up of
 # packages
 
-include MANIFEST.in README.md .travis.yml NOTES developers.md
+include MANIFEST.in README.md .travis.yml NOTES developers.md details.md
 recursive-include src *.py
-recursive-include test *.py
+recursive-include test *.py *.cfg README MANIFEST.in
 include test/demoapp/bin/rundemo
 include test/demoapp/MANIFEST.in
 include test/demoapp/README
@@ -14,3 +14,4 @@ include test/demoapp-script-only/README
 include test/demoapp-script-only/src/demo/placeholder
 include test/demoapp-script-only/src/dummy
 include test/demoapp-script-only/src/rundemo-template
+include test/demoapp2-distutils/bin/rundemo
