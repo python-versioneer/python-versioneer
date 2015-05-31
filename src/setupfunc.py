@@ -5,6 +5,7 @@ def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
 def do_vcs_install(): pass # --STRIP DURING BUILD
+configparser = None # --STRIP DURING BUILD
 
 CONFIG_ERROR = """
 setup.cfg is missing the necessary Versioneer configuration. You need

@@ -20,5 +20,10 @@ script:
   - python test/git/test_invocations.py -v
   - python setup.py make_long_version_py_git
   - pyflakes setup.py versioneer.py git_version.py
-  - pyflakes test src/subprocess_helper.py src/git/from_keywords.py
+  - pyflakes src/cmdclass.py src/from_file.py src/from_parentdir.py
+    src/get_versions.py src/installer.py src/render.py src/setupfunc.py
+    src/subprocess_helper.py
+  - pyflakes src/git/from_keywords.py src/git/from_vcs.py
+    src/git/install.py src/git/long_get_versions.py
+  - pyflakes test
   - flake8 git_version.py versioneer.py
