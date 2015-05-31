@@ -169,8 +169,8 @@ To versioneer-enable your project:
     generated `_version.py` in sdist tarballs
 
   `versioneer install` will complain about any problems it finds with your
-  `setup.py` or `setup.cfg`. You can run it multiple times until you have
-  fixed all the problems.
+  `setup.py` or `setup.cfg`. Run it multiple times until you have fixed all
+  the problems.
 
 * 3: add a `import versioneer` to your setup.py, and add the following
   arguments to the setup() call:
@@ -282,15 +282,18 @@ To upgrade your project to a new release of Versioneer, do the following:
   `SRC/_version.py`
 * commit any changed files
 
-### Upgrading from 0.10 to 0.11
+### Upgrading to 0.15
 
-You must add a `versioneer.VCS = "git"` to your `setup.py` before re-running
-`setup.py setup_versioneer`. This will enable the use of additional
-version-control systems (SVN, etc) in the future.
+Starting with this version, Versioneer is configured with a `[versioneer]`
+section in your `setup.cfg` file. Earlier versions required the `setup.py` to
+set attributes on the `versioneer` module immediately after import. The new
+version will refuse to run (raising an exception during import) until you
+have provided the necessary `setup.cfg` section.
 
-### Upgrading from 0.11 to 0.12
-
-Nothing special.
+In addition, the Versioneer package provides an executable named
+`versioneer`, and the installation process is driven by running `versioneer
+install`. In 0.14 and earlier, the executable was named
+`versioneer-installer` and was run without an argument.
 
 ### Upgrading to 0.14
 
@@ -300,18 +303,15 @@ plus-separated "local version" section strings, with dot-separated
 components, like "0.11+2.g1076c97". PEP440-strict tools did not like the old
 format, but should be ok with the new one.
 
-### Upgrading to XXX
+### Upgrading from 0.11 to 0.12
 
-Starting with this version, Versioneer is configured with a `[versioneer]`
-section in your `setup.cfg` file. Earlier versions required the `setup.py` to
-set attributes on the `versioneer` module immediately after import. The new
-version will refuse to run (exception during import) until you have provided
-the necessary `setup.cfg` section.
+Nothing special.
 
-In addition, the Versioneer package provides an executable named
-`versioneer`, and the installation process is driven by running `versioneer
-install`. In 0.14 and earlier, the executable was named
-`versioneer-installer` and was run without an argument.
+### Upgrading from 0.10 to 0.11
+
+You must add a `versioneer.VCS = "git"` to your `setup.py` before re-running
+`setup.py setup_versioneer`. This will enable the use of additional
+version-control systems (SVN, etc) in the future.
 
 ## Future Directions
 
