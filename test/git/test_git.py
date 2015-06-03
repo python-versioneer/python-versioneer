@@ -419,6 +419,10 @@ class Repo(common.Common, unittest.TestCase):
         self.git("add", "setup.py")
         self.git("commit", "-m", "dirty")
         self.git("tag", "demo-1.0")
+        # also add an unrelated tag, to test exclusion. git-describe appears
+        # to return the highest lexicographically-sorted tag, so make sure
+        # the unrelated one sorts earlier
+        self.git("tag", "aaa-999")
         full = self.git("rev-parse", "HEAD")
         short = "1.0"
         if VERBOSE: print("FULL %s" % full)
