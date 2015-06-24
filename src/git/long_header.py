@@ -17,6 +17,7 @@ import sys
 
 
 def get_keywords():
+    """Get the keywords needed to look up the version information."""
     # these strings will be replaced by git during git-archive.
     # setup.py/versioneer.py will grep for the variable names, so they must
     # each be defined on a line of their own. _version.py will just call
@@ -28,10 +29,12 @@ def get_keywords():
 
 
 class VersioneerConfig:
-    pass
+
+    """Container for Versioneer configuration parameters."""
 
 
 def get_config():
+    """Create, populate and return the VersioneerConfig() object."""
     # these strings are filled in when 'setup.py versioneer' creates
     # _version.py
     cfg = VersioneerConfig()
@@ -45,7 +48,8 @@ def get_config():
 
 
 class NotThisMethod(Exception):
-    pass
+
+    """Exception raised if a method is not valid for the current scenario."""
 
 
 LONG_VERSION_PY = {}
@@ -53,7 +57,9 @@ HANDLERS = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
+    """Decorator to mark a method as the handler for a particular VCS."""
     def decorate(f):
+        """Store f in HANDLERS[vcs][method]."""
         if vcs not in HANDLERS:
             HANDLERS[vcs] = {}
         HANDLERS[vcs][method] = f
