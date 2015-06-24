@@ -8,6 +8,7 @@ class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 @register_vcs_handler("git", "get_keywords")
 def git_get_keywords(versionfile_abs):
+    """Extract version information from the given file."""
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
     # so we do it with a regexp instead. This function is not used from
@@ -32,6 +33,7 @@ def git_get_keywords(versionfile_abs):
 
 @register_vcs_handler("git", "keywords")
 def git_versions_from_keywords(keywords, tag_prefix, verbose):
+    """Get version information from git keywords."""
     if not keywords:
         raise NotThisMethod("no keywords at all, weird")
     refnames = keywords["refnames"].strip()

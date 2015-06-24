@@ -8,11 +8,12 @@ class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 @register_vcs_handler("git", "pieces_from_vcs")
 def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
-    # this runs 'git' from the root of the source tree. This only gets called
-    # if the git-archive 'subst' keywords were *not* expanded, and
-    # _version.py hasn't already been rewritten with a short version string,
-    # meaning we're inside a checked out source tree.
+    """Get version from 'git describe' in the root of the source tree.
 
+    This only gets called if the git-archive 'subst' keywords were *not*
+    expanded, and _version.py hasn't already been rewritten with a short
+    version string, meaning we're inside a checked out source tree.
+    """
     if not os.path.exists(os.path.join(root, ".git")):
         if verbose:
             print("no .git in %s" % root)
