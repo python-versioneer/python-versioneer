@@ -8,6 +8,7 @@ class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 def render(): pass # --STRIP DURING BUILD
 
 def get_versions():
+    """Get version information or return default if unable to do so."""
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
     # __file__, we can work backwards from there to the root. Some
     # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which
