@@ -1,6 +1,7 @@
 import re  # --STRIP DURING BUILD
 
 
+
 def plus_or_dot(pieces):
     """Return a + if we don't already have one, else return a ."""
     if "+" in pieces.get("closest-tag", ""):
@@ -138,6 +139,7 @@ def render_git_describe_long(pieces):
     return rendered
 
 
+<<<<<<< HEAD
 def add_one_to_version(version_string, number_index_to_increment=-1):
     """
     Add one to a version string at the given numeric indices.

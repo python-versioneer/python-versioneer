@@ -161,6 +161,7 @@ class Test_Keywords(unittest.TestCase):
         self.assertEqual(v["error"], None)
 
 
+<<<<<<< HEAD
 expected_renders = """
 closest-tag: 1.0
 distance: 0
