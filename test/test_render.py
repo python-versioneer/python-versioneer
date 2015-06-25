@@ -21,8 +21,8 @@ class Testing_renderer_case_mixin(object):
     def assert_rendered(self, pieces, test_case_name):
         version = render(pieces, self.style)['version']
         expected = self.expected[test_case_name]
-        msg = ('Versions differ for {} style with "{}" case: expected {}, '
-               'got {}'.format(self.style, test_case_name, expected, version))
+        msg = ('Versions differ for {0} style with "{1}" case: expected {2}, '
+               'got {3}'.format(self.style, test_case_name, expected, version))
         self.assertEqual(version, expected, msg)
 
     # Naming structure:
