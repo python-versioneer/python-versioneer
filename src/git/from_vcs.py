@@ -6,6 +6,7 @@ def register_vcs_handler(*args): # --STRIP DURING BUILD
 def run_command(): pass # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
+
 @register_vcs_handler("git", "pieces_from_vcs")
 def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     """Get version from 'git describe' in the root of the source tree.
@@ -41,6 +42,13 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     pieces["long"] = full_out
     pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
+
+    # abbrev-ref available with git >= 1.7
+    branch_name = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
+                              cwd=root).strip()
+    if branch_name == 'HEAD':
+        branch_name = None
+    pieces['branch'] = branch_name
 
     # parse describe_out. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]
     # TAG might have hyphens.

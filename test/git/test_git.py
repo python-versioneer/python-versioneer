@@ -1,11 +1,12 @@
 #! /usr/bin/python
 
 from __future__ import print_function
-import os, sys
+import os
 import shutil
 import tarfile
 import unittest
 import tempfile
+import sys
 
 
 from pkg_resources import parse_version, SetuptoolsLegacyVersion
@@ -16,14 +17,15 @@ from render import render
 from git import from_vcs, from_keywords
 from subprocess_helper import run_command
 
-class ParseGitDescribe(unittest.TestCase):
+
+class Test_ParseGitDescribe(unittest.TestCase):
     def setUp(self):
         self.fakeroot = tempfile.mkdtemp()
         self.fakegit = os.path.join(self.fakeroot, ".git")
         os.mkdir(self.fakegit)
 
     def test_pieces(self):
-        def pv(git_describe, do_error=False, expect_pieces=False):
+        def pv(git_describe, do_error=False, expect_pieces=False, branch_name='HEAD'):
             def fake_run_command(exes, args, cwd=None):
                 if args[0] == "describe":
                     if do_error == "describe":
@@ -32,7 +34,10 @@ class ParseGitDescribe(unittest.TestCase):
                 if args[0] == "rev-parse":
                     if do_error == "rev-parse":
                         return None
-                    return "longlong\n"
+                    if args[1] == '--abbrev-ref':
+                        return '%s\n' % branch_name
+                    else:
+                        return "longlong\n"
                 if args[0] == "rev-list":
                     return "42\n"
                 self.fail("git called in weird way: %s" % (args,))
@@ -44,32 +49,44 @@ class ParseGitDescribe(unittest.TestCase):
         self.assertRaises(from_vcs.NotThisMethod,
                           pv, "ignored", do_error="rev-parse")
         self.assertEqual(pv("1f"),
-                         {"closest-tag": None, "dirty": False, "error": None,
+                         {"branch": None, "closest-tag": None,
+                          "dirty": False, "error": None,
                           "distance": 42,
                           "long": "longlong",
                           "short": "longlon"})
         self.assertEqual(pv("1f-dirty"),
-                         {"closest-tag": None, "dirty": True, "error": None,
+                         {"branch": None, "closest-tag": None,
+                          "dirty": True, "error": None,
                           "distance": 42,
                           "long": "longlong",
                           "short": "longlon"})
         self.assertEqual(pv("v1.0-0-g1f"),
-                         {"closest-tag": "1.0", "dirty": False, "error": None,
+                         {"branch": None, "closest-tag": "1.0",
+                          "dirty": False, "error": None,
                           "distance": 0,
                           "long": "longlong",
                           "short": "1f"})
         self.assertEqual(pv("v1.0-0-g1f-dirty"),
-                         {"closest-tag": "1.0", "dirty": True, "error": None,
+                         {"branch": None, "closest-tag": "1.0",
+                          "dirty": True, "error": None,
                           "distance": 0,
                           "long": "longlong",
                           "short": "1f"})
         self.assertEqual(pv("v1.0-1-g1f"),
-                         {"closest-tag": "1.0", "dirty": False, "error": None,
+                         {"branch": None, "closest-tag": "1.0",
+                          "dirty": False, "error": None,
                           "distance": 1,
                           "long": "longlong",
                           "short": "1f"})
         self.assertEqual(pv("v1.0-1-g1f-dirty"),
-                         {"closest-tag": "1.0", "dirty": True, "error": None,
+                         {"branch": None, "closest-tag": "1.0",
+                          "dirty": True, "error": None,
+                          "distance": 1,
+                          "long": "longlong",
+                          "short": "1f"})
+        self.assertEqual(pv("v1.0-1-g1f-dirty", branch_name="v1.0.x"),
+                         {"branch": 'v1.0.x', "closest-tag": "1.0",
+                          "dirty": True, "error": None,
                           "distance": 1,
                           "long": "longlong",
                           "short": "1f"})
@@ -79,13 +96,14 @@ class ParseGitDescribe(unittest.TestCase):
         os.rmdir(self.fakeroot)
 
 
-class Keywords(unittest.TestCase):
+class Test_Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix=""):
         return from_keywords.git_versions_from_keywords(
             {"refnames": refnames, "full": full}, prefix, False)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
+        self.assertEqual(v["branch"], None)
         self.assertEqual(v["version"], "2.0")
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
@@ -93,6 +111,7 @@ class Keywords(unittest.TestCase):
 
     def test_prefer_short(self):
         v = self.parse(" (HEAD, 2.0rc1, 2.0, 2.0rc2) ", " full ")
+        self.assertEqual(v["branch"], None)
         self.assertEqual(v["version"], "2.0")
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
@@ -100,6 +119,7 @@ class Keywords(unittest.TestCase):
 
     def test_prefix(self):
         v = self.parse(" (HEAD, projectname-2.0) ", " full ", "projectname-")
+        self.assertEqual(v["branch"], None)
         self.assertEqual(v["version"], "2.0")
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
@@ -111,6 +131,7 @@ class Keywords(unittest.TestCase):
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
+        self.assertEqual(v["branch"], None)
         self.assertEqual(v["version"], "0+unknown")
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
@@ -118,10 +139,27 @@ class Keywords(unittest.TestCase):
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
+        self.assertEqual(v["branch"], None)
         self.assertEqual(v["version"], "0+unknown")
-        self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
+
+    def test_branch_heuristics(self):
+        v = self.parse("(v0.12.x)", "full", "v")
+        self.assertEqual(v["branch"], None)
+        # Questionable whether this is desirable.
+        self.assertEqual(v["version"], "0.12.x")
+        self.assertEqual(v["dirty"], False)
+        self.assertEqual(v["error"], None)
+
+    def test_new_tag_style(self):
+        v = self.parse("(tag: v0.12.0)", "full", "v")
+        self.assertEqual(v["branch"], None)
+        self.assertEqual(v["version"], "0.12.0")
+        self.assertEqual(v["full-revisionid"], "full")
+        self.assertEqual(v["dirty"], False)
+        self.assertEqual(v["error"], None)
+
 
 expected_renders = """
 closest-tag: 1.0
@@ -208,7 +246,8 @@ git-describe-long: 250b7ca-dirty
 
 """
 
-class RenderPieces(unittest.TestCase):
+
+class Test_RenderPieces(unittest.TestCase):
     def do_render(self, pieces):
         out = {}
         for style in ["pep440", "pep440-pre", "pep440-post", "pep440-old",
@@ -263,7 +302,8 @@ class RenderPieces(unittest.TestCase):
 
 VERBOSE = False
 
-class Repo(common.Common, unittest.TestCase):
+
+class Test_RepoIntegration(common.Common, unittest.TestCase):
 
     # There are three tree states we're interested in:
     #  S1: sitting on the initial commit, no tags
@@ -293,7 +333,7 @@ class Repo(common.Common, unittest.TestCase):
     # or test/demoapp-script-only/)
 
     def test_full(self):
-        self.run_test("test/demoapp", False)
+        self.run_case("test/demoapp", False)
 
     def test_script_only(self):
         # This test looks at an application that consists entirely of a
@@ -302,9 +342,9 @@ class Repo(common.Common, unittest.TestCase):
         # anything executable. So of the 3 runtime situations examined by
         # Repo.test_full above, we only care about RB. (RA1 is valid too, but
         # covered by Repo).
-        self.run_test("test/demoapp-script-only", True)
+        self.run_case("test/demoapp-script-only", True)
 
-    def run_test(self, demoapp_dir, script_only):
+    def run_case(self, demoapp_dir, script_only):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
@@ -567,6 +607,148 @@ class Repo(common.Common, unittest.TestCase):
         self.assertEqual(str(pv), got,
                          "%s: '%s' pep440-normalized to '%s'"
                          % (where, got, str(pv)))
+
+
+class Test_GitRepo(common.Common, unittest.TestCase):
+    # We care about the following git scenarios:
+    #  S1 : master, 0 commits, 0 tags, v0
+    #  S2 : master, 1 commits, 0 tags, v0.dev1
+    #  S3 : master, 1 commits, 1 tags, v1
+    #  S4 : master, 2 commits, 1 tags, v1.dev1
+    #  S5 : v1.x, 2 commits, 2 tags, v1.1
+    #  S6 : master, 3 commits, 1 tags, v2.pre2
+    #       (merge of v1.x back to master)
+    #
+    # For both clean and dirty situations (uncommitted code changes)
+    # We should also check export state.
+
+    expecteds = {'S1': None,
+                 'S2': {'branch': 'master',
+                        'closest-tag': None,
+                        'dirty': False,
+                        'distance': 1,
+                        'error': None},
+                 'S3': {'branch': 'master',
+                        'closest-tag': '1.0',
+                        'dirty': False,
+                        'distance': 0,
+                        'error': None},
+                 'S4': {'branch': 'master',
+                        'closest-tag': '1.0',
+                        'dirty': False,
+                        'distance': 1,
+                        'error': None},
+                 'S5': {'branch': 'master',
+                        'closest-tag': '2.0',
+                        'dirty': False,
+                        'distance': 0,
+                        'error': None},
+                 'S6': {'branch': 'v1.x',
+                        'closest-tag': '1.0',
+                        'dirty': False,
+                        'distance': 1,
+                        'error': None},
+                 'S7': {'branch': 'v1.x',
+                        'closest-tag': '1.1',
+                        'dirty': False,
+                        'distance': 0,
+                        'error': None},
+                 'S8': {'branch': 'master',
+                        'closest-tag': '2.0',
+                        'dirty': False,
+                        'distance': 2,
+                        'error': None},
+                 'S9': {'branch': 'master',
+                        'closest-tag': '2.1',
+                        'dirty': False,
+                        'distance': 0,
+                        'error': None},
+                 }
+
+    def assert_case(self, case_name, dirty=False):
+        tag_prefix = 'v'
+        pieces = from_vcs.git_pieces_from_vcs(tag_prefix, self.repo_root,
+                                              run_command=run_command)
+        pieces.pop('short')
+        pieces.pop('long')
+        expected = self.expecteds.get(case_name, {})
+
+        if dirty:
+            expected['dirty'] = True
+        if expected != pieces:
+            print('Case: %s' % case_name)
+
+        self.assertEqual(expected, pieces)
+
+    def write_file(self, fname, content):
+        with open(os.path.join(self.repo_root, fname), 'w') as fh:
+            fh.write(content)
+
+    def test(self):
+        tag_prefix = 'v'
+
+        self.testdir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                    'git_test_repo')
+        self.repo_root = os.path.join(self.testdir, 'demoapp')
+
+        # Cleanup
+        if os.path.exists(self.repo_root):
+            import shutil
+            shutil.rmtree(self.repo_root)
+        os.makedirs(self.repo_root)
+
+        # S1
+        self.git("init")
+        self.assertRaises(from_vcs.NotThisMethod,
+                          from_vcs.git_pieces_from_vcs,
+                          tag_prefix, self.repo_root, run_command=run_command)
+
+        # S2
+        self.write_file('a.txt', 'abc')
+        self.git("add", "a.txt")
+        self.git("commit", "-m", "First commmit.")
+        self.assert_case('S2')
+
+        # S3
+        self.git("tag", "-a", "v1.0", "-m", "First tag.")
+        self.git("branch", "v1.x")
+        self.assert_case('S3')
+
+        # S4
+        self.write_file('b.txt', 'abc')
+        self.git("add", "b.txt")
+        self.assert_case('S3', dirty=True)
+        self.git("commit", "-m", "Start of 2.0.")
+        self.assert_case('S4')
+
+        # S5
+        self.git("tag", "-a", "v2.0", "-m", "Second tag.")
+        self.assert_case('S5')
+
+        # S6
+        self.git("checkout", "v1.x")
+        self.write_file('a.txt', 'abcdef')
+        self.git("commit", "-am", "Modify 1.x")
+        self.assert_case('S6')
+
+        # S7
+        self.git("tag", "-a", "v1.1", "-m", "Tag v1.1.")
+        self.assert_case('S7')
+
+        # S8
+        self.git("checkout", "master")
+        # Just check that S5 hasn't been distrupted - we've just added a tag.
+        self.assert_case('S5')
+        self.git("merge", "v1.x")
+        self.assert_case('S8')
+
+        # S9
+        self.git("tag", "-a", "v2.1", "-m", "Tag v2.1.")
+        self.assert_case('S9')
+        self.git("checkout", "v1.x")
+        # Again, just check that we haven't disrupted the v1.x branch.
+        self.assert_case('S7')
+
 
 if __name__ == '__main__':
     ver = run_command(common.GITS, ["--version"], ".", True)

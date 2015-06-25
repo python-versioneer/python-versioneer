@@ -1,3 +1,5 @@
+import re  # --STRIP DURING BUILD
+
 
 def plus_or_dot(pieces):
     """Return a + if we don't already have one, else return a ."""
@@ -136,6 +138,65 @@ def render_git_describe_long(pieces):
     return rendered
 
 
+def add_one_to_version(version_string, number_index_to_increment=-1):
+    """
+    Add one to a version string at the given numeric indices.
+
+    >>> add_one_to_version('v1.2.3')
+    'v1.2.4'
+
+    """
+    # Break up the tag by number groups (preserving multi-digit
+    # numbers as multidigit)
+    parts = re.split("([0-9]+)", version_string)
+
+    digit_parts = [(i, part) for i, part in enumerate(parts)
+                   if part.isdigit()]
+
+    # Deal with negative indexing.
+    increment_at_index = ((number_index_to_increment + len(digit_parts))
+                          % len(digit_parts))
+    for n_seen, (i, part) in enumerate(digit_parts):
+        if n_seen == increment_at_index:
+            parts[i] = str(int(part) + 1)
+        elif n_seen > increment_at_index:
+            parts[i] = '0'
+    return ''.join(parts)
+
+
+def render_pep440_plus_one_dev(pieces):
+    # [TAG+1 of minor number][.devDISTANCE][+gHEX]. The git short is
+    # included for dirty.
+
+    # exceptions:
+    # 1: no tags. 0.0.0.devDISTANCE[+gHEX]
+
+    if pieces["closest-tag"]:
+        if pieces["distance"] or pieces["dirty"]:
+            rendered = add_one_to_version(pieces["closest-tag"])
+            rendered += ".dev%d" % pieces["distance"]
+            if pieces["dirty"]:
+                rendered += "+g%s" % pieces["short"]
+        else:
+            rendered = pieces["closest-tag"]
+    else:
+        # exception #1
+        rendered = "0.0.0.dev%d" % pieces["distance"]
+        if pieces["dirty"]:
+            rendered += "+g%s" % pieces["short"]
+    return rendered
+
+
+STYLES = {'default': render_pep440,
+          'pep440': render_pep440,
+          'pep440-pre': render_pep440_pre,
+          'pep440-post': render_pep440_post,
+          'pep440-old': render_pep440_old,
+          'git-describe': render_git_describe,
+          'git-describe-long': render_git_describe_long,
+          }
+
+
 def render(pieces, style):
     """Render the given version pieces into the requested style."""
     if pieces["error"]:
@@ -144,24 +205,15 @@ def render(pieces, style):
                 "dirty": None,
                 "error": pieces["error"]}
 
-    if not style or style == "default":
-        style = "pep440"  # the default
+    if not style:
+        style = 'default'
 
-    if style == "pep440":
-        rendered = render_pep440(pieces)
-    elif style == "pep440-pre":
-        rendered = render_pep440_pre(pieces)
-    elif style == "pep440-post":
-        rendered = render_pep440_post(pieces)
-    elif style == "pep440-old":
-        rendered = render_pep440_old(pieces)
-    elif style == "git-describe":
-        rendered = render_git_describe(pieces)
-    elif style == "git-describe-long":
-        rendered = render_git_describe_long(pieces)
-    else:
+    renderer = STYLES.get(style)
+
+    if not renderer:
         raise ValueError("unknown style '%s'" % style)
+
+    rendered = renderer(pieces)
 
     return {"version": rendered, "full-revisionid": pieces["long"],
             "dirty": pieces["dirty"], "error": None}
-

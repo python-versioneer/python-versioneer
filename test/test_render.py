@@ -1,7 +1,8 @@
 import unittest
 
-from versioneer import render
+from versioneer import render, add_one_to_version
 
+from versioneer_src.render import add_one_to_version
 
 class Testing_renderer_case_mixin(object):
     """
@@ -134,6 +135,49 @@ class Test_git_describe(unittest.TestCase, Testing_renderer_case_mixin):
                 'untagged_1_commits_dirty': 'abc-dirty',
                 'error_getting_parts': 'unknown'
                 }
+
+
+class Test_add_one_to_version(unittest.TestCase):
+    def test_index_0(self):
+        result = add_one_to_version('v1.2.3', 0)
+        self.assertEqual(result, 'v2.0.0')
+
+    def test_index_1(self):
+        result = add_one_to_version('v1.2.3', 1)
+        self.assertEqual(result, 'v1.3.0')
+
+    def test_index_2(self):
+        result = add_one_to_version('v1.2.3', 2)
+        self.assertEqual(result, 'v1.2.4')
+
+    def test_negative_indexing(self):
+        result = add_one_to_version('v1.2.3', -2)
+        self.assertEqual(result, 'v1.3.0')
+
+    def test_year_version(self):
+        result = add_one_to_version('1066.8', 1)
+        self.assertEqual(result, '1066.9')
+
+    def test_index_with_rc(self):
+        # Note this is not the result you would want from a style,
+        # but it is the expected behaviour of this function.
+        result = add_one_to_version('v1.2.3rc4', 2)
+        self.assertEqual(result, 'v1.2.4rc0')
+
+
+
+#class Test_git_describe(unittest.TestCase, Testing_renderer_case_mixin):
+#    style = 'pep440-branch-based'
+#    expected = {'tagged_0_commits_clean': 'v1.2.3',
+#                'tagged_0_commits_dirty': 'v1.2.3-dirty',
+#                'tagged_1_commits_clean': 'v1.2.3-1-gabc',
+#                'tagged_1_commits_dirty': 'v1.2.3-1-gabc-dirty',
+#                'untagged_0_commits_clean': '',
+#                'untagged_0_commits_dirty': '-dirty',
+#                'untagged_1_commits_clean': 'abc',
+#                'untagged_1_commits_dirty': 'abc-dirty',
+#                'error_getting_parts': 'unknown'
+#                }
 
 
 if __name__ == '__main__':
