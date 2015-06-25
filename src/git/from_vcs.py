@@ -52,6 +52,13 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
 
+    # abbrev-ref available with git >= 1.7
+    branch_name = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
+                              cwd=root).strip()
+    if branch_name == 'HEAD':
+        branch_name = None
+    pieces['branch'] = branch_name
+
     # parse describe_out. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]
     # TAG might have hyphens.
     git_describe = describe_out
