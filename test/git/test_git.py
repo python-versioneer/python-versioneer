@@ -161,7 +161,6 @@ class Test_Keywords(unittest.TestCase):
         self.assertEqual(v["error"], None)
 
 
-<<<<<<< HEAD
 expected_renders = """
 closest-tag: 1.0
 distance: 0
@@ -611,18 +610,6 @@ class Test_RepoIntegration(common.Common, unittest.TestCase):
 
 
 class Test_GitRepo(common.Common, unittest.TestCase):
-    # We care about the following git scenarios:
-    #  S1 : master, 0 commits, 0 tags, v0
-    #  S2 : master, 1 commits, 0 tags, v0.dev1
-    #  S3 : master, 1 commits, 1 tags, v1
-    #  S4 : master, 2 commits, 1 tags, v1.dev1
-    #  S5 : v1.x, 2 commits, 2 tags, v1.1
-    #  S6 : master, 3 commits, 1 tags, v2.pre2
-    #       (merge of v1.x back to master)
-    #
-    # For both clean and dirty situations (uncommitted code changes)
-    # We should also check export state.
-
     expecteds = {'S1': None,
                  'S2': {'branch': 'master',
                         'closest-tag': None,
@@ -669,6 +656,7 @@ class Test_GitRepo(common.Common, unittest.TestCase):
     def assert_case(self, case_name, dirty=False):
         tag_prefix = 'v'
         pieces = from_vcs.git_pieces_from_vcs(tag_prefix, self.repo_root,
+                                              verbose=False,
                                               run_command=run_command)
         pieces.pop('short')
         pieces.pop('long')
@@ -702,7 +690,8 @@ class Test_GitRepo(common.Common, unittest.TestCase):
         self.git("init")
         self.assertRaises(from_vcs.NotThisMethod,
                           from_vcs.git_pieces_from_vcs,
-                          tag_prefix, self.repo_root, run_command=run_command)
+                          tag_prefix, self.repo_root, run_command=run_command,
+                          verbose=False)
 
         # S2
         self.write_file('a.txt', 'abc')

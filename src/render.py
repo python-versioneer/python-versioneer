@@ -1,5 +1,6 @@
 import re  # --STRIP DURING BUILD
 
+from header import get_root, get_config_from_root  # --STRIP DURING BUILD
 
 
 def plus_or_dot(pieces):
@@ -139,7 +140,6 @@ def render_git_describe_long(pieces):
     return rendered
 
 
-<<<<<<< HEAD
 def add_one_to_version(version_string, number_index_to_increment=-1):
     """
     Add one to a version string at the given numeric indices.
@@ -166,26 +166,48 @@ def add_one_to_version(version_string, number_index_to_increment=-1):
     return ''.join(parts)
 
 
-def render_pep440_plus_one_dev(pieces):
+def render_pep440_branch_based(pieces):
     # [TAG+1 of minor number][.devDISTANCE][+gHEX]. The git short is
     # included for dirty.
 
     # exceptions:
     # 1: no tags. 0.0.0.devDISTANCE[+gHEX]
 
-    if pieces["closest-tag"]:
+    cfg = get_config_from_root(get_root())
+
+    master = pieces.get('branch') == 'master'
+    maint = re.match(cfg.maint_branch_regexp,
+                     pieces.get('branch') or '')
+
+    # If we are on a tag, just pep440-pre it.
+    if pieces["closest-tag"] and not (pieces["distance"] or
+                                      pieces["dirty"]):
+        rendered = pieces["closest-tag"]
+    else:
+        # Put a default closest-tag in.
+        if not pieces["closest-tag"]:
+            pieces["closest-tag"] = '0.0.0'
+
         if pieces["distance"] or pieces["dirty"]:
-            rendered = add_one_to_version(pieces["closest-tag"])
-            rendered += ".dev%d" % pieces["distance"]
+            if maint:
+                rendered = pieces["closest-tag"]
+                if pieces["distance"]:
+                    rendered += ".post%d" % pieces["distance"]
+            else:
+                rendered = add_one_to_version(pieces["closest-tag"])
+                if pieces["distance"]:
+                    rendered += ".dev%d" % pieces["distance"]
+                # Put the branch name in if it isn't master nor a
+                # maintenance branch.
+
+            if not (master or maint):
+                rendered += "+%s" % (pieces.get('branch') or
+                                     'unknown_branch')
+
             if pieces["dirty"]:
                 rendered += "+g%s" % pieces["short"]
         else:
             rendered = pieces["closest-tag"]
-    else:
-        # exception #1
-        rendered = "0.0.0.dev%d" % pieces["distance"]
-        if pieces["dirty"]:
-            rendered += "+g%s" % pieces["short"]
     return rendered
 
 
@@ -196,6 +218,8 @@ STYLES = {'default': render_pep440,
           'pep440-old': render_pep440_old,
           'git-describe': render_git_describe,
           'git-describe-long': render_git_describe_long,
+          'pep440-old': render_pep440_old,
+          'pep440-branch-based': render_pep440_branch_based,
           }
 
 
