@@ -157,7 +157,8 @@ class Testing_renderer_case_mixin(object):
                 "dirty": dirty,
                 "short": "abc" if distance else '',
                 "long": "abcdefg" if distance else '',
-                "date": "2016-05-31T13:02:11+0200"}
+                "date": "2016-05-31T13:02:11+0200",
+                "branch": getattr(self, 'branch', 'master')}
 
     def assert_rendered(self, pieces, test_case_name):
         version = render(pieces, self.style)['version']
@@ -305,19 +306,68 @@ class Test_add_one_to_version(unittest.TestCase):
         self.assertEqual(result, 'v1.2.4rc0')
 
 
+class Test_pep440_branch_based__master(unittest.TestCase,
+                                       Testing_renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'master'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.4+g',
+                'tagged_1_commits_clean': 'v1.2.4.dev1',
+                'tagged_1_commits_dirty': 'v1.2.4.dev1+gabc',
+                'untagged_0_commits_clean': '0.0.0',
+                'untagged_0_commits_dirty': '0.0.1+g',
+                'untagged_1_commits_clean': '0.0.1.dev1',
+                'untagged_1_commits_dirty': '0.0.1.dev1+gabc',
+                'error_getting_parts': 'unknown'
+                }
 
-#class Test_git_describe(unittest.TestCase, Testing_renderer_case_mixin):
-#    style = 'pep440-branch-based'
-#    expected = {'tagged_0_commits_clean': 'v1.2.3',
-#                'tagged_0_commits_dirty': 'v1.2.3-dirty',
-#                'tagged_1_commits_clean': 'v1.2.3-1-gabc',
-#                'tagged_1_commits_dirty': 'v1.2.3-1-gabc-dirty',
-#                'untagged_0_commits_clean': '',
-#                'untagged_0_commits_dirty': '-dirty',
-#                'untagged_1_commits_clean': 'abc',
-#                'untagged_1_commits_dirty': 'abc-dirty',
-#                'error_getting_parts': 'unknown'
-#                }
+
+class Test_pep440_branch_based__maint(unittest.TestCase,
+                                      Testing_renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'v1.2.x'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.3+g',
+                'tagged_1_commits_clean': 'v1.2.3.post1',
+                'tagged_1_commits_dirty': 'v1.2.3.post1+gabc',
+                'untagged_0_commits_clean': '0.0.0',
+                'untagged_0_commits_dirty': '0.0.0+g',
+                'untagged_1_commits_clean': '0.0.0.post1',
+                'untagged_1_commits_dirty': '0.0.0.post1+gabc',
+                'error_getting_parts': 'unknown'
+                }
+
+
+class Test_pep440_branch_based__feature_branch(unittest.TestCase,
+                                               Testing_renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'feature_branch'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.4+feature_branch+g',
+                'tagged_1_commits_clean': 'v1.2.4.dev1+feature_branch',
+                'tagged_1_commits_dirty': 'v1.2.4.dev1+feature_branch+gabc',
+                'untagged_0_commits_clean': '0.0.0',
+                'untagged_0_commits_dirty': '0.0.1+feature_branch+g',
+                'untagged_1_commits_clean': '0.0.1.dev1+feature_branch',
+                'untagged_1_commits_dirty': '0.0.1.dev1+feature_branch+gabc',
+                'error_getting_parts': 'unknown'
+                }
+
+
+class Test_pep440_branch_based__no_branch_info(unittest.TestCase,
+                                               Testing_renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = None
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.4+unknown_branch+g',
+                'tagged_1_commits_clean': 'v1.2.4.dev1+unknown_branch',
+                'tagged_1_commits_dirty': 'v1.2.4.dev1+unknown_branch+gabc',
+                'untagged_0_commits_clean': '0.0.0',
+                'untagged_0_commits_dirty': '0.0.1+unknown_branch+g',
+                'untagged_1_commits_clean': '0.0.1.dev1+unknown_branch',
+                'untagged_1_commits_dirty': '0.0.1.dev1+unknown_branch+gabc',
+                'error_getting_parts': 'unknown'
+                }
 
 
 if __name__ == '__main__':
