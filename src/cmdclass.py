@@ -129,4 +129,15 @@ def get_cmdclass():
                                   self._versioneer_generated_versions)
     cmds["sdist"] = cmd_sdist
 
+    from distutils.command.build import build as _build
+
+    class cmd_static_version(_build):
+        def run(self):
+            versions = get_versions(verbose=True)
+            # locate _version.py  and replace it
+            # with an updated value
+            print("UPDATING %s" % cfg.versionfile_source)
+            write_to_version_file(cfg.versionfile_source, versions)
+    cmds["static_version"] = cmd_static_version
+
     return cmds
