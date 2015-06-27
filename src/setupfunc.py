@@ -16,7 +16,7 @@ a section like:
  style = pep440
  versionfile_source = src/myproject/_version.py
  versionfile_build = myproject/_version.py
- tag_prefix = ""
+ tag_prefix = 
  parentdir_prefix = myproject-
 
 You will also need to edit your setup.py to use the results:
