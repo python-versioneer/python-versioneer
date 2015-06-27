@@ -133,9 +133,10 @@ def get_cmdclass():
 
     class cmd_static_version(_build):
         def run(self):
+            root = get_root()
+            cfg = get_config_from_root(root)
             versions = get_versions(verbose=True)
-            # locate _version.py  and replace it
-            # with an updated value
+            # locate _version.py and replace it with an updated value
             print("UPDATING %s" % cfg.versionfile_source)
             write_to_version_file(cfg.versionfile_source, versions)
     cmds["static_version"] = cmd_static_version
