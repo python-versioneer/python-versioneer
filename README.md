@@ -329,6 +329,8 @@ number of intermediate scripts.
 
 ## License
 
-To make Versioneer easier to embed, all its code is hereby released into the
-public domain. The `_version.py` that it creates is also in the public
-domain.
+To make Versioneer easier to embed, all its code is dedicated to the public
+domain. The `_version.py` that it creates is also in the public domain.
+Specifically, both are released under the Creative Commons "Public Domain
+Dedication" license (CC0-1.0), as described in
+https://creativecommons.org/publicdomain/zero/1.0/ .
