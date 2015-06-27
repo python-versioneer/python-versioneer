@@ -1,18 +1,20 @@
 
 def plus_or_dot(pieces):
+    """Return a + if we don't already have one, else return a ."""
     if "+" in pieces.get("closest-tag", ""):
         return "."
     return "+"
 
 
 def render_pep440(pieces):
-    # now build up version string, with post-release "local version
-    # identifier". Our goal: TAG[+DISTANCE.gHEX[.dirty]] . Note that if you
-    # get a tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
+    """Build up version string, with post-release "local version identifier".
 
-    # exceptions:
-    # 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
+    Our goal: TAG[+DISTANCE.gHEX[.dirty]] . Note that if you
+    get a tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
 
+    Exceptions:
+    1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
+    """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
@@ -30,11 +32,11 @@ def render_pep440(pieces):
 
 
 def render_pep440_pre(pieces):
-    # TAG[.post.devDISTANCE] . No -dirty
+    """TAG[.post.devDISTANCE] -- No -dirty.
 
-    # exceptions:
-    # 1: no tags. 0.post.devDISTANCE
-
+    Exceptions:
+    1: no tags. 0.post.devDISTANCE
+    """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"]:
@@ -46,14 +48,15 @@ def render_pep440_pre(pieces):
 
 
 def render_pep440_post(pieces):
-    # TAG[.postDISTANCE[.dev0]+gHEX] . The ".dev0" means dirty. Note that
-    # .dev0 sorts backwards (a dirty tree will appear "older" than the
-    # corresponding clean one), but you shouldn't be releasing software with
-    # -dirty anyways.
+    """TAG[.postDISTANCE[.dev0]+gHEX] .
 
-    # exceptions:
-    # 1: no tags. 0.postDISTANCE[.dev0]
+    The ".dev0" means dirty. Note that .dev0 sorts backwards
+    (a dirty tree will appear "older" than the corresponding clean one),
+    but you shouldn't be releasing software with -dirty anyways.
 
+    Exceptions:
+    1: no tags. 0.postDISTANCE[.dev0]
+    """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
@@ -72,11 +75,13 @@ def render_pep440_post(pieces):
 
 
 def render_pep440_old(pieces):
-    # TAG[.postDISTANCE[.dev0]] . The ".dev0" means dirty.
+    """TAG[.postDISTANCE[.dev0]] .
 
-    # exceptions:
-    # 1: no tags. 0.postDISTANCE[.dev0]
+    The ".dev0" means dirty.
 
+    Eexceptions:
+    1: no tags. 0.postDISTANCE[.dev0]
+    """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
@@ -92,12 +97,13 @@ def render_pep440_old(pieces):
 
 
 def render_git_describe(pieces):
-    # TAG[-DISTANCE-gHEX][-dirty], like 'git describe --tags --dirty
-    # --always'
+    """TAG[-DISTANCE-gHEX][-dirty].
 
-    # exceptions:
-    # 1: no tags. HEX[-dirty]  (note: no 'g' prefix)
+    Like 'git describe --tags --dirty --always'.
 
+    Exceptions:
+    1: no tags. HEX[-dirty]  (note: no 'g' prefix)
+    """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"]:
@@ -111,12 +117,14 @@ def render_git_describe(pieces):
 
 
 def render_git_describe_long(pieces):
-    # TAG-DISTANCE-gHEX[-dirty], like 'git describe --tags --dirty
-    # --always -long'. The distance/hash is unconditional.
+    """TAG-DISTANCE-gHEX[-dirty].
 
-    # exceptions:
-    # 1: no tags. HEX[-dirty]  (note: no 'g' prefix)
+    Like 'git describe --tags --dirty --always -long'.
+    The distance/hash is unconditional.
 
+    Exceptions:
+    1: no tags. HEX[-dirty]  (note: no 'g' prefix)
+    """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         rendered += "-%d-g%s" % (pieces["distance"], pieces["short"])
@@ -129,6 +137,7 @@ def render_git_describe_long(pieces):
 
 
 def render(pieces, style):
+    """Render the given version pieces into the requested style."""
     if pieces["error"]:
         return {"version": "unknown",
                 "full-revisionid": pieces.get("long"),

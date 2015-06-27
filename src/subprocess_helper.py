@@ -2,6 +2,7 @@ import sys, subprocess, errno # --STRIP DURING BUILD
 
 
 def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
+    """Call the given command(s)."""
     assert isinstance(commands, list)
     p = None
     for c in commands:

@@ -3,8 +3,11 @@ class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 
 def versions_from_parentdir(parentdir_prefix, root, verbose):
-    # Source tarballs conventionally unpack into a directory that includes
-    # both the project name and a version string.
+    """Try to determine the version from the parent directory name.
+
+    Source tarballs conventionally unpack into a directory that includes
+    both the project name and a version string.
+    """
     dirname = os.path.basename(root)
     if not dirname.startswith(parentdir_prefix):
         if verbose:
