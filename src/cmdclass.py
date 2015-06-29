@@ -58,7 +58,11 @@ def get_cmdclass():
     #  setuptools/install -> bdist_egg ->..
     #  setuptools/develop -> ?
 
-    from distutils.command.build_py import build_py as _build_py
+    # we override different "build_py" commands for both environments
+    if "setuptools" in sys.modules:
+        from setuptools.command.build_py import build_py as _build_py
+    else:
+        from distutils.command.build_py import build_py as _build_py
 
     class cmd_build_py(_build_py):
         def run(self):
