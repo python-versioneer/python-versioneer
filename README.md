@@ -130,7 +130,7 @@ First, decide on values for the following configuration variables:
   a string, like 'PROJECTNAME-', which appears at the start of all VCS tags.
   If your tags look like 'myproject-1.2.0', then you should use
   tag_prefix='myproject-'. If you use unprefixed tags like '1.2.0', this
-  should be an empty string.
+  should be an empty string, using either `tag_prefix=` or `tag_prefix=''`.
 
 * `parentdir_prefix`:
 
@@ -155,7 +155,7 @@ To versioneer-enable your project:
   style = pep440
   versionfile_source = src/myproject/_version.py
   versionfile_build = myproject/_version.py
-  tag_prefix = ""
+  tag_prefix =
   parentdir_prefix = myproject-
   ````
 
@@ -329,6 +329,8 @@ number of intermediate scripts.
 
 ## License
 
-To make Versioneer easier to embed, all its code is hereby released into the
-public domain. The `_version.py` that it creates is also in the public
-domain.
+To make Versioneer easier to embed, all its code is dedicated to the public
+domain. The `_version.py` that it creates is also in the public domain.
+Specifically, both are released under the Creative Commons "Public Domain
+Dedication" license (CC0-1.0), as described in
+https://creativecommons.org/publicdomain/zero/1.0/ .

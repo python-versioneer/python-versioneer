@@ -8,7 +8,7 @@ python:
   - "pypy"
   - "pypy3"
 install:
-  - travis_retry pip install pyflakes flake8 wheel setuptools virtualenv pep257
+  - travis_retry pip install pyflakes flake8 wheel setuptools virtualenv discover pep257
 before_script:
   - git config --global user.email "foo@example.com"
   - git config --global user.name "foo"
@@ -16,15 +16,20 @@ script:
   - easy_install --version
   - virtualenv --version
   - python setup.py make_versioneer
+
+  - python -m discover test
   - python test/git/test_git.py -v
   - python test/git/test_invocations.py -v
+
   - python setup.py make_long_version_py_git
+
   - pyflakes setup.py versioneer.py git_version.py
-  - pyflakes src/cmdclass.py src/from_file.py src/from_parentdir.py
-    src/get_versions.py src/installer.py src/render.py src/setupfunc.py
-    src/subprocess_helper.py
-  - pyflakes src/git/from_keywords.py src/git/from_vcs.py
-    src/git/install.py src/git/long_get_versions.py
+  - find src -iname "*.py"
+    -not -path "src/git/long_header.py"
+    -not -path "src/header.py"
+    -exec pyflakes {} \;
+    -exec echo "{}" \;
   - pyflakes test
+
   - flake8 git_version.py versioneer.py
   - pep257 git_version.py
