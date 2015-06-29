@@ -1,6 +1,8 @@
 
 # Version: @VERSIONEER-VERSION@
 
+"""The Versioneer - like a rocketeer, but for versions."""
+
 """
 @README@
 """
@@ -19,12 +21,16 @@ import sys
 
 
 class VersioneerConfig:
-    pass
+
+    """Container for Versioneer configuration parameters."""
 
 
 def get_root():
-    # we require that all commands are run from the project root, i.e. the
-    # directory that contains setup.py, setup.cfg, and versioneer.py .
+    """Get the project root directory.
+
+    We require that all commands are run from the project root, i.e. the
+    directory that contains setup.py, setup.cfg, and versioneer.py .
+    """
     root = os.path.realpath(os.path.abspath(os.getcwd()))
     setup_py = os.path.join(root, "setup.py")
     versioneer_py = os.path.join(root, "versioneer.py")
@@ -57,6 +63,7 @@ def get_root():
 
 
 def get_config_from_root(root):
+    """Read the project setup.cfg file to determine Versioneer config."""
     # This might raise EnvironmentError (if setup.cfg is missing), or
     # configparser.NoSectionError (if it lacks a [versioneer] section), or
     # configparser.NoOptionError (if it lacks "VCS="). See the docstring at
@@ -85,7 +92,8 @@ def get_config_from_root(root):
 
 
 class NotThisMethod(Exception):
-    pass
+
+    """Exception raised if a method is not valid for the current scenario."""
 
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}
@@ -93,7 +101,9 @@ HANDLERS = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
+    """Decorator to mark a method as the handler for a particular VCS."""
     def decorate(f):
+        """Store f in HANDLERS[vcs][method]."""
         if vcs not in HANDLERS:
             HANDLERS[vcs] = {}
         HANDLERS[vcs][method] = f

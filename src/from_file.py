@@ -23,6 +23,7 @@ import re # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 def versions_from_file(filename):
+    """Try to determine the version from _version.py if present."""
     try:
         with open(filename) as f:
             contents = f.read()
@@ -36,6 +37,7 @@ def versions_from_file(filename):
 
 
 def write_to_version_file(filename, versions):
+    """Write the given version number to the given _version.py file."""
     os.unlink(filename)
     contents = json.dumps(versions, sort_keys=True,
                           indent=1, separators=(",", ": "))

@@ -2,6 +2,11 @@ import sys # --STRIP DURING BUILD
 def run_command(): pass # --STRIP DURING BUILD
 
 def do_vcs_install(manifest_in, versionfile_source, ipy):
+    """Git-specific installation logic for Versioneer.
+
+    For Git, this means creating/changing .gitattributes to mark _version.py
+    for export-time keyword substitution.
+    """
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
