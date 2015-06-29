@@ -8,6 +8,7 @@ def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
 def get_cmdclass():
+    """Get the custom setuptools/distutils subclasses used by Versioneer."""
     if "versioneer" in sys.modules:
         del sys.modules["versioneer"]
         # this fixes the "python setup.py develop" case (also 'install' and

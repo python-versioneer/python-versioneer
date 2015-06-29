@@ -8,12 +8,15 @@ HANDLERS = {} # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 class VersioneerBadRootError(Exception):
-    pass
+
+    """The project root directory is unknown or missing key files."""
 
 
 def get_versions(verbose=False):
-    # returns dict with two keys: 'version' and 'full'
+    """Get the project version from whatever source is available.
 
+    Returns dict with two keys: 'version' and 'full'.
+    """
     if "versioneer" in sys.modules:
         # see the discussion in cmdclass.py:get_cmdclass()
         del sys.modules["versioneer"]
@@ -85,4 +88,5 @@ def get_versions(verbose=False):
 
 
 def get_version():
+    """Get the short version string for this project."""
     return get_versions()["version"]
