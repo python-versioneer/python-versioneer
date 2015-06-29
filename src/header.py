@@ -1,9 +1,8 @@
 
 # Version: @VERSIONEER-VERSION@
 
-"""The Versioneer - like a rocketeer, but for versions."""
+"""The Versioneer - like a rocketeer, but for versions.
 
-"""
 @README@
 """
 
