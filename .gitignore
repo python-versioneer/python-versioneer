@@ -1,3 +1,4 @@
+*.pyc
 /_test/
 /build/
 /versioneer.py
