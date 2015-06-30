@@ -231,12 +231,16 @@ information:
   useful to throw an exception in setup.py if this is set, to avoid e.g.
   creating tarballs with a version string of "unknown".
 
+If the underlying VCS supports it and that information is available, this will also be included:
+
+* `['branch']`: A string with the VCS branch name the version was built on.
+
 Some variants are more useful than others. Including `full-revisionid` in a
 bug report should allow developers to reconstruct the exact code being tested
 (or indicate the presence of local changes that should be shared with the
 developers). `version` is suitable for display in an "about" box or a CLI
 `--version` output: it can be easily compared against release notes and lists
-of bugs fixed in various releases.
+of bugs fixed in various releases. Augmenting that with the `branch` information if it is available will give additional hints during bug reporting what kind of setup a user was running.
 
 The installer adds the following text to your `__init__.py` to place a basic
 version in `YOURPROJECT.__version__`:

@@ -22,7 +22,7 @@ It returns `get_versions()["version"]`. See below for what that means.
 
 ## What does get_versions() return?
 
-`get_versions()` returns a small dictionary of rendered version information, which always contains four keys: 
+`get_versions()` returns a small dictionary of rendered version information, which always contains four keys:
 
 | key | description |
 | --- | ---         |
@@ -31,7 +31,13 @@ It returns `get_versions()["version"]`. See below for what that means.
 | `dirty` | A boolean, True if the source tree has local changes. None if unknown. |
 | `error` | None, or a error description string |
 
-`version` will always be a string (`str` on py3, `unicode` on py2): if Versioneer is unable to compute a version, it will be set to `"0+unknown"`. `full-revisionid` will be a str/unicode, or None if that information is not available. `dirty` will be a boolean, or None if unavailable. `error` will be None, or a str/unicode if there was an error.
+It may also contain a fifth key `branch` if that is supported by the selected VCS and the information is available:
+
+| key | description |
+| --- | ---         |
+| `branch` | The name of the branch (for git), or equivalent (for other VCS systems). |
+
+`version` will always be a string (`str` on py3, `unicode` on py2): if Versioneer is unable to compute a version, it will be set to `"0+unknown"`. `full-revisionid` will be a str/unicode, or None if that information is not available. `dirty` will be a boolean, or None if unavailable. `error` will be None, or a str/unicode if there was an error. `branch` will be a str/unicode if that information is available, otherwise it will be unset.
 
 If the `error` key is non-None, that indicates that Versioneer was unable to obtain a satisfactory version string. There are several possibilities:
 
@@ -60,6 +66,8 @@ if versioneer.get_versions()["dirty"]:
 ```
 
 `dirty` is most meaningful in from-vcs mode. In from-file mode, it records the dirty status of the tree from which the setup.py build/sdist command was run, and is not affected by subsequent changes to the generated tree. In from-keyword and from-parentdir mode, it will always be `False`.
+
+`branch` might be useful for version display within installed applications, to provide helpful information during error reporting by users.
 
 ## How do I select a 'version-style'?
 
@@ -110,4 +118,3 @@ The from-keywords mode will only produce `exact-tag` and `full-revisionid`. If t
 | pep440-old   | TAG[.postDIST]     | TAG or ?          | TAG[.postDIST[.dev0]]    | TAG or ?  |
 | git-describe | TAG[-DIST-gHASH]   | TAG or ?          | TAG[-DIST-gHASH][-dirty] | TAG or ?  |
 | long         | TAG-DIST-gHASH     | TAG-gHASH or ?    | TAG-DIST-gHASH[-dirty]   | ?         |
-
