@@ -52,6 +52,7 @@ del get_versions
 
 
 def do_setup():
+    """Main VCS-independent setup function for installing Versioneer."""
     root = get_root()
     try:
         cfg = get_config_from_root(root)
@@ -133,6 +134,7 @@ def do_setup():
 
 
 def scan_setup_py():
+    """Validate the contents of setup.py against Versioneer's expectations."""
     found = set()
     setters = False
     errors = 0
