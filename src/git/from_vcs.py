@@ -52,6 +52,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     if dirty:
         git_describe = git_describe[:git_describe.rindex("-dirty")]
 
+    # figure out our branch
+    abbrev_ref_out = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"], cwd=root)
+    if abbrev_ref_out is not None:
+        pieces["branch"] = abbrev_ref_out.strip()
+
     # now we have TAG-NUM-gHEX or HEX
 
     if "-" in git_describe:

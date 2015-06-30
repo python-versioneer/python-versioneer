@@ -162,6 +162,9 @@ def render(pieces, style):
     else:
         raise ValueError("unknown style '%s'" % style)
 
-    return {"version": rendered, "full-revisionid": pieces["long"],
+    result = {"version": rendered, "full-revisionid": pieces["long"],
             "dirty": pieces["dirty"], "error": None}
+    if "branch" in pieces and pieces["branch"] is not None:
+        result["branch"] = pieces["branch"]
+    return result
 

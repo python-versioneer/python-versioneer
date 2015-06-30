@@ -23,16 +23,21 @@ class ParseGitDescribe(unittest.TestCase):
         os.mkdir(self.fakegit)
 
     def test_pieces(self):
-        def pv(git_describe, do_error=False, expect_pieces=False):
+        def pv(git_describe, branch="master", do_error=False, expect_pieces=False):
             def fake_run_command(exes, args, cwd=None):
                 if args[0] == "describe":
                     if do_error == "describe":
                         return None
                     return git_describe+"\n"
                 if args[0] == "rev-parse":
-                    if do_error == "rev-parse":
-                        return None
-                    return "longlong\n"
+                    if args[1] == "--abbrev-ref":
+                        if do_error == "ref-parse-branch":
+                            return None
+                        return branch + "\n"
+                    else:
+                        if do_error == "rev-parse":
+                            return None
+                        return "longlong\n"
                 if args[0] == "rev-list":
                     return "42\n"
                 self.fail("git called in weird way: %s" % (args,))
@@ -43,36 +48,41 @@ class ParseGitDescribe(unittest.TestCase):
                           pv, "ignored", do_error="describe")
         self.assertRaises(from_vcs.NotThisMethod,
                           pv, "ignored", do_error="rev-parse")
-        self.assertEqual(pv("1f"),
+        self.assertEqual(pv("1f", do_error="ref-parse-branch"),
                          {"closest-tag": None, "dirty": False, "error": None,
                           "distance": 42,
                           "long": "longlong",
                           "short": "longlon"})
+        self.assertEqual(pv("1f"),
+                         {"closest-tag": None, "dirty": False, "error": None,
+                          "distance": 42,
+                          "long": "longlong",
+                          "short": "longlon", "branch": "master"})
         self.assertEqual(pv("1f-dirty"),
                          {"closest-tag": None, "dirty": True, "error": None,
                           "distance": 42,
                           "long": "longlong",
-                          "short": "longlon"})
+                          "short": "longlon", "branch": "master"})
         self.assertEqual(pv("v1.0-0-g1f"),
                          {"closest-tag": "1.0", "dirty": False, "error": None,
                           "distance": 0,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f", "branch": "master"})
         self.assertEqual(pv("v1.0-0-g1f-dirty"),
                          {"closest-tag": "1.0", "dirty": True, "error": None,
                           "distance": 0,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f", "branch": "master"})
         self.assertEqual(pv("v1.0-1-g1f"),
                          {"closest-tag": "1.0", "dirty": False, "error": None,
                           "distance": 1,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f", "branch": "master"})
         self.assertEqual(pv("v1.0-1-g1f-dirty"),
                          {"closest-tag": "1.0", "dirty": True, "error": None,
                           "distance": 1,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f", "branch": "master"})
 
     def tearDown(self):
         os.rmdir(self.fakegit)

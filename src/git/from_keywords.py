@@ -57,6 +57,14 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         tags = set([r for r in refs if re.search(r'\d', r)])
         if verbose:
             print("discarding '%s', no digits" % ",".join(refs-tags))
+
+    branches = [r for r in refs if not r.startswith(TAG) and r != "HEAD" and not r.startswith("refs/")]
+    if verbose:
+        print("likely branches: %s" % ",".join(sorted(branches)))
+    branch = None
+    if branches:
+        branch = branches[0]
+
     if verbose:
         print("likely tags: %s" % ",".join(sorted(tags)))
     for ref in sorted(tags):
@@ -65,10 +73,14 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
             r = ref[len(tag_prefix):]
             if verbose:
                 print("picking %s" % r)
-            return {"version": r,
-                    "full-revisionid": keywords["full"].strip(),
-                    "dirty": False, "error": None
-                    }
+
+            result = {"version": r,
+                "full-revisionid": keywords["full"].strip(),
+                "dirty": False, "error": None
+            }
+            if branch is not None:
+                result["branch"] = branch
+            return result
     # no suitable tags, so version is "0+unknown", but full hex is still there
     if verbose:
         print("no suitable tags, using unknown + full revision id")

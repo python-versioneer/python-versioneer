@@ -43,6 +43,8 @@ def get_cmdclass():
             vers = get_versions(verbose=True)
             print("Version: %s" % vers["version"])
             print(" full-revisionid: %s" % vers.get("full-revisionid"))
+            if "branch" in vers:
+                print(" branch: %s" % vers["branch"])
             print(" dirty: %s" % vers.get("dirty"))
             if vers["error"]:
                 print(" error: %s" % vers["error"])
