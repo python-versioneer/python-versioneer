@@ -58,7 +58,8 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         if verbose:
             print("discarding '%s', no digits" % ",".join(refs-tags))
 
-    branches = [r for r in refs if not r.startswith(TAG) and r != "HEAD" and not r.startswith("refs/")]
+    branches = [r for r in refs if not r.startswith(TAG)
+                and r != "HEAD" and not r.startswith("refs/")]
     if verbose:
         print("likely branches: %s" % ",".join(sorted(branches)))
     branch = None
@@ -75,9 +76,8 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
                 print("picking %s" % r)
 
             result = {"version": r,
-                "full-revisionid": keywords["full"].strip(),
-                "dirty": False, "error": None
-            }
+                      "full-revisionid": keywords["full"].strip(),
+                      "dirty": False, "error": None}
             if branch is not None:
                 result["branch"] = branch
             return result
