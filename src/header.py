@@ -74,9 +74,6 @@ def get_config_from_root(root):
         parser.readfp(f)
     VCS = parser.get("versioneer", "VCS")  # mandatory
 
-    # Default matches v1.2.x, maint/1.2.x, 1.2.x, 1.x etc.
-    default_maint_branch_regexp = ".*([0-9]+\.)+x$"
-
     def get(parser, name):
         if parser.has_option("versioneer", name):
             return parser.get("versioneer", name)
@@ -91,8 +88,6 @@ def get_config_from_root(root):
         cfg.tag_prefix = ""
     cfg.parentdir_prefix = get(parser, "parentdir_prefix")
     cfg.verbose = get(parser, "verbose")
-    cfg.maint_branch_regexp = (get(parser, "maint_branch_regexp") or
-                               default_maint_branch_regexp)
     return cfg
 
 

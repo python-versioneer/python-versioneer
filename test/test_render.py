@@ -142,7 +142,7 @@ class Test_RenderPieces(unittest.TestCase):
                                  (pieces, key, got[key], expected[key]))
 
 
-class Testing_renderer_case_mixin(object):
+class renderer_case_mixin(object):
     """
     This is a mixin object which can be combined with a unittest.TestCase
     which defines a style and an expected dictionary. See Test_pep440 for
@@ -207,7 +207,7 @@ class Testing_renderer_case_mixin(object):
                              'error_getting_parts')
 
 
-class Test_pep440(unittest.TestCase, Testing_renderer_case_mixin):
+class Test_pep440(unittest.TestCase, renderer_case_mixin):
     style = 'pep440'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3+0.g.dirty',
@@ -221,7 +221,7 @@ class Test_pep440(unittest.TestCase, Testing_renderer_case_mixin):
                 }
 
 
-class Test_pep440_old(unittest.TestCase, Testing_renderer_case_mixin):
+class Test_pep440_old(unittest.TestCase, renderer_case_mixin):
     style = 'pep440-old'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3.post0.dev0',
@@ -235,7 +235,7 @@ class Test_pep440_old(unittest.TestCase, Testing_renderer_case_mixin):
                 }
 
 
-class Test_pep440_post(unittest.TestCase, Testing_renderer_case_mixin):
+class Test_pep440_post(unittest.TestCase, renderer_case_mixin):
     style = 'pep440-post'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3.post0.dev0+g',
@@ -249,7 +249,7 @@ class Test_pep440_post(unittest.TestCase, Testing_renderer_case_mixin):
                 }
 
 
-class Test_pep440_pre(unittest.TestCase, Testing_renderer_case_mixin):
+class Test_pep440_pre(unittest.TestCase, renderer_case_mixin):
     style = 'pep440-pre'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3',
@@ -263,7 +263,7 @@ class Test_pep440_pre(unittest.TestCase, Testing_renderer_case_mixin):
                 }
 
 
-class Test_git_describe(unittest.TestCase, Testing_renderer_case_mixin):
+class Test_git_describe(unittest.TestCase, renderer_case_mixin):
     style = 'git-describe'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3-dirty',
@@ -306,7 +306,7 @@ class Test_add_one_to_version(unittest.TestCase):
 
 
 class Test_pep440_branch_based__master(unittest.TestCase,
-                                       Testing_renderer_case_mixin):
+                                       renderer_case_mixin):
     style = 'pep440-branch-based'
     branch = 'master'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
@@ -322,7 +322,7 @@ class Test_pep440_branch_based__master(unittest.TestCase,
 
 
 class Test_pep440_branch_based__maint(unittest.TestCase,
-                                      Testing_renderer_case_mixin):
+                                      renderer_case_mixin):
     style = 'pep440-branch-based'
     branch = 'v1.2.x'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
@@ -338,7 +338,7 @@ class Test_pep440_branch_based__maint(unittest.TestCase,
 
 
 class Test_pep440_branch_based__feature_branch(unittest.TestCase,
-                                               Testing_renderer_case_mixin):
+                                               renderer_case_mixin):
     style = 'pep440-branch-based'
     branch = 'feature_branch'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
@@ -354,7 +354,7 @@ class Test_pep440_branch_based__feature_branch(unittest.TestCase,
 
 
 class Test_pep440_branch_based__no_branch_info(unittest.TestCase,
-                                               Testing_renderer_case_mixin):
+                                               renderer_case_mixin):
     style = 'pep440-branch-based'
     branch = None
     expected = {'tagged_0_commits_clean': 'v1.2.3',

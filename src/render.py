@@ -1,6 +1,7 @@
 import re  # --STRIP DURING BUILD
 
-from header import get_root, get_config_from_root  # --STRIP DURING BUILD
+# Default matches v1.2.x, maint/1.2.x, 1.2.x, 1.x etc.
+default_maint_branch_regexp = ".*([0-9]+\.)+x$"
 
 
 def plus_or_dot(pieces):
@@ -173,10 +174,8 @@ def render_pep440_branch_based(pieces):
     # exceptions:
     # 1: no tags. 0.0.0.devDISTANCE[+gHEX]
 
-    cfg = get_config_from_root(get_root())
-
     master = pieces.get('branch') == 'master'
-    maint = re.match(cfg.maint_branch_regexp,
+    maint = re.match(default_maint_branch_regexp,
                      pieces.get('branch') or '')
 
     # If we are on a tag, just pep440-pre it.
