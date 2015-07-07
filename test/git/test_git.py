@@ -738,6 +738,11 @@ class Test_GitRepo(common.Common, unittest.TestCase):
         # S5
         self.git("tag", "-a", "v2.0", "-m", "Second tag.")
         self.assert_case('S5')
+        # Even checking out the SHA, without a branch, should figure out the
+        # appropriate branch name.
+        sha = self.git("rev-parse", "HEAD")
+        self.git("checkout", sha)
+        self.assert_case('S5')
 
         # S6
         self.git("checkout", "v1.x")
