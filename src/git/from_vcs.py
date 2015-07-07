@@ -47,7 +47,17 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     branch_name = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
                               cwd=root).strip()
     if branch_name == 'HEAD':
-        branch_name = None
+        branches = run_command(GITS, ["branch", "--list", "--contains"],
+                               cwd=root).split('\n')
+        branches = [branch[2:] for branch in branches if branch[4:5] != '(']
+        if 'master' in branches:
+            branch_name = 'master'
+        elif not branches:
+            branch_name = None
+        else:
+            # Pick the first branch that is returned. Good or bad.
+            branch_name = branches[0]
+
     pieces['branch'] = branch_name
 
     # parse describe_out. It will be like TAG-NUM-gHEX[-dirty] or HEX[-dirty]

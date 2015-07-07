@@ -2,7 +2,6 @@ import unittest
 
 from versioneer import render, add_one_to_version
 
-from versioneer_src.render import add_one_to_version
 
 expected_renders = """
 closest-tag: 1.0
