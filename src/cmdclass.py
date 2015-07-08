@@ -111,6 +111,34 @@ def get_cmdclass():
         cmds["build_exe"] = cmd_build_exe
         del cmds["build_py"]
 
+    if 'py2exe' in sys.modules:  # py2exe enabled?
+        try:
+            from py2exe.distutils_buildexe import py2exe as _py2exe  # py3
+        except ImportError:
+            from py2exe.build_exe import py2exe as _py2exe  # py2
+
+        class cmd_py2exe(_py2exe):
+            def run(self):
+                root = get_root()
+                cfg = get_config_from_root(root)
+                versions = get_versions()
+                target_versionfile = cfg.versionfile_source
+                print("UPDATING %s" % target_versionfile)
+                write_to_version_file(target_versionfile, versions)
+
+                _py2exe.run(self)
+                os.unlink(target_versionfile)
+                with open(cfg.versionfile_source, "w") as f:
+                    LONG = LONG_VERSION_PY[cfg.VCS]
+                    f.write(LONG %
+                            {"DOLLAR": "$",
+                             "STYLE": cfg.style,
+                             "TAG_PREFIX": cfg.tag_prefix,
+                             "PARENTDIR_PREFIX": cfg.parentdir_prefix,
+                             "VERSIONFILE_SOURCE": cfg.versionfile_source,
+                             })
+        cmds["py2exe"] = cmd_py2exe
+
     # we override different "sdist" commands for both environments
     if "setuptools" in sys.modules:
         from setuptools.command.sdist import sdist as _sdist
