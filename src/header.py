@@ -52,7 +52,9 @@ def get_root():
         # os.path.dirname(__file__), as that will find whichever
         # versioneer.py was first imported, even in later projects.
         me = os.path.realpath(os.path.abspath(__file__))
-        if os.path.splitext(me)[0] != os.path.splitext(versioneer_py)[0]:
+        me_dir = os.path.normcase(os.path.splitext(me)[0])
+        vsr_dir = os.path.normcase(os.path.splitext(versioneer_py)[0])
+        if me_dir != vsr_dir:
             print("Warning: build in %s is using versioneer.py from %s"
                   % (os.path.dirname(me), versioneer_py))
     except NameError:
