@@ -96,6 +96,28 @@ def render_pep440_old(pieces):
     return rendered
 
 
+def render_pep440_bare(pieces):
+    """TAG[.DISTANCE[.dev0]] .
+
+    The ".dev0" means dirty.
+
+    Eexceptions:
+    1: no tags. 0.DISTANCE[.dev0]
+    """
+    if pieces["closest-tag"]:
+        rendered = pieces["closest-tag"]
+        if pieces["distance"] or pieces["dirty"]:
+            rendered += ".%d" % pieces["distance"]
+            if pieces["dirty"]:
+                rendered += ".dev0"
+    else:
+        # exception #1
+        rendered = "0.%d" % pieces["distance"]
+        if pieces["dirty"]:
+            rendered += ".dev0"
+    return rendered
+
+
 def render_git_describe(pieces):
     """TAG[-DISTANCE-gHEX][-dirty].
 
@@ -155,6 +177,8 @@ def render(pieces, style):
         rendered = render_pep440_post(pieces)
     elif style == "pep440-old":
         rendered = render_pep440_old(pieces)
+    elif style == "pep440-bare":
+        rendered = render_pep440_bare(pieces)
     elif style == "git-describe":
         rendered = render_git_describe(pieces)
     elif style == "git-describe-long":
@@ -164,4 +188,3 @@ def render(pieces, style):
 
     return {"version": rendered, "full-revisionid": pieces["long"],
             "dirty": pieces["dirty"], "error": None}
-
