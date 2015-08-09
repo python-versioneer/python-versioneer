@@ -131,6 +131,7 @@ pep440: 1.0
 pep440-pre: 1.0
 pep440-post: 1.0
 pep440-old: 1.0
+pep440-bare: 1.0
 git-describe: 1.0
 git-describe-long: 1.0-0-g250b7ca
 
@@ -141,6 +142,7 @@ pep440: 1.0+0.g250b7ca.dirty
 pep440-pre: 1.0
 pep440-post: 1.0.post0.dev0+g250b7ca
 pep440-old: 1.0.post0.dev0
+pep440-bare: 1.0.0.dev0
 git-describe: 1.0-dirty
 git-describe-long: 1.0-0-g250b7ca-dirty
 
@@ -151,6 +153,7 @@ pep440: 1.0+1.g250b7ca
 pep440-pre: 1.0.post.dev1
 pep440-post: 1.0.post1+g250b7ca
 pep440-old: 1.0.post1
+pep440-bare: 1.0.1
 git-describe: 1.0-1-g250b7ca
 git-describe-long: 1.0-1-g250b7ca
 
@@ -161,6 +164,7 @@ pep440: 1.0+1.g250b7ca.dirty
 pep440-pre: 1.0.post.dev1
 pep440-post: 1.0.post1.dev0+g250b7ca
 pep440-old: 1.0.post1.dev0
+pep440-bare: 1.0.1.dev0
 git-describe: 1.0-1-g250b7ca-dirty
 git-describe-long: 1.0-1-g250b7ca-dirty
 
@@ -172,6 +176,7 @@ pep440: 1.0+plus.1.g250b7ca
 pep440-pre: 1.0+plus.post.dev1
 pep440-post: 1.0+plus.post1.g250b7ca
 pep440-old: 1.0+plus.post1
+pep440-bare: 1.0+plus.1
 git-describe: 1.0+plus-1-g250b7ca
 git-describe-long: 1.0+plus-1-g250b7ca
 
@@ -182,6 +187,7 @@ pep440: 1.0+plus.1.g250b7ca.dirty
 pep440-pre: 1.0+plus.post.dev1
 pep440-post: 1.0+plus.post1.dev0.g250b7ca
 pep440-old: 1.0+plus.post1.dev0
+pep440-bare: 1.0+plus.1.dev0
 git-describe: 1.0+plus-1-g250b7ca-dirty
 git-describe-long: 1.0+plus-1-g250b7ca-dirty
 
@@ -193,6 +199,7 @@ pep440: 0+untagged.1.g250b7ca
 pep440-pre: 0.post.dev1
 pep440-post: 0.post1+g250b7ca
 pep440-old: 0.post1
+pep440-bare: 0.1
 git-describe: 250b7ca
 git-describe-long: 250b7ca
 
@@ -203,6 +210,7 @@ pep440: 0+untagged.1.g250b7ca.dirty
 pep440-pre: 0.post.dev1
 pep440-post: 0.post1.dev0+g250b7ca
 pep440-old: 0.post1.dev0
+pep440-bare: 0.1.dev0
 git-describe: 250b7ca-dirty
 git-describe-long: 250b7ca-dirty
 
@@ -212,7 +220,7 @@ class RenderPieces(unittest.TestCase):
     def do_render(self, pieces):
         out = {}
         for style in ["pep440", "pep440-pre", "pep440-post", "pep440-old",
-                      "git-describe", "git-describe-long"]:
+                      "pep440-bare", "git-describe", "git-describe-long"]:
             out[style] = render(pieces, style)["version"]
         DEFAULT = "pep440"
         self.assertEqual(render(pieces, ""), render(pieces, DEFAULT))

@@ -94,6 +94,20 @@ class Test_pep440_old(unittest.TestCase, Testing_renderer_case_mixin):
                 }
 
 
+class Test_pep440_bare(unittest.TestCase, Testing_renderer_case_mixin):
+    style = 'pep440-old'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.3.0.dev0',
+                'tagged_1_commits_clean': 'v1.2.3.1',
+                'tagged_1_commits_dirty': 'v1.2.3.1.dev0',
+                'untagged_0_commits_clean': '0.0',
+                'untagged_0_commits_dirty': '0.0.dev0',
+                'untagged_1_commits_clean': '0.1',
+                'untagged_1_commits_dirty': '0.1.dev0',
+                'error_getting_parts': 'unknown'
+                }
+
+
 class Test_pep440_post(unittest.TestCase, Testing_renderer_case_mixin):
     style = 'pep440-post'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
