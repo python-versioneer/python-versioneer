@@ -95,7 +95,7 @@ class Test_pep440_old(unittest.TestCase, Testing_renderer_case_mixin):
 
 
 class Test_pep440_bare(unittest.TestCase, Testing_renderer_case_mixin):
-    style = 'pep440-old'
+    style = 'pep440-bare'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3.0.dev0',
                 'tagged_1_commits_clean': 'v1.2.3.1',
