@@ -121,9 +121,11 @@ First, decide on values for the following configuration variables:
   If this is set to None, then `setup.py build` will not attempt to rewrite
   any `_version.py` in the built tree. If your project does not have any
   libraries (e.g. if it only builds a script), then you should use
-  `versionfile_build = None` and override `distutils.command.build_scripts`
-  to explicitly insert a copy of `versioneer.get_version()` into your
-  generated script.
+  `versionfile_build = None`. To actually use the computed version string,
+  your `setup.py` will need to override `distutils.command.build_scripts`
+  with a subclass that explicitly inserts a copy of
+  `versioneer.get_version()` into your script file. See
+  `test/demoapp-script-only/setup.py` for an example.
 
 * `tag_prefix`:
 
