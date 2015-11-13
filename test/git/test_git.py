@@ -42,6 +42,8 @@ class Test_ParseGitDescribe(unittest.TestCase):
                     return "42\n", 0
                 if args[0] == "show":
                     return "12345\n", 0
+                elif args[0:2] == ["branch", "--contains"]:
+                    return ''
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,

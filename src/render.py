@@ -174,9 +174,12 @@ def render_pep440_branch_based(pieces):
     # exceptions:
     # 1: no tags. 0.0.0.devDISTANCE[+gHEX]
 
-    master = pieces.get('branch') == 'master'
-    maint = re.match(default_maint_branch_regexp,
-                     pieces.get('branch') or '')
+    replacements = ([' ', '.'], ['(', ''], [')', ''])
+    branch_name = pieces.get('branch') or ''
+    for old, new in replacements:
+        branch_name = branch_name.replace(old, new)
+    master = branch_name == 'master'
+    maint = re.match(default_maint_branch_regexp, branch_name)
 
     # If we are on a tag, just pep440-pre it.
     if pieces["closest-tag"] and not (pieces["distance"] or
@@ -196,15 +199,17 @@ def render_pep440_branch_based(pieces):
                 rendered = add_one_to_version(pieces["closest-tag"])
                 if pieces["distance"]:
                     rendered += ".dev%d" % pieces["distance"]
-                # Put the branch name in if it isn't master nor a
-                # maintenance branch.
 
+            suffix = []
+            # Put the branch name in if it isn't master nor a
+            # maintenance branch.
             if not (master or maint):
-                rendered += "+%s" % (pieces.get('branch') or
-                                     'unknown_branch')
+                suffix.append('%s' % (branch_name or 'unknown_branch'))
 
             if pieces["dirty"]:
-                rendered += "+g%s" % pieces["short"]
+                suffix.append('g%s' % pieces["short"])
+            if suffix:
+                rendered += '+%s' % '_'.join(suffix)
         else:
             rendered = pieces["closest-tag"]
     return rendered
