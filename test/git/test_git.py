@@ -31,15 +31,18 @@ class Test_ParseGitDescribe(unittest.TestCase):
                     if do_error == "describe":
                         return None
                     return git_describe+"\n"
-                if args[0] == "rev-parse":
+                elif args[0] == "rev-parse":
                     if do_error == "rev-parse":
                         return None
                     if args[1] == '--abbrev-ref':
                         return '%s\n' % branch_name
                     else:
                         return "longlong\n"
-                if args[0] == "rev-list":
+                elif args[0] == "rev-list":
                     return "42\n"
+                elif args[0:2] == ["branch", "--contains"]:
+                    return ''
+
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,

@@ -341,13 +341,13 @@ class Test_pep440_branch_based__feature_branch(unittest.TestCase,
     style = 'pep440-branch-based'
     branch = 'feature_branch'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
-                'tagged_0_commits_dirty': 'v1.2.4+feature_branch+g',
+                'tagged_0_commits_dirty': 'v1.2.4+feature_branch_g',
                 'tagged_1_commits_clean': 'v1.2.4.dev1+feature_branch',
-                'tagged_1_commits_dirty': 'v1.2.4.dev1+feature_branch+gabc',
+                'tagged_1_commits_dirty': 'v1.2.4.dev1+feature_branch_gabc',
                 'untagged_0_commits_clean': '0.0.0',
-                'untagged_0_commits_dirty': '0.0.1+feature_branch+g',
+                'untagged_0_commits_dirty': '0.0.1+feature_branch_g',
                 'untagged_1_commits_clean': '0.0.1.dev1+feature_branch',
-                'untagged_1_commits_dirty': '0.0.1.dev1+feature_branch+gabc',
+                'untagged_1_commits_dirty': '0.0.1.dev1+feature_branch_gabc',
                 'error_getting_parts': 'unknown'
                 }
 
@@ -357,13 +357,13 @@ class Test_pep440_branch_based__no_branch_info(unittest.TestCase,
     style = 'pep440-branch-based'
     branch = None
     expected = {'tagged_0_commits_clean': 'v1.2.3',
-                'tagged_0_commits_dirty': 'v1.2.4+unknown_branch+g',
+                'tagged_0_commits_dirty': 'v1.2.4+unknown_branch_g',
                 'tagged_1_commits_clean': 'v1.2.4.dev1+unknown_branch',
-                'tagged_1_commits_dirty': 'v1.2.4.dev1+unknown_branch+gabc',
+                'tagged_1_commits_dirty': 'v1.2.4.dev1+unknown_branch_gabc',
                 'untagged_0_commits_clean': '0.0.0',
-                'untagged_0_commits_dirty': '0.0.1+unknown_branch+g',
+                'untagged_0_commits_dirty': '0.0.1+unknown_branch_g',
                 'untagged_1_commits_clean': '0.0.1.dev1+unknown_branch',
-                'untagged_1_commits_dirty': '0.0.1.dev1+unknown_branch+gabc',
+                'untagged_1_commits_dirty': '0.0.1.dev1+unknown_branch_gabc',
                 'error_getting_parts': 'unknown'
                 }
 

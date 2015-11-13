@@ -71,7 +71,7 @@ def generate_versioneer_py():
     s.write(get("src/subprocess_helper.py", do_strip=True))
 
     for VCS in get_vcs_list():
-        s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
+        s.write(u("LONG_VERSION_PY['%s'] = r'''\n" % VCS))
         s.write(generate_long_version_py(VCS))
         s.write(u("'''\n"))
 
