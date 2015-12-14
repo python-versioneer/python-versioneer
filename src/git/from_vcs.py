@@ -14,9 +14,10 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     expanded, and _version.py hasn't already been rewritten with a short
     version string, meaning we're inside a checked out source tree.
     """
-    if not os.path.exists(os.path.join(root, ".git")):
+    git_dir = os.environ.get("GIT_DIR", os.path.join(root, ".git"))
+    if not os.path.exists(git_dir):
         if verbose:
-            print("no .git in %s" % root)
+            print("no .git or GIT_DIR found in %s" % root)
         raise NotThisMethod("no .git directory")
 
     GITS = ["git"]
