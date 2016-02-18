@@ -568,6 +568,242 @@ class Repo(common.Common, unittest.TestCase):
                          "%s: '%s' pep440-normalized to '%s'"
                          % (where, got, str(pv)))
 
+
+class MultiLevelRepo(Repo):
+
+    def create_false_repo(self, falserepo_dir):
+        os.mkdir(falserepo_dir)
+        self.git("init", workdir=falserepo_dir)
+        f = open(os.path.join(falserepo_dir, "false-repo"), "w")
+        f.write("don't look at me\n")
+        f.close()
+        self.git("add", "false-repo", workdir=self.testdir)
+        self.git("commit", "-m", "first false commit", workdir=falserepo_dir)
+        self.git("tag", "demo-4.0", workdir=falserepo_dir)
+
+    def subpath(self, *path):
+        if len(path) > 0 and (path[0] == "demoapp" or path[0].startswith("demoapp/")):
+            # Add an extra directory level to demoapp
+            return os.path.join(self.testdir, "extra", *path)
+
+        # Else
+        return os.path.join(self.testdir, *path)
+
+    def run_test(self, demoapp_dir, script_only):
+        self.testdir = tempfile.mkdtemp()
+        if VERBOSE: print("testdir: %s" % (self.testdir,))
+        if os.path.exists(self.testdir):
+            shutil.rmtree(self.testdir)
+
+        # create an unrelated git tree above the testdir. Some tests will run
+        # from this directory, and they should use the demoapp git
+        # environment instead of the deceptive parent
+        self.create_false_repo(self.testdir)
+
+        shutil.copytree(demoapp_dir, self.subpath("demoapp"))
+        setup_cfg_fn = self.subpath("demoapp", "setup.cfg")
+        with open(setup_cfg_fn, "r") as f:
+            setup_cfg = f.read()
+        setup_cfg = setup_cfg.replace("@VCS@", "git")
+        setup_cfg += "\nvcs_root = ..\n"
+        with open(setup_cfg_fn, "w") as f:
+            f.write(setup_cfg)
+        shutil.copyfile("versioneer.py", self.subpath("demoapp", "versioneer.py"))
+
+        # Create GIT Repo one directory level above module.
+        self.git("init", workdir=self.subpath("extra"))
+
+        self.git("add", "--all")
+        self.git("commit", "-m", "comment")
+
+        full = self.git("rev-parse", "HEAD")
+        v = self.python("setup.py", "--version")
+        self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
+        v = self.python(self.subpath("demoapp", "setup.py"),
+                        "--version", workdir=self.testdir)
+        self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
+
+        out = self.python("versioneer.py", "setup").splitlines()
+        self.assertEqual(out[0], "creating src/demo/_version.py")
+        if script_only:
+            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+        else:
+            self.assertEqual(out[1], " appending to src/demo/__init__.py")
+        self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
+        self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
+        out = set(self.git("status", "--porcelain").splitlines())
+        # Many folks have a ~/.gitignore with ignores .pyc files, but if they
+        # don't, it will show up in the status here. Ignore it.
+        out.discard("?? demoapp/versioneer.pyc")
+        out.discard("?? demoapp/__pycache__/")
+        expected = set(["A  demoapp/.gitattributes",
+                        "M  demoapp/MANIFEST.in",
+                        "A  demoapp/src/demo/_version.py"])
+        if not script_only:
+            expected.add("M  demoapp/src/demo/__init__.py")
+        self.assertEqual(out, expected)
+        if not script_only:
+            f = open(self.subpath("demoapp/src/demo/__init__.py"))
+            i = f.read().splitlines()
+            f.close()
+            self.assertEqual(i[-3], "from ._version import get_versions")
+            self.assertEqual(i[-2], "__version__ = get_versions()['version']")
+            self.assertEqual(i[-1], "del get_versions")
+        self.git("commit", "-m", "add _version stuff")
+
+        # "versioneer.py setup" should be idempotent
+        out = self.python("versioneer.py", "setup").splitlines()
+        self.assertEqual(out[0], "creating src/demo/_version.py")
+        if script_only:
+            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+        else:
+            self.assertEqual(out[1], " src/demo/__init__.py unmodified")
+        self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
+        self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
+        out = set(self.git("status", "--porcelain").splitlines())
+        out.discard("?? demoapp/versioneer.pyc")
+        out.discard("?? demoapp/__pycache__/")
+        self.assertEqual(out, set([]))
+
+        UNABLE = "unable to compute version"
+        NOTAG = "no suitable tags"
+
+        # S1: the tree is sitting on a pre-tagged commit
+        full = self.git("rev-parse", "HEAD")
+        short = "0+untagged.2.g%s" % full[:7]
+        self.do_checks("S1", {"TA": [short, full, False, None],
+                              "TB": ["0+unknown", None, None, UNABLE],
+                              "TC": [short, full, False, None],
+                              "TD": ["0+unknown", full, False, NOTAG],
+                              "TE": [short, full, False, None],
+                              })
+
+        # TD: expanded keywords only tell us about tags and full revisionids,
+        # not how many patches we are beyond a tag. So any TD git-archive
+        # tarball from a non-tagged version will give us an error. "dirty" is
+        # False, since the tree from which the tarball was created is
+        # necessarily clean.
+
+        # S2: dirty the pre-tagged tree
+        f = open(self.subpath("demoapp/setup.py"),"a")
+        f.write("# dirty\n")
+        f.close()
+        full = self.git("rev-parse", "HEAD")
+        short = "0+untagged.2.g%s.dirty" % full[:7]
+        self.do_checks("S2", {"TA": [short, full, True, None],
+                              "TB": ["0+unknown", None, None, UNABLE],
+                              "TC": [short, full, True, None],
+                              "TD": ["0+unknown", full, False, NOTAG],
+                              "TE": [short, full, True, None],
+                              })
+
+        # S3: we commit that change, then make the first tag (1.0)
+        self.git("add", "setup.py")
+        self.git("commit", "-m", "dirty")
+        self.git("tag", "demo-1.0")
+        # also add an unrelated tag, to test exclusion. git-describe appears
+        # to return the highest lexicographically-sorted tag, so make sure
+        # the unrelated one sorts earlier
+        self.git("tag", "aaa-999")
+        full = self.git("rev-parse", "HEAD")
+        short = "1.0"
+        if VERBOSE: print("FULL %s" % full)
+        # the tree is now sitting on the 1.0 tag
+        self.do_checks("S3", {"TA": [short, full, False, None],
+                              "TB": ["0+unknown", None, None, UNABLE],
+                              "TC": [short, full, False, None],
+                              "TD": [short, full, False, None],
+                              "TE": [short, full, False, None],
+                              })
+
+        # S4: now we dirty the tree
+        f = open(self.subpath("demoapp/setup.py"),"a")
+        f.write("# dirty\n")
+        f.close()
+        full = self.git("rev-parse", "HEAD")
+        short = "1.0+0.g%s.dirty" % full[:7]
+        self.do_checks("S4", {"TA": [short, full, True, None],
+                              "TB": ["0+unknown", None, None, UNABLE],
+                              "TC": [short, full, True, None],
+                              "TD": ["1.0", full, False, None],
+                              "TE": [short, full, True, None],
+                              })
+
+        # S5: now we make one commit past the tag
+        self.git("add", "setup.py")
+        self.git("commit", "-m", "dirty")
+        full = self.git("rev-parse", "HEAD")
+        short = "1.0+1.g%s" % full[:7]
+        self.do_checks("S5", {"TA": [short, full, False, None],
+                              "TB": ["0+unknown", None, None, UNABLE],
+                              "TC": [short, full, False, None],
+                              "TD": ["0+unknown", full, False, NOTAG],
+                              "TE": [short, full, False, None],
+                              })
+
+        # S6: dirty the post-tag tree
+        f = open(self.subpath("demoapp/setup.py"),"a")
+        f.write("# more dirty\n")
+        f.close()
+        full = self.git("rev-parse", "HEAD")
+        short = "1.0+1.g%s.dirty" % full[:7]
+        self.do_checks("S6", {"TA": [short, full, True, None],
+                              "TB": ["0+unknown", None, None, UNABLE],
+                              "TC": [short, full, True, None],
+                              "TD": ["0+unknown", full, False, NOTAG],
+                              "TE": [short, full, True, None],
+                              })
+
+    def do_checks(self, state, exps):
+        if os.path.exists(self.subpath("out")):
+            shutil.rmtree(self.subpath("out"))
+        # TA: source tree
+        self.check_version(self.subpath("demoapp"), state, "TA", exps["TA"])
+
+        # TB: .git-less copy of source tree
+        target = self.subpath("out/demoapp-TB")
+        shutil.copytree(self.subpath("extra"), target)
+        shutil.rmtree(os.path.join(target, ".git"))
+        target = os.path.join(target, "demoapp")
+        self.check_version(target, state, "TB", exps["TB"])
+
+        # TC: source tree in versionprefix-named parentdir
+        target = self.subpath("out/demo-1.1")
+        shutil.copytree(self.subpath("extra"), target)
+        shutil.rmtree(os.path.join(target, ".git"))
+        shutil.move(os.path.join(target, "demoapp"), os.path.join(target, "demo-1.1"))
+        target = os.path.join(target, "demo-1.1")
+        self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
+
+        # TD: unpacked git-archive tarball
+        target = self.subpath("out/TD/demoapp-TD")
+        self.git("archive", "--format=tar", "--prefix=demoapp-TD/",
+                 "--output=../demo.tar", "HEAD", workdir=self.subpath("extra"))
+        os.mkdir(self.subpath("out/TD"))
+        t = tarfile.TarFile(self.subpath("demo.tar"))
+        t.extractall(path=self.subpath("out/TD"))
+        t.close()
+        target = os.path.join(target, "demoapp")
+        self.check_version(target, state, "TD", exps["TD"])
+
+        # TE: unpacked setup.py sdist tarball
+        if os.path.exists(self.subpath("demoapp/dist")):
+            shutil.rmtree(self.subpath("demoapp/dist"))
+        self.python("setup.py", "sdist", "--formats=tar")
+        files = os.listdir(self.subpath("demoapp/dist"))
+        self.assertTrue(len(files)==1, files)
+        distfile = files[0]
+        self.assertEqual(distfile, "demo-%s.tar" % exps["TE"][0])
+        fn = os.path.join(self.subpath("demoapp/dist"), distfile)
+        os.mkdir(self.subpath("out/TE"))
+        t = tarfile.TarFile(fn)
+        t.extractall(path=self.subpath("out/TE"))
+        t.close()
+        target = self.subpath("out/TE/demo-%s" % exps["TE"][0])
+        self.assertTrue(os.path.isdir(target))
+        self.check_version(target, state, "TE", exps["TE"])
+
+
 if __name__ == '__main__':
     ver = run_command(common.GITS, ["--version"], ".", True)
     print("git --version: %s" % ver.strip())
