@@ -138,6 +138,7 @@ class _Invocations(common.Common):
         venv = self.make_venv("make-distutils-wheel-with-pip")
         self.run_in_venv(venv, repodir,
                          "pip", "wheel",
+                         "-w", "wheelhouse",
                          "--no-index",# "--find-links", linkdir,
                          ".")
         created = os.path.join(repodir, "wheelhouse", wheelname)
@@ -254,6 +255,7 @@ class _Invocations(common.Common):
         venv = self.make_venv("make-setuptools-wheel-with-pip")
         self.run_in_venv(venv, repodir,
                          "pip", "wheel",
+                         "-w", "wheelhouse",
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(repodir, "wheelhouse", wheelname)
@@ -487,6 +489,7 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         venv = self.make_venv("distutils-unpacked-pip-wheel")
         self.run_in_venv(venv, unpacked,
                          "pip", "wheel",
+                         "-w", "wheelhouse",
                          "--no-index",# "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
@@ -542,6 +545,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         venv = self.make_venv("setuptools-unpacked-pip-wheel")
         self.run_in_venv(venv, unpacked,
                          "pip", "wheel",
+                         "-w", "wheelhouse",
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
