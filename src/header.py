@@ -20,7 +20,6 @@ import sys
 
 
 class VersioneerConfig:
-
     """Container for Versioneer configuration parameters."""
 
 
@@ -85,13 +84,15 @@ def get_config_from_root(root):
     cfg.tag_prefix = get(parser, "tag_prefix")
     if cfg.tag_prefix in ("''", '""'):
         cfg.tag_prefix = ""
+    cfg.vcs_root = get(parser, "vcs_root") or ""
+    if cfg.vcs_root in ("''", '""'):
+        cfg.vcs_root = ""
     cfg.parentdir_prefix = get(parser, "parentdir_prefix")
     cfg.verbose = get(parser, "verbose")
     return cfg
 
 
 class NotThisMethod(Exception):
-
     """Exception raised if a method is not valid for the current scenario."""
 
 # these dictionaries contain VCS-specific tools

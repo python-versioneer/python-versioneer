@@ -100,6 +100,7 @@ def get_cmdclass():
                             {"DOLLAR": "$",
                              "STYLE": cfg.style,
                              "TAG_PREFIX": cfg.tag_prefix,
+                             "VCS_ROOT": cfg.vcs_root,
                              "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                              "VERSIONFILE_SOURCE": cfg.versionfile_source,
                              })

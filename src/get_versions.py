@@ -8,7 +8,6 @@ HANDLERS = {} # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
 class VersioneerBadRootError(Exception):
-
     """The project root directory is unknown or missing key files."""
 
 
@@ -62,8 +61,9 @@ def get_versions(verbose=False):
 
     from_vcs_f = handlers.get("pieces_from_vcs")
     if from_vcs_f:
+        vcs_root = os.path.join(root, cfg.vcs_root)
         try:
-            pieces = from_vcs_f(cfg.tag_prefix, root, verbose)
+            pieces = from_vcs_f(cfg.tag_prefix, vcs_root, verbose)
             ver = render(pieces, cfg.style)
             if verbose:
                 print("got version from VCS %s" % ver)

@@ -29,7 +29,6 @@ def get_keywords():
 
 
 class VersioneerConfig:
-
     """Container for Versioneer configuration parameters."""
 
 
@@ -39,6 +38,7 @@ def get_config():
     # _version.py
     cfg = VersioneerConfig()
     cfg.VCS = "git"
+    cfg.vcs_root = "%(VCS_ROOT)s"
     cfg.style = "%(STYLE)s"
     cfg.tag_prefix = "%(TAG_PREFIX)s"
     cfg.parentdir_prefix = "%(PARENTDIR_PREFIX)s"
@@ -48,7 +48,6 @@ def get_config():
 
 
 class NotThisMethod(Exception):
-
     """Exception raised if a method is not valid for the current scenario."""
 
 
