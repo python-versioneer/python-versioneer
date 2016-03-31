@@ -284,6 +284,10 @@ To upgrade your project to a new release of Versioneer, do the following:
   `SRC/_version.py`
 * commit any changed files
 
+### Upgrading to 0.16
+
+Nothing special.
+
 ### Upgrading to 0.15
 
 Starting with this version, Versioneer is configured with a `[versioneer]`
