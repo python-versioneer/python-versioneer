@@ -29,7 +29,6 @@ def get_keywords():
 
 
 class VersioneerConfig:
-
     """Container for Versioneer configuration parameters."""
 
 
@@ -48,7 +47,6 @@ def get_config():
 
 
 class NotThisMethod(Exception):
-
     """Exception raised if a method is not valid for the current scenario."""
 
 

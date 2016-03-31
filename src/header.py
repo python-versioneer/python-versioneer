@@ -20,7 +20,6 @@ import sys
 
 
 class VersioneerConfig:
-
     """Container for Versioneer configuration parameters."""
 
 
@@ -91,7 +90,6 @@ def get_config_from_root(root):
 
 
 class NotThisMethod(Exception):
-
     """Exception raised if a method is not valid for the current scenario."""
 
 # these dictionaries contain VCS-specific tools
