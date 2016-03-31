@@ -137,11 +137,11 @@ class _Invocations(common.Common):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("make-distutils-wheel-with-pip")
         self.run_in_venv(venv, repodir,
-                         "pip", "wheel",
+                         "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index",# "--find-links", linkdir,
                          ".")
         created = os.path.join(repodir, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_distutils_wheel)
         return demoapp2_distutils_wheel
 
@@ -154,7 +154,7 @@ class _Invocations(common.Common):
         repodir = self.make_distutils_repo()
         self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
         created = os.path.join(repodir, "dist", "demoapp2-2.0.tar")
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_distutils_sdist)
         return demoapp2_distutils_sdist
 
@@ -194,7 +194,7 @@ class _Invocations(common.Common):
         repodir = self.make_setuptools_repo()
         self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
         created = os.path.join(repodir, "dist", "demoapp2-2.0.tar")
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_sdist)
         return demoapp2_setuptools_sdist
 
@@ -220,7 +220,7 @@ class _Invocations(common.Common):
         repodir = self.make_setuptools_repo()
         self.python("setup.py", "bdist_egg", workdir=repodir)
         created = os.path.join(repodir, "dist", "demoapp2-2.0-%s.egg" % pyver)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_egg)
         return demoapp2_setuptools_egg
 
@@ -236,7 +236,7 @@ class _Invocations(common.Common):
         repodir = self.make_setuptools_repo()
         self.python("setup.py", "bdist_wheel", workdir=repodir)
         created = os.path.join(repodir, "dist", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_wheel)
         return demoapp2_setuptools_wheel
 
@@ -253,11 +253,11 @@ class _Invocations(common.Common):
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("make-setuptools-wheel-with-pip")
         self.run_in_venv(venv, repodir,
-                         "pip", "wheel",
+                         "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(repodir, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_wheel)
         return demoapp2_setuptools_wheel
 
@@ -486,11 +486,11 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
         venv = self.make_venv("distutils-unpacked-pip-wheel")
         self.run_in_venv(venv, unpacked,
-                         "pip", "wheel",
+                         "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index",# "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
 
     def test_pip_install(self):
         repodir = self.make_distutils_unpacked()
@@ -541,11 +541,11 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
         venv = self.make_venv("setuptools-unpacked-pip-wheel")
         self.run_in_venv(venv, unpacked,
-                         "pip", "wheel",
+                         "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
 
     def test_pip_install(self):
         linkdir = self.make_linkdir()
