@@ -7,3 +7,4 @@
 /dist/
 /versioneer.egg-info/
 /.idea
+/.tox/
