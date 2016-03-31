@@ -16,7 +16,12 @@ class Common:
     def git(self, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.subpath("demoapp"))
         assert not kwargs, kwargs.keys()
-        output = run_command(GITS, list(args), workdir, True)
+        env = os.environ.copy()
+        env["EMAIL"] = "foo@example.com"
+        env["GIT_AUTHOR_NAME"] = "foo"
+        env["GIT_COMMITTER_NAME"] = "foo"
+        output = run_command(GITS, args=list(args), cwd=workdir, verbose=True,
+                             env=env)
         if output is None:
             self.fail("problem running git")
         return output
