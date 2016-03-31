@@ -1,7 +1,8 @@
 import sys, subprocess, errno # --STRIP DURING BUILD
 
 
-def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
+                env=None):
     """Call the given command(s)."""
     assert isinstance(commands, list)
     p = None
@@ -9,7 +10,8 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
         try:
             dispcmd = str([c] + args)
             # remember shell=False, so use git.cmd on windows, not just git
-            p = subprocess.Popen([c] + args, cwd=cwd, stdout=subprocess.PIPE,
+            p = subprocess.Popen([c] + args, cwd=cwd, env=env,
+                                 stdout=subprocess.PIPE,
                                  stderr=(subprocess.PIPE if hide_stderr
                                          else None))
             break
