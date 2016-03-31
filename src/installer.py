@@ -12,7 +12,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 command = sys.argv[1]
-if command == "version":
+if command in ("version", "--version"):
     print("versioneer (installer) %s" % newver)
     sys.exit(0)
 
