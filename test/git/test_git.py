@@ -24,17 +24,17 @@ class ParseGitDescribe(unittest.TestCase):
 
     def test_pieces(self):
         def pv(git_describe, do_error=False, expect_pieces=False):
-            def fake_run_command(exes, args, cwd=None):
+            def fake_run_command(exes, args, cwd=None, hide_stderr=None):
                 if args[0] == "describe":
                     if do_error == "describe":
-                        return None
-                    return git_describe+"\n"
+                        return None, 0
+                    return git_describe+"\n", 0
                 if args[0] == "rev-parse":
                     if do_error == "rev-parse":
-                        return None
-                    return "longlong\n"
+                        return None, 0
+                    return "longlong\n", 0
                 if args[0] == "rev-list":
-                    return "42\n"
+                    return "42\n", 0
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,
@@ -576,6 +576,6 @@ class Repo(common.Common, unittest.TestCase):
                          % (where, got, str(pv)))
 
 if __name__ == '__main__':
-    ver = run_command(common.GITS, ["--version"], ".", True)
+    ver, rc = run_command(common.GITS, ["--version"], ".", True)
     print("git --version: %s" % ver.strip())
     unittest.main()

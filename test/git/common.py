@@ -9,7 +9,7 @@ class Common:
     def command(self, cmd, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.gitpath())
         assert not kwargs, kwargs.keys()
-        output = run_command([cmd], list(args), workdir, True)
+        output, rc = run_command([cmd], list(args), workdir, True)
         if output is None:
             self.fail("problem running command %s" % cmd)
         return output
@@ -20,8 +20,8 @@ class Common:
         env["EMAIL"] = "foo@example.com"
         env["GIT_AUTHOR_NAME"] = "foo"
         env["GIT_COMMITTER_NAME"] = "foo"
-        output = run_command(GITS, args=list(args), cwd=workdir, verbose=True,
-                             env=env)
+        output, rc = run_command(GITS, args=list(args), cwd=workdir,
+                                 verbose=True, env=env)
         if output is None:
             self.fail("problem running git (workdir: %s)" % workdir)
         return output
@@ -29,7 +29,7 @@ class Common:
         workdir = kwargs.pop("workdir", self.gitpath())
         exe = kwargs.pop("python", sys.executable)
         assert not kwargs, kwargs.keys()
-        output = run_command([exe], list(args), workdir, True)
+        output, rc = run_command([exe], list(args), workdir, True)
         if output is None:
             self.fail("problem running python (workdir: %s)" % workdir)
         return output

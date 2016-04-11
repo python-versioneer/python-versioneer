@@ -1,11 +1,8 @@
 import sys, subprocess, errno # --STRIP DURING BUILD
 
-def run_command_for_return_code(commands, args, cwd=None, verbose=False, hide_stderr=True, env=None):
-    stdout, rc = _run_command(commands, args, cwd, verbose, hide_stderr, env)
-    return rc
 
-def _run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
-                 env=None):
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
+                env=None):
     """Call the given command(s)."""
     assert isinstance(commands, list)
     p = None
@@ -38,8 +35,3 @@ def _run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
             print("unable to run %s (error)" % dispcmd)
         return None, p.returncode
     return stdout, p.returncode
-
-def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
-                env=None):
-    stdout, rc = _run_command(commands, args, cwd, verbose, hide_stderr, env)
-    return stdout

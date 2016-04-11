@@ -1,4 +1,4 @@
-import os, sys, re # --STRIP DURING BUILD
+import sys, re # --STRIP DURING BUILD
 def register_vcs_handler(*args): # --STRIP DURING BUILD
     def nil(f): # --STRIP DURING BUILD
         return f # --STRIP DURING BUILD
@@ -18,23 +18,24 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
 
-    retcode = run_command_for_return_code(GITS, ["rev-parse", "--git-dir"], cwd=root)
-    if retcode == 128:
+    out, rc = run_command(GITS, ["rev-parse", "--git-dir"], cwd=root,
+                          hide_stderr=True)
+    if rc == 128:
         if verbose:
             print("Directory %s not under git control" % root)
         raise NotThisMethod("no .git directory")
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
-    describe_out = run_command(GITS, ["describe", "--tags", "--dirty",
-                                      "--always", "--long",
-                                      "--match", "%s*" % tag_prefix],
-                               cwd=root)
+    describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",
+                                          "--always", "--long",
+                                          "--match", "%s*" % tag_prefix],
+                                   cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
         raise NotThisMethod("'git describe' failed")
     describe_out = describe_out.strip()
-    full_out = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
+    full_out, rc = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if full_out is None:
         raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
@@ -85,8 +86,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     else:
         # HEX: no tags
         pieces["closest-tag"] = None
-        count_out = run_command(GITS, ["rev-list", "HEAD", "--count"],
-                                cwd=root)
+        count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--count"],
+                                    cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits
 
     return pieces
