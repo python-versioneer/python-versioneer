@@ -19,9 +19,9 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
                     "dirty": False, "error": None}
         else:
             rootdirs.append(root)
-            root = os.path.dirname(root) # up a level
+            root = os.path.dirname(root)  # up a level
 
     if verbose:
         print("Tried directories %s but none started with prefix %s" %
-            (str(rootdirs), parentdir_prefix) )
+              (str(rootdirs), parentdir_prefix))
     raise NotThisMethod("rootdir doesn't start with parentdir_prefix")
