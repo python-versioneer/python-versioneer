@@ -7,14 +7,15 @@ if sys.platform == "win32":
 
 class Common:
     def command(self, cmd, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.gitpath())
+        workdir = kwargs.pop("workdir", self.projdir)
         assert not kwargs, kwargs.keys()
         output, rc = run_command([cmd], list(args), workdir, True)
         if output is None:
             self.fail("problem running command %s" % cmd)
         return output
+
     def git(self, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.gitpath())
+        workdir = kwargs.pop("workdir", self.gitdir)
         assert not kwargs, kwargs.keys()
         env = os.environ.copy()
         env["EMAIL"] = "foo@example.com"
@@ -25,19 +26,18 @@ class Common:
         if output is None:
             self.fail("problem running git (workdir: %s)" % workdir)
         return output
+
     def python(self, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.gitpath())
+        workdir = kwargs.pop("workdir", self.projdir)
         exe = kwargs.pop("python", sys.executable)
         assert not kwargs, kwargs.keys()
         output, rc = run_command([exe], list(args), workdir, True)
         if output is None:
             self.fail("problem running python (workdir: %s)" % workdir)
         return output
-    def subpath(self, path, base_dir = ""):
-        return os.path.join(self.testdir, base_dir, path)
-    def projpath(self, alt_base = None):
-        base = alt_base or self.gitpath()
-        return os.path.join(base, self.projdir)
-    def gitpath(self, alt_base = None):
-        base = alt_base or self.testdir
-        return os.path.join(base, self.gitdir)
+
+    def project_file(self, *path):
+        return os.path.join(self.projdir, *path)
+
+    def subpath(self, *path):
+        return os.path.join(self.testdir, *path)

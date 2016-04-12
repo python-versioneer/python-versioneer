@@ -22,6 +22,8 @@ class _Invocations(common.Common):
         os.mkdir(self.subpath("cache"))
         os.mkdir(self.subpath("cache", "distutils"))
         os.mkdir(self.subpath("cache", "setuptools"))
+        self.gitdir = None
+        self.projdir = None
 
     def make_venv(self, mode):
         if not os.path.exists(self.subpath("venvs")):
