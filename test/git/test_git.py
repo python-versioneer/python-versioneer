@@ -363,11 +363,13 @@ class Repo(common.Common, unittest.TestCase):
 
         # Many folks have a ~/.gitignore with ignores .pyc files, but if they
         # don't, it will show up in the status here. Ignore it.
-        out = set([f for f in self.git("status", "--porcelain").splitlines()
-                   if not (f.startswith("?? ") and (f.endswith(".pyc") or
-                                                    f.endswith("__pycache__/"))
-                           )
-                   ])
+        def remove_pyc(s):
+            return [f for f in s
+                    if not (f.startswith("?? ")
+                            and (f.endswith(".pyc") or
+                                 f.endswith("__pycache__/")))
+                    ]
+        out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         def pf(fn):
             return os.path.normpath(os.path.join(self.project_sub_dir, fn))
         expected = set(["A  %s" % pf(".gitattributes"),
@@ -395,11 +397,7 @@ class Repo(common.Common, unittest.TestCase):
             self.assertEqual(out[1], " src/demo/__init__.py unmodified")
         self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
         self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
-        out = set(self.git("status", "--porcelain").splitlines())
-        out.discard("?? versioneer.pyc")
-        out.discard("?? __pycache__/")
-        out.discard("?? " + self.projdir + "/versioneer.pyc")
-        out.discard("?? " + self.projdir + "/__pycache__/")
+        out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         self.assertEqual(out, set([]))
 
         UNABLE = "unable to compute version"
