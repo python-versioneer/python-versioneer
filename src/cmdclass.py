@@ -58,6 +58,11 @@ def get_cmdclass():
     #  setuptools/bdist_egg -> distutils/install_lib -> build_py
     #  setuptools/install -> bdist_egg ->..
     #  setuptools/develop -> ?
+    #  pip install:
+    #   copies source tree to a tempdir before running egg_info/etc
+    #   if .git isn't copied too, 'git describe' will fail
+    #   then does setup.py bdist_wheel, or sometimes setup.py install
+    #  setup.py egg_info -> ?
 
     # we override different "build_py" commands for both environments
     if "setuptools" in sys.modules:
