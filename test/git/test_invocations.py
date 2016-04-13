@@ -54,6 +54,7 @@ class _Invocations(common.Common):
                 "easy_install": os.path.join(venv, "bin", "easy_install"),
                 }
         if command == "pip":
+            args = ["--no-cache-dir"] + list(args)
             maj, min = sys.version_info[0:2]
             if ((maj == 2 and min >= 7) or
                 (maj == 3 and min >= 4) or
