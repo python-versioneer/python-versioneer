@@ -9,6 +9,24 @@ import common
 pyver_major = "py%d" % sys.version_info[0]
 pyver = "py%d.%d" % sys.version_info[:2]
 
+if not hasattr(unittest, "skip"): # py26
+    def _skip(reason):
+        def _skip_decorator(f):
+            def _skipped_test(*args, **kwargs):
+                print("skipping: %s" % reason)
+            return _skipped_test
+        return _skip_decorator
+    unittest.skip = _skip
+
+if not hasattr(unittest, "expectedFailure"):
+    def _expectedFailure(reason="expected to fail"):
+        def _ef_decorator(f):
+            def _ef(*args, **kwargs):
+                print("skipping: %s" % reason)
+            return _ef
+        return _ef_decorator
+    unittest.expectedFailure = _expectedFailure
+
 class _Invocations(common.Common):
     def setUp(self):
         if False:
@@ -458,7 +476,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
 
-    @unittest.skip("skipping setuptools 'easy_install .': known to be broken")
+    @unittest.skip("setuptools 'easy_install .': known to be broken")
     def test_easy_install(self):
         # This case still fails: the 'easy_install' command modifies the
         # repo's setup.cfg (copying our --index-url and --find-links
