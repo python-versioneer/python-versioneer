@@ -33,5 +33,6 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
     if p.returncode != 0:
         if verbose:
             print("unable to run %s (error)" % dispcmd)
+            print("stdout was %s" % stdout)
         return None, p.returncode
     return stdout, p.returncode
