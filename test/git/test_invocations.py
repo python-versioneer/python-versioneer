@@ -458,6 +458,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
 
+    @unittest.skip("skipping setuptools 'easy_install .': known to be broken")
     def test_easy_install(self):
         # This case still fails: the 'easy_install' command modifies the
         # repo's setup.cfg (copying our --index-url and --find-links
@@ -469,8 +470,6 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         # parent command (which could calculate the version before setup.cfg
         # is modified) and the command which builds the .egg. Leave it broken
         # for now.
-        print("skipping setuptools 'easy_install .': known to be broken")
-        return
         linkdir = self.make_linkdir()
         indexdir = self.make_empty_indexdir()
         repodir = self.make_setuptools_repo()
