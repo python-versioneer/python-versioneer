@@ -405,6 +405,7 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, repodir, "pip", "install", ".")
         self.check_in_venv(venv)
 
+    @unittest.expectedFailure
     def test_pip_install_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-pip-install-subproject")
@@ -417,6 +418,7 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", repodir)
         self.check_in_venv(venv)
 
+    @unittest.expectedFailure
     def test_pip_install_from_afar_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-pip-install-from-afar-subproject")
@@ -541,6 +543,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
+    @unittest.expectedFailure
     def test_pip_install_subproject(self):
         linkdir = self.make_linkdir()
         projectdir = self.make_setuptools_repo_subproject()
@@ -557,6 +560,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
+    @unittest.expectedFailure
     def test_pip_install_from_afar_subproject(self):
         linkdir = self.make_linkdir()
         projectdir = self.make_setuptools_repo_subproject()
