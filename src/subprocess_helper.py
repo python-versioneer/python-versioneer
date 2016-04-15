@@ -22,16 +22,17 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
             if verbose:
                 print("unable to run %s" % dispcmd)
                 print(e)
-            return None
+            return None, None
     else:
         if verbose:
             print("unable to find command, tried %s" % (commands,))
-        return None
+        return None, None
     stdout = p.communicate()[0].strip()
     if sys.version_info[0] >= 3:
         stdout = stdout.decode()
     if p.returncode != 0:
         if verbose:
             print("unable to run %s (error)" % dispcmd)
-        return None
-    return stdout
+            print("stdout was %s" % stdout)
+        return None, p.returncode
+    return stdout, p.returncode

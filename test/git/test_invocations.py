@@ -9,6 +9,24 @@ import common
 pyver_major = "py%d" % sys.version_info[0]
 pyver = "py%d.%d" % sys.version_info[:2]
 
+if not hasattr(unittest, "skip"): # py26
+    def _skip(reason):
+        def _skip_decorator(f):
+            def _skipped_test(*args, **kwargs):
+                print("skipping: %s" % reason)
+            return _skipped_test
+        return _skip_decorator
+    unittest.skip = _skip
+
+if not hasattr(unittest, "expectedFailure"):
+    def _expectedFailure(reason="expected to fail"):
+        def _ef_decorator(f):
+            def _ef(*args, **kwargs):
+                print("skipping: %s" % reason)
+            return _ef
+        return _ef_decorator
+    unittest.expectedFailure = _expectedFailure
+
 class _Invocations(common.Common):
     def setUp(self):
         if False:
@@ -22,6 +40,8 @@ class _Invocations(common.Common):
         os.mkdir(self.subpath("cache"))
         os.mkdir(self.subpath("cache", "distutils"))
         os.mkdir(self.subpath("cache", "setuptools"))
+        self.gitdir = None
+        self.projdir = None
 
     def make_venv(self, mode):
         if not os.path.exists(self.subpath("venvs")):
@@ -78,6 +98,15 @@ class _Invocations(common.Common):
     # "demoapp2-distutils" is v2.0, uses distutils, and has no deps
     # "demoapp2-setuptools" is v2.0, uses setuptools, and depends on demolib
 
+    # repos and unpacked git-archive tarballs come in two flavors: normal (in
+    # which the setup.py/setup.cfg/versioneer.py files live in the root of
+    # the source tree), and "subproject" (where they live in a subdirectory).
+    # sdists are always "normal" (although they might have come from either
+    # normal or subproject -style source trees), and wheels/eggs don't have
+    # these files at all.
+
+    # TODO: git-archive subproject-flavor
+
     def make_demolib_sdist(self):
         # create an sdist of demolib-1.0 . for the *lib*, we only use the
         # tarball, never the repo.
@@ -129,6 +158,21 @@ class _Invocations(common.Common):
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return repodir
 
+    def make_distutils_repo_subproject(self):
+        # create a clean repo of demoapp2-distutils at 2.0
+        repodir = self.subpath("demoapp2-distutils-repo-subproject")
+        if os.path.exists(repodir):
+            shutil.rmtree(repodir)
+        shutil.copytree("test/demoapp2-distutils-subproject", repodir)
+        projectdir = os.path.join(repodir, "subproject")
+        shutil.copy("versioneer.py", projectdir)
+        self.git("init", workdir=repodir)
+        self.python("versioneer.py", "setup", workdir=projectdir)
+        self.git("add", "--all", workdir=repodir)
+        self.git("commit", "-m", "commemt", workdir=repodir)
+        self.git("tag", "demoapp2-2.0", workdir=repodir)
+        return projectdir
+
     def make_distutils_wheel_with_pip(self):
         # create an wheel of demoapp2-distutils at 2.0
         wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
@@ -159,9 +203,36 @@ class _Invocations(common.Common):
         shutil.copyfile(created, demoapp2_distutils_sdist)
         return demoapp2_distutils_sdist
 
+    def make_distutils_sdist_subproject(self):
+        demoapp2_distutils_sdist = self.subpath("cache", "distutils",
+                                                "demoapp2-subproject-2.0.tar")
+        if os.path.exists(demoapp2_distutils_sdist):
+            return demoapp2_distutils_sdist
+        projectdir = self.make_distutils_repo_subproject()
+        self.python("setup.py", "sdist", "--format=tar", workdir=projectdir)
+        created = os.path.join(projectdir, "dist", "demoapp2-2.0.tar")
+        # if that gets the version wrong, it will make the wrong tarball, and
+        # this check will fail
+        self.assertTrue(os.path.exists(created), created)
+        shutil.copyfile(created, demoapp2_distutils_sdist)
+        return demoapp2_distutils_sdist
+
     def make_distutils_unpacked(self):
         sdist = self.make_distutils_sdist()
         unpack_into = self.subpath("demoapp2-distutils-unpacked")
+        if os.path.exists(unpack_into):
+            shutil.rmtree(unpack_into)
+        os.mkdir(unpack_into)
+        t = tarfile.TarFile(sdist)
+        t.extractall(path=unpack_into)
+        t.close()
+        unpacked = os.path.join(unpack_into, "demoapp2-2.0")
+        self.assertTrue(os.path.exists(unpacked))
+        return unpacked
+
+    def make_distutils_subproject_unpacked(self):
+        sdist = self.make_distutils_sdist_subproject()
+        unpack_into = self.subpath("demoapp2-distutils-unpacked-subproject")
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
@@ -186,6 +257,21 @@ class _Invocations(common.Common):
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return repodir
 
+    def make_setuptools_repo_subproject(self):
+        # create a clean repo of demoapp2-setuptools at 2.0
+        repodir = self.subpath("demoapp2-setuptools-repo-subproject")
+        if os.path.exists(repodir):
+            shutil.rmtree(repodir)
+        shutil.copytree("test/demoapp2-setuptools-subproject", repodir)
+        projectdir = os.path.join(repodir, "subproject")
+        shutil.copy("versioneer.py", projectdir)
+        self.git("init", workdir=repodir)
+        self.python("versioneer.py", "setup", workdir=projectdir)
+        self.git("add", "--all", workdir=repodir)
+        self.git("commit", "-m", "commemt", workdir=repodir)
+        self.git("tag", "demoapp2-2.0", workdir=repodir)
+        return projectdir
+
     def make_setuptools_sdist(self):
         # create an sdist tarball of demoapp2-setuptools at 2.0
         demoapp2_setuptools_sdist = self.subpath("cache", "setuptools",
@@ -199,9 +285,34 @@ class _Invocations(common.Common):
         shutil.copyfile(created, demoapp2_setuptools_sdist)
         return demoapp2_setuptools_sdist
 
+    def make_setuptools_sdist_subproject(self):
+        demoapp2_setuptools_sdist = self.subpath("cache", "setuptools",
+                                                 "demoapp2-subproject-2.0.tar")
+        if os.path.exists(demoapp2_setuptools_sdist):
+            return demoapp2_setuptools_sdist
+        projectdir = self.make_setuptools_repo_subproject()
+        self.python("setup.py", "sdist", "--format=tar", workdir=projectdir)
+        created = os.path.join(projectdir, "dist", "demoapp2-2.0.tar")
+        self.assertTrue(os.path.exists(created), created)
+        shutil.copyfile(created, demoapp2_setuptools_sdist)
+        return demoapp2_setuptools_sdist
+
     def make_setuptools_unpacked(self):
         sdist = self.make_setuptools_sdist()
         unpack_into = self.subpath("demoapp2-setuptools-unpacked")
+        if os.path.exists(unpack_into):
+            shutil.rmtree(unpack_into)
+        os.mkdir(unpack_into)
+        t = tarfile.TarFile(sdist)
+        t.extractall(path=unpack_into)
+        t.close()
+        unpacked = os.path.join(unpack_into, "demoapp2-2.0")
+        self.assertTrue(os.path.exists(unpacked))
+        return unpacked
+
+    def make_setuptools_subproject_unpacked(self):
+        sdist = self.make_setuptools_sdist_subproject()
+        unpack_into = self.subpath("demoapp2-setuptools-unpacked-subproject")
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
@@ -280,6 +391,12 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
         self.check_in_venv(venv)
 
+    def test_install_subproject(self):
+        projectdir = self.make_distutils_repo_subproject()
+        venv = self.make_venv("distutils-repo-install-subproject")
+        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
+        self.check_in_venv(venv)
+
     def test_pip_wheel(self):
         self.make_distutils_wheel_with_pip()
         # asserts version as a side-effect
@@ -292,10 +409,25 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
                          t.getnames())
         t.close()
 
+    def test_sdist_subproject(self):
+        sdist = self.make_distutils_sdist_subproject()
+        t = tarfile.TarFile(sdist)
+        # make sure we used distutils/sdist, not setuptools/sdist
+        self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
+                         t.getnames())
+        t.close()
+
     def test_pip_install(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install")
         self.run_in_venv(venv, repodir, "pip", "install", ".")
+        self.check_in_venv(venv)
+
+    @unittest.expectedFailure
+    def test_pip_install_subproject(self):
+        projectdir = self.make_distutils_repo_subproject()
+        venv = self.make_venv("distutils-repo-pip-install-subproject")
+        self.run_in_venv(venv, projectdir, "pip", "install", ".")
         self.check_in_venv(venv)
 
     def test_pip_install_from_afar(self):
@@ -304,10 +436,23 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", repodir)
         self.check_in_venv(venv)
 
+    @unittest.expectedFailure
+    def test_pip_install_from_afar_subproject(self):
+        projectdir = self.make_distutils_repo_subproject()
+        venv = self.make_venv("distutils-repo-pip-install-from-afar-subproject")
+        self.run_in_venv(venv, venv, "pip", "install", projectdir)
+        self.check_in_venv(venv)
+
     def test_pip_install_editable(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install-editable")
         self.run_in_venv(venv, repodir, "pip", "install", "--editable", ".")
+        self.check_in_venv(venv)
+
+    def test_pip_install_editable_subproject(self):
+        projectdir = self.make_distutils_repo_subproject()
+        venv = self.make_venv("distutils-repo-pip-install-editable-subproject")
+        self.run_in_venv(venv, projectdir, "pip", "install", "--editable", ".")
         self.check_in_venv(venv)
 
 class SetuptoolsRepo(_Invocations, unittest.TestCase):
@@ -321,6 +466,17 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
 
+    def test_install_subproject(self):
+        projectdir = self.make_setuptools_repo_subproject()
+        demolib = self.make_demolib_sdist()
+        venv = self.make_venv("setuptools-repo-install-subproject")
+        # "setup.py install" doesn't take --no-index or --find-links, so we
+        # pre-install the dependency
+        self.run_in_venv(venv, venv, "pip", "install", demolib)
+        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
+        self.check_in_venv_withlib(venv)
+
+    @unittest.skip("setuptools 'easy_install .': known to be broken")
     def test_easy_install(self):
         # This case still fails: the 'easy_install' command modifies the
         # repo's setup.cfg (copying our --index-url and --find-links
@@ -332,8 +488,6 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         # parent command (which could calculate the version before setup.cfg
         # is modified) and the command which builds the .egg. Leave it broken
         # for now.
-        print("skipping setuptools 'easy_install .': known to be broken")
-        return
         linkdir = self.make_linkdir()
         indexdir = self.make_empty_indexdir()
         repodir = self.make_setuptools_repo()
@@ -358,6 +512,19 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                          )
         self.check_in_venv_withlib(venv)
 
+    def test_develop_subproject(self):
+        linkdir = self.make_linkdir()
+        indexdir = self.make_empty_indexdir()
+        projectdir = self.make_setuptools_repo_subproject()
+        venv = self.make_venv("setuptools-repo-develop-subproject")
+        # "setup.py develop" takes --find-links and --index-url but not
+        # --no-index
+        self.run_in_venv(venv, projectdir,
+                         "python", "setup.py", "develop",
+                         "--index-url", indexdir, "--find-links", linkdir,
+                         )
+        self.check_in_venv_withlib(venv)
+
     def test_egg(self):
         self.make_setuptools_egg() # asserts version as a side-effect
 
@@ -377,11 +544,28 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                         t.getnames())
         t.close()
 
+    def test_sdist_subproject(self):
+        sdist = self.make_setuptools_sdist_subproject()
+        t = tarfile.TarFile(sdist)
+        # make sure we used setuptools/sdist, not distutils/sdist
+        self.assertTrue("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
+                        t.getnames())
+        t.close()
+
     def test_pip_install(self):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("setuptools-repo-pip-install")
         self.run_in_venv(venv, repodir, "pip", "install", ".",
+                         "--no-index", "--find-links", linkdir)
+        self.check_in_venv_withlib(venv)
+
+    @unittest.expectedFailure
+    def test_pip_install_subproject(self):
+        linkdir = self.make_linkdir()
+        projectdir = self.make_setuptools_repo_subproject()
+        venv = self.make_venv("setuptools-repo-pip-install-subproject")
+        self.run_in_venv(venv, projectdir, "pip", "install", ".",
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
@@ -393,6 +577,15 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
+    @unittest.expectedFailure
+    def test_pip_install_from_afar_subproject(self):
+        linkdir = self.make_linkdir()
+        projectdir = self.make_setuptools_repo_subproject()
+        venv = self.make_venv("setuptools-repo-pip-install-from-afar-subproject")
+        self.run_in_venv(venv, venv, "pip", "install", projectdir,
+                         "--no-index", "--find-links", linkdir)
+        self.check_in_venv_withlib(venv)
+
     def test_pip_install_editable(self):
         linkdir = self.make_linkdir()
         repodir = self.make_setuptools_repo()
@@ -401,10 +594,25 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
+    def test_pip_install_editable_subproject(self):
+        linkdir = self.make_linkdir()
+        projectdir = self.make_setuptools_repo_subproject()
+        venv = self.make_venv("setuptools-repo-pip-install-editable-subproject")
+        self.run_in_venv(venv, projectdir, "pip", "install", "--editable", ".",
+                         "--no-index", "--find-links", linkdir)
+        self.check_in_venv_withlib(venv)
+
 class DistutilsSdist(_Invocations, unittest.TestCase):
     def test_pip_install(self):
         sdist = self.make_distutils_sdist()
         venv = self.make_venv("distutils-sdist-pip-install")
+        self.run_in_venv(venv, venv,
+                         "pip", "install", sdist)
+        self.check_in_venv(venv)
+
+    def test_pip_install_subproject(self):
+        sdist = self.make_distutils_sdist_subproject()
+        venv = self.make_venv("distutils-sdist-pip-install-subproject")
         self.run_in_venv(venv, venv,
                          "pip", "install", sdist)
         self.check_in_venv(venv)
@@ -425,6 +633,16 @@ class SetuptoolsSdist(_Invocations, unittest.TestCase):
         linkdir = self.make_linkdir()
         sdist = self.make_setuptools_sdist()
         venv = self.make_venv("setuptools-sdist-pip-install")
+        self.run_in_venv(venv, venv,
+                         "pip", "install",
+                         "--no-index", "--find-links", linkdir,
+                         sdist)
+        self.check_in_venv_withlib(venv)
+
+    def test_pip_install_subproject(self):
+        linkdir = self.make_linkdir()
+        sdist = self.make_setuptools_sdist_subproject()
+        venv = self.make_venv("setuptools-sdist-pip-install-subproject")
         self.run_in_venv(venv, venv,
                          "pip", "install",
                          "--no-index", "--find-links", linkdir,
@@ -482,6 +700,12 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, unpacked, "python", "setup.py", "install")
         self.check_in_venv(venv)
 
+    def test_install_subproject(self):
+        unpacked = self.make_distutils_subproject_unpacked()
+        venv = self.make_venv("distutils-subproject-unpacked-install")
+        self.run_in_venv(venv, unpacked, "python", "setup.py", "install")
+        self.check_in_venv(venv)
+
     def test_pip_wheel(self):
         unpacked = self.make_distutils_unpacked()
         wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
@@ -499,6 +723,12 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, repodir, "pip", "install", ".")
         self.check_in_venv(venv)
 
+    def test_pip_install_subproject(self):
+        unpacked = self.make_distutils_subproject_unpacked()
+        venv = self.make_venv("distutils-subproject-unpacked-pip-install")
+        self.run_in_venv(venv, unpacked, "pip", "install", ".")
+        self.check_in_venv(venv)
+
     def test_pip_install_from_afar(self):
         repodir = self.make_distutils_unpacked()
         venv = self.make_venv("distutils-unpacked-pip-install-from-afar")
@@ -510,6 +740,17 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         unpacked = self.make_setuptools_unpacked()
         demolib = self.make_demolib_sdist()
         venv = self.make_venv("setuptools-unpacked-install")
+        # "setup.py install" doesn't take --no-index or --find-links, so we
+        # pre-install the dependency
+        self.run_in_venv(venv, venv, "pip", "install", demolib)
+        self.run_in_venv(venv, unpacked,
+                         "python", "setup.py", "install")
+        self.check_in_venv_withlib(venv)
+
+    def test_install_subproject(self):
+        unpacked = self.make_setuptools_subproject_unpacked()
+        demolib = self.make_demolib_sdist()
+        venv = self.make_venv("setuptools-subproject-unpacked-install")
         # "setup.py install" doesn't take --no-index or --find-links, so we
         # pre-install the dependency
         self.run_in_venv(venv, venv, "pip", "install", demolib)
@@ -553,6 +794,14 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         repodir = self.make_setuptools_unpacked()
         venv = self.make_venv("setuptools-unpacked-pip-install")
         self.run_in_venv(venv, repodir, "pip", "install", ".",
+                         "--no-index", "--find-links", linkdir)
+        self.check_in_venv_withlib(venv)
+
+    def test_pip_install_subproject(self):
+        linkdir = self.make_linkdir()
+        unpacked = self.make_setuptools_subproject_unpacked()
+        venv = self.make_venv("setuptools-subproject-unpacked-pip-install")
+        self.run_in_venv(venv, unpacked, "pip", "install", ".",
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 

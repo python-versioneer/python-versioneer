@@ -161,9 +161,9 @@ most significant ones. More can be found on Github
 
 ### Subprojects
 
-Versioneer can currently only handle source trees in which the `setup.py`
-file is in the root directory (e.g. `setup.py` and `.git/` are siblings). The
-are two common reasons why `setup.py` might not be in the root:
+Versioneer has limited support for source trees in which `setup.py` is not in
+the root directory (e.g. `setup.py` and `.git/` are *not* siblings). The are
+two common reasons why `setup.py` might not be in the root:
 
 * Source trees which contain multiple subprojects, such as
   [Buildbot](https://github.com/buildbot/buildbot), which contains both
@@ -173,12 +173,28 @@ are two common reasons why `setup.py` might not be in the root:
 * Source trees whose main purpose is to contain a C library, but which also
   provide bindings to Python (and perhaps other langauges) in subdirectories.
 
-Versioneer-0.16 only looks for a `.git` directory next to the `setup.cfg`. If
-it doesn't find one there, it does not believe it is in a git checkout, and
-will not try to compute a version with `git describe`.
+Versioneer will look for `.git` in parent directories, and most operations
+should get the right version string. However `pip` and `setuptools` have bugs
+and implementation details which frequently cause `pip install .` from a
+subproject directory to fail to find a correct version string (so it usually
+defaults to `0+unknown`).
+
+`pip install --editable .` should work correctly. `setup.py install` might
+work too.
+
+Pip-8.1.1 is known to have this problem, but hopefully it will get fixed in
+some later version.
 
 [Bug #38](https://github.com/warner/python-versioneer/issues/38) is tracking
-this issue.
+this issue. The discussion in
+[PR #61](https://github.com/warner/python-versioneer/pull/61) describes the
+issue from the Versioneer side in more detail.
+[pip PR#3176](https://github.com/pypa/pip/pull/3176) and
+[pip PR#3615](https://github.com/pypa/pip/pull/3615) contain work to improve
+pip to let Versioneer work correctly.
+
+Versioneer-0.16 and earlier only looked for a `.git` directory next to the
+`setup.cfg`, so subprojects were completely unsupported with those releases.
 
 ### Editable installs with setuptools <= 18.5
 
