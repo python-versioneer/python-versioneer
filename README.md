@@ -153,6 +153,69 @@ version`, which will run the version-lookup code in a verbose mode, and will
 display the full contents of `get_versions()` (including the `error` string,
 which may help identify what went wrong).
 
+## Known Limitations
+
+Some situations are known to cause problems for Versioneer. This details the
+most significant ones. More can be found on Github
+[issues page](https://github.com/warner/python-versioneer/issues).
+
+### Subprojects
+
+Versioneer can currently only handle source trees in which the `setup.py`
+file is in the root directory (e.g. `setup.py` and `.git/` are siblings). The
+are two common reasons why `setup.py` might not be in the root:
+
+* Source trees which contain multiple subprojects, such as
+  [Buildbot](https://github.com/buildbot/buildbot), which contains both
+  "master" and "slave" subprojects, each with their own `setup.py`,
+  `setup.cfg`, and `tox.ini`. Projects like these produce multiple PyPI
+  distributions (and upload multiple independently-installable tarballs).
+* Source trees whose main purpose is to contain a C library, but which also
+  provide bindings to Python (and perhaps other langauges) in subdirectories.
+
+Versioneer-0.16 only looks for a `.git` directory next to the `setup.cfg`. If
+it doesn't find one there, it does not believe it is in a git checkout, and
+will not try to compute a version with `git describe`.
+
+[Bug #38](https://github.com/warner/python-versioneer/issues/38) is tracking
+this issue.
+
+### Editable installs with setuptools <= 18.5
+
+`setup.py develop` and `pip install --editable .` allow you to install a
+project into a virtualenv once, then continue editing the source code (and
+test) without re-installing after every change.
+
+"Entry-point scripts" (`setup(entry_points={"console_scripts": ..})`) are a
+convenient way to specify executable scripts that should be installed along
+with the python package.
+
+These both work as expected when using modern setuptools. When using
+setuptools-18.5 or earlier, however, certain operations will cause
+`pkg_resources.DistributionNotFound` errors when running the entrypoint
+script, which must be resolved by re-installing the package. This happens
+when the install happens with one version, then the egg_info data is
+regenerated while a different version is checked out. Many setup.py commands
+cause egg_info to be rebuilt (including `sdist`, `wheel`, and installing into
+a different virtualenv), so this can be surprising.
+
+[Bug #83](https://github.com/warner/python-versioneer/issues/83) describes
+this one, but upgrading to a newer version of setuptools should probably
+resolve it.
+
+### Unicode version strings
+
+While Versioneer works (and is continually tested) with both Python 2 and
+Python 3, it is not entirely consistent with bytes-vs-unicode distinctions.
+Newer releases probably generate unicode version strings on py2. It's not
+clear that this is wrong, but it may be surprising for applications when then
+write these strings to a network connection or include them in bytes-oriented
+APIs like cryptographic checksums.
+
+[Bug #71](https://github.com/warner/python-versioneer/issues/71) investigates
+this question.
+
+
 ## Updating Versioneer
 
 To upgrade your project to a new release of Versioneer, do the following:
