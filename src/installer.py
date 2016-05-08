@@ -20,7 +20,7 @@ if command != "install":
     print("Usage: versioneer install")
     sys.exit(1)
 
-v = base64.b64decode(VERSIONEER_b64)
+v = base64.b64decode(VERSIONEER_b64.encode('ASCII'))
 if os.path.exists("versioneer.py"):
     for line in open("versioneer.py").readlines()[:5]:
         if line.startswith("# Version: "):
