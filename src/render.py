@@ -142,7 +142,8 @@ def render(pieces, style):
         return {"version": "unknown",
                 "full-revisionid": pieces.get("long"),
                 "dirty": None,
-                "error": pieces["error"]}
+                "error": pieces["error"],
+                "time": pieces["time"]}
 
     if not style or style == "default":
         style = "pep440"  # the default
@@ -163,5 +164,5 @@ def render(pieces, style):
         raise ValueError("unknown style '%s'" % style)
 
     return {"version": rendered, "full-revisionid": pieces["long"],
-            "dirty": pieces["dirty"], "error": None}
+            "dirty": pieces["dirty"], "error": None, "time": None}
 
