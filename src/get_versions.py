@@ -83,7 +83,8 @@ def get_versions(verbose=False):
         print("unable to compute version")
 
     return {"version": "0+unknown", "full-revisionid": None,
-            "dirty": None, "error": "unable to compute version"}
+            "dirty": None, "error": "unable to compute version",
+            "time": None}
 
 
 def get_version():
