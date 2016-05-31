@@ -89,10 +89,10 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--count"],
                                     cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits
-    
-    # commit time
-    pieces["time"] = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"],
-                                cwd=root)
+
+    # commit date
+    pieces["date"] = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"],
+                                cwd=root)[0].strip()
 
     return pieces
 
