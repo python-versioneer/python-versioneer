@@ -16,7 +16,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
         if dirname.startswith(parentdir_prefix):
             return {"version": dirname[len(parentdir_prefix):],
                     "full-revisionid": None,
-                    "dirty": False, "error": None, "time": None}
+                    "dirty": False, "error": None, "date": None}
         else:
             rootdirs.append(root)
             root = os.path.dirname(root)  # up a level

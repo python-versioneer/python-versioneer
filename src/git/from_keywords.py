@@ -25,10 +25,10 @@ def git_get_keywords(versionfile_abs):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
                     keywords["full"] = mo.group(1)
-            if line.strip().startswith("git_time ="):
+            if line.strip().startswith("git_date ="):
                 mo = re.search(r'=\s*"(.*)"', line)
                 if mo:
-                    keywords["time"] = mo.group(1)
+                    keywords["date"] = mo.group(1)
         f.close()
     except EnvironmentError:
         pass
@@ -72,11 +72,11 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
             return {"version": r,
                     "full-revisionid": keywords["full"].strip(),
                     "dirty": False, "error": None,
-                    "time": keywords["time"].strip()}
+                    "date": keywords.get("date", "").strip()}
     # no suitable tags, so version is "0+unknown", but full hex is still there
     if verbose:
         print("no suitable tags, using unknown + full revision id")
     return {"version": "0+unknown",
             "full-revisionid": keywords["full"].strip(),
-            "dirty": False, "error": "no suitable tags", "time": None}
+            "dirty": False, "error": "no suitable tags", "date": None}
 

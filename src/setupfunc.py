@@ -127,7 +127,7 @@ def do_setup():
         print(" versionfile_source already in MANIFEST.in")
 
     # Make VCS-specific changes. For git, this means creating/changing
-    # .gitattributes to mark _version.py for export-time keyword
+    # .gitattributes to mark _version.py for export-subst keyword
     # substitution.
     do_vcs_install(manifest_in, cfg.versionfile_source, ipy)
     return 0
