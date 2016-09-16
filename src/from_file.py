@@ -6,7 +6,6 @@ SHORT_VERSION_PY = """
 # of this file.
 
 import json
-import sys
 
 version_json = '''
 %s
