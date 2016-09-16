@@ -87,6 +87,12 @@ def get_cmdclass():
 
     if "cx_Freeze" in sys.modules:  # cx_freeze enabled?
         from cx_Freeze.dist import build_exe as _build_exe
+        # nczeczulin reports that py2exe won't like the pep440-style string
+        # as FILEVERSION, but it can be used for PRODUCTVERSION, e.g.
+        # setup(console=[{
+        #   "version": versioneer.get_version().split("+", 1)[0], # FILEVERSION
+        #   "product_version": versioneer.get_version(),
+        #   ...
 
         class cmd_build_exe(_build_exe):
             def run(self):
