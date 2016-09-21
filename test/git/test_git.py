@@ -35,6 +35,8 @@ class ParseGitDescribe(unittest.TestCase):
                     return "longlong\n", 0
                 if args[0] == "rev-list":
                     return "42\n", 0
+                if args[0] == "show":
+                    return "12345\n", 0
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,
@@ -47,32 +49,38 @@ class ParseGitDescribe(unittest.TestCase):
                          {"closest-tag": None, "dirty": False, "error": None,
                           "distance": 42,
                           "long": "longlong",
-                          "short": "longlon"})
+                          "short": "longlon",
+                          "date": "12345"})
         self.assertEqual(pv("1f-dirty"),
                          {"closest-tag": None, "dirty": True, "error": None,
                           "distance": 42,
                           "long": "longlong",
-                          "short": "longlon"})
+                          "short": "longlon",
+                          "date": "12345"})
         self.assertEqual(pv("v1.0-0-g1f"),
                          {"closest-tag": "1.0", "dirty": False, "error": None,
                           "distance": 0,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f",
+                          "date": "12345"})
         self.assertEqual(pv("v1.0-0-g1f-dirty"),
                          {"closest-tag": "1.0", "dirty": True, "error": None,
                           "distance": 0,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f",
+                          "date": "12345"})
         self.assertEqual(pv("v1.0-1-g1f"),
                          {"closest-tag": "1.0", "dirty": False, "error": None,
                           "distance": 1,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f",
+                          "date": "12345"})
         self.assertEqual(pv("v1.0-1-g1f-dirty"),
                          {"closest-tag": "1.0", "dirty": True, "error": None,
                           "distance": 1,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f",
+                          "date": "12345"})
 
     def tearDown(self):
         os.rmdir(self.fakegit)

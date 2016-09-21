@@ -24,7 +24,8 @@ def get_keywords():
     # get_keywords().
     git_refnames = "%(DOLLAR)sFormat:%%d%(DOLLAR)s"
     git_full = "%(DOLLAR)sFormat:%%H%(DOLLAR)s"
-    keywords = {"refnames": git_refnames, "full": git_full}
+    git_date = "%(DOLLAR)sFormat:%%ci%(DOLLAR)s"
+    keywords = {"refnames": git_refnames, "full": git_full, "date": git_date}
     return keywords
 
 
