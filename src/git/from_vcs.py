@@ -98,9 +98,10 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
                                     cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits
 
-    # commit date
-    pieces["date"] = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"],
-                                 cwd=root)[0].strip()
+    # commit date: see ISO-8601 comment in git_versions_from_keywords()
+    date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"],
+                       cwd=root)[0].strip()
+    pieces["date"] = date.strip().replace(" ", "T", 1).replace(" ", "", 1)
 
     return pieces
 

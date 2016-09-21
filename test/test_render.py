@@ -17,7 +17,7 @@ class Testing_renderer_case_mixin(object):
                 "dirty": dirty,
                 "short": "abc" if distance else '',
                 "long": "abcdefg" if distance else '',
-                "date": "2016-05-31 13:02:11 +0200"}
+                "date": "2016-05-31T13:02:11+0200"}
 
     def assert_rendered(self, pieces, test_case_name):
         version = render(pieces, self.style)['version']
