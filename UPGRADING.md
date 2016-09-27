@@ -3,7 +3,7 @@
 Some releases of Versioneer change the way your setup.py and setup.cfg must be configured. This document contains a list of releases where, when upgrading from an older release, you must make changes in your project.
 
 
-## Upgrading to 0.16
+## Upgrading to 0.16 or 0.17
 
 Nothing special.
 
