@@ -4,6 +4,7 @@ import os, base64, tempfile, io
 from os import path
 from setuptools import setup, Command
 from distutils.command.build_scripts import build_scripts
+from distutils.command.install import install
 from setuptools.dist import Distribution as _Distribution
 
 LONG="""
@@ -140,11 +141,19 @@ class my_build_scripts(build_scripts):
         with open(installer, "w") as f:
             f.write(s)
 
-        self.scripts = [installer]
+        self.scripts = [installer, 'scripts/versioneer.bat']
         rc = build_scripts.run(self)
         os.unlink(installer)
         os.rmdir(tempdir)
         return rc
+
+class my_install(install):
+    def run(self):
+        if not os.name == 'nt':
+            # remove the script required for windows
+            self.scripts.remove('scripts/versioneer.bat')
+
+        install.run(self)
 
 # python's distutils treats module-less packages as binary-specific (not
 # "pure"), so "setup.py bdist_wheel" creates binary-specific wheels. Override
@@ -168,6 +177,7 @@ setup(
     long_description = LONG,
     distclass=Distribution,
     cmdclass = { "build_scripts": my_build_scripts,
+                 "install": my_install,
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
                  },
