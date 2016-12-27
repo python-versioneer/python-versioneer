@@ -4,7 +4,10 @@ import os, base64, tempfile, io
 from os import path
 from setuptools import setup, Command
 from distutils.command.build_scripts import build_scripts
-from setuptools.command.install import install
+try:
+    from setuptools.command.install import install
+except ImportError:
+    from distutils.command.install import install
 from setuptools.dist import Distribution as _Distribution
 
 LONG="""
