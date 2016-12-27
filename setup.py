@@ -152,7 +152,7 @@ class my_build_scripts(build_scripts):
 
 class my_install(install):
     def run(self):
-        if not os.name == 'nt':
+        if not os.name == 'nt' and hasattr(self, 'scripts') and 'scripts/versioneer.bat' in self.scripts:
             # remove the script required for windows
             self.scripts.remove('scripts/versioneer.bat')
 
