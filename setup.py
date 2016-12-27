@@ -4,10 +4,6 @@ import os, base64, tempfile, io
 from os import path
 from setuptools import setup, Command
 from distutils.command.build_scripts import build_scripts
-try:
-    from setuptools.command.install import install
-except ImportError:
-    from distutils.command.install import install
 from setuptools.dist import Distribution as _Distribution
 
 LONG="""
@@ -150,14 +146,6 @@ class my_build_scripts(build_scripts):
         os.rmdir(tempdir)
         return rc
 
-class my_install(install):
-    def run(self):
-        if not os.name == 'nt' and hasattr(self, 'scripts') and 'scripts/versioneer.bat' in self.scripts:
-            # remove the script required for windows
-            self.scripts.remove('scripts/versioneer.bat')
-
-        install.run(self)
-
 # python's distutils treats module-less packages as binary-specific (not
 # "pure"), so "setup.py bdist_wheel" creates binary-specific wheels. Override
 # this so we get cross-platform wheels instead. More info at:
@@ -181,7 +169,6 @@ setup(
     long_description = LONG,
     distclass=Distribution,
     cmdclass = { "build_scripts": my_build_scripts,
-                 "install": my_install,
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
                  },
