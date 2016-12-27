@@ -163,37 +163,34 @@ class Distribution(_Distribution):
     def is_pure(self): return True
 
 
-try:
-    setup(
-        name = "versioneer",
-        license = "public domain",
-        version = VERSION,
-        description = "Easy VCS-based management of project version strings",
-        author = "Brian Warner",
-        author_email = "warner-versioneer@lothar.com",
-        url = "https://github.com/warner/python-versioneer",
-        # "fake" is replaced with versioneer-installer in build_scripts. We need
-        # a non-empty list to provoke "setup.py build" into making scripts,
-        # otherwise it skips that step.
-        scripts = ["fake"],
-        long_description = LONG,
-        distclass=Distribution,
-        cmdclass = { "build_scripts": my_build_scripts,
-                     "install": my_install,
-                     "make_versioneer": make_versioneer,
-                     "make_long_version_py_git": make_long_version_py_git,
-                     },
-        classifiers=[
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 2",
-            "Programming Language :: Python :: 2.6",
-            "Programming Language :: Python :: 2.7",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.2",
-            "Programming Language :: Python :: 3.3",
-            "Programming Language :: Python :: 3.4",
-            "Programming Language :: Python :: 3.5"
-            ],
-        )
-except Exception as e:
-    print(e)
+setup(
+    name = "versioneer",
+    license = "public domain",
+    version = VERSION,
+    description = "Easy VCS-based management of project version strings",
+    author = "Brian Warner",
+    author_email = "warner-versioneer@lothar.com",
+    url = "https://github.com/warner/python-versioneer",
+    # "fake" is replaced with versioneer-installer in build_scripts. We need
+    # a non-empty list to provoke "setup.py build" into making scripts,
+    # otherwise it skips that step.
+    scripts = ["fake"],
+    long_description = LONG,
+    distclass=Distribution,
+    cmdclass = { "build_scripts": my_build_scripts,
+                 "install": my_install,
+                 "make_versioneer": make_versioneer,
+                 "make_long_version_py_git": make_long_version_py_git,
+                 },
+    classifiers=[
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5"
+        ],
+    )
