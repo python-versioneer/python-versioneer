@@ -15,3 +15,4 @@ include test/demoapp-script-only/src/demo/placeholder
 include test/demoapp-script-only/src/dummy
 include test/demoapp-script-only/src/rundemo-template
 include test/demoapp2-distutils/bin/rundemo
+include scripts/versioneer.bat
