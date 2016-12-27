@@ -4,6 +4,7 @@ import os, base64, tempfile, io
 from os import path
 from setuptools import setup, Command
 from distutils.command.build_scripts import build_scripts
+from setuptools.command.install import install
 from setuptools.dist import Distribution as _Distribution
 
 LONG="""
@@ -147,6 +148,19 @@ class my_build_scripts(build_scripts):
         os.rmdir(tempdir)
         return rc
 
+batch_content = '''@echo off
+python "%~p0\\versioneer" %*'''
+
+class my_install(install):
+    def run(self):
+        install.run(self)
+        if os.name == 'nt' and hasattr(self, 'install_scripts') and \
+                not os.path.isfile(os.path.join(self.install_scripts, 'versioneer.bat')):
+            f = open(os.path.join(self.install_scripts, 'versioneer.bat'), 'w+')
+            f.write(batch_content.replace('\n', '\r\n'))
+            f.close()
+
+
 # python's distutils treats module-less packages as binary-specific (not
 # "pure"), so "setup.py bdist_wheel" creates binary-specific wheels. Override
 # this so we get cross-platform wheels instead. More info at:
@@ -169,6 +183,7 @@ setup(
     long_description = LONG,
     distclass=Distribution,
     cmdclass = { "build_scripts": my_build_scripts,
+                 "install": my_install,
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
                  },
