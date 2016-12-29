@@ -22,7 +22,7 @@ It returns `get_versions()["version"]`. See below for what that means.
 
 ## What does get_versions() return?
 
-`get_versions()` returns a small dictionary of rendered version information, which always contains four keys: 
+`get_versions()` returns a small dictionary of rendered version information, which always contains four keys:
 
 | key | description |
 | --- | ---         |
@@ -61,13 +61,11 @@ if versioneer.get_versions()["dirty"]:
 
 `dirty` is most meaningful in from-vcs mode. In from-file mode, it records the dirty status of the tree from which the setup.py build/sdist command was run, and is not affected by subsequent changes to the generated tree. In from-keyword and from-parentdir mode, it will always be `False`.
 
-## How do I select a 'version-style'?
-
-(note: styles are not yet implemented, and all strings use the `pep440` style)
+## How do I select a version `style`?
 
 In from-vcs mode (inside a git checkout), Versioneer can get a lot of data about the state of the tree: the current tag (if any), the closest historical tag, the number of commits since that tag, the exact revision ID, and the 'dirty' state. These pieces are used by a renderer function to compute the `['version']` in the small dictionary that will be returned by `get_versions()`.
 
-The renderer function is controlled by a configuration value called `version-style`. You can use this to select the kind of version string you want to use. The available forms are:
+The renderer function is controlled by a configuration value called `style`. You can use this to select the kind of version string you want to use. The available forms are:
 
 | key            | description |
 | ---            | ----------- |
@@ -110,4 +108,3 @@ The from-keywords mode will only produce `exact-tag` and `full-revisionid`. If t
 | pep440-old   | TAG[.postDIST]     | TAG or ?          | TAG[.postDIST[.dev0]]    | TAG or ?  |
 | git-describe | TAG[-DIST-gHASH]   | TAG or ?          | TAG[-DIST-gHASH][-dirty] | TAG or ?  |
 | long         | TAG-DIST-gHASH     | TAG-gHASH or ?    | TAG-DIST-gHASH[-dirty]   | ?         |
-
