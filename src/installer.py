@@ -36,7 +36,11 @@ def main():
         f.write(v)
     print("versioneer.py (%s) installed into local tree" % newver)
     print("Now running 'versioneer.py setup' to install the generated files..")
-    os.execl(sys.executable, sys.executable, "versioneer.py", "setup")
+    if " " in sys.executable:
+        import subprocess  # Do not import unless absolutely necessary to avoid compatibility issues
+        subprocess.call([sys.executable, "versioneer.py", "setup"])
+    else:
+        os.execl(sys.executable, sys.executable, "versioneer.py", "setup")
 
 if __name__ == '__main__':
     main()
