@@ -20,3 +20,6 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION != '3.2' ]]; then pip install -U tox virtualenv; else travis_retry pip install tox "virtualenv<14.0.0"; fi
 script:
   - tox -e py${TRAVIS_PYTHON_VERSION}
+matrix:
+  allow_failures:
+    - python: "pypy3"
