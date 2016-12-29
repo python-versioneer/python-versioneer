@@ -94,6 +94,7 @@ def get_config_from_root(root):
 class NotThisMethod(Exception):
     """Exception raised if a method is not valid for the current scenario."""
 
+
 # these dictionaries contain VCS-specific tools
 LONG_VERSION_PY = {}
 HANDLERS = {}
@@ -108,3 +109,5 @@ def register_vcs_handler(vcs, method):  # decorator
         HANDLERS[vcs][method] = f
         return f
     return decorate
+
+

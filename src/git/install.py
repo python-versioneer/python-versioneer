@@ -37,3 +37,5 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
         f.close()
         files.append(".gitattributes")
     run_command(GITS, ["add", "--"] + files)
+
+

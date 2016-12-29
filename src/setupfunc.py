@@ -169,6 +169,7 @@ def scan_setup_py():
         errors += 1
     return errors
 
+
 if __name__ == "__main__":
     cmd = sys.argv[1]
     if cmd == "setup":

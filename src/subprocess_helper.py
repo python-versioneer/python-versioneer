@@ -1,6 +1,4 @@
 import sys, subprocess, errno # --STRIP DURING BUILD
-
-
 def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
                 env=None):
     """Call the given command(s)."""
@@ -36,3 +34,5 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
             print("stdout was %s" % stdout)
         return None, p.returncode
     return stdout, p.returncode
+
+

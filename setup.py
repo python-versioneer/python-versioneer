@@ -74,6 +74,7 @@ def generate_versioneer_py():
         s.write(u("LONG_VERSION_PY['%s'] = '''\n" % VCS))
         s.write(generate_long_version_py(VCS))
         s.write(u("'''\n"))
+        s.write(u("\n\n"))
 
         s.write(get("src/%s/from_keywords.py" % VCS, do_strip=True))
         s.write(get("src/%s/from_vcs.py" % VCS, do_strip=True))

@@ -64,3 +64,5 @@ def register_vcs_handler(vcs, method):  # decorator
         HANDLERS[vcs][method] = f
         return f
     return decorate
+
+

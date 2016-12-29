@@ -4,8 +4,6 @@ def register_vcs_handler(*args): # --STRIP DURING BUILD
         return f # --STRIP DURING BUILD
     return nil # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
-
-
 @register_vcs_handler("git", "get_keywords")
 def git_get_keywords(versionfile_abs):
     """Extract version information from the given file."""
@@ -88,4 +86,5 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
     return {"version": "0+unknown",
             "full-revisionid": keywords["full"].strip(),
             "dirty": False, "error": "no suitable tags", "date": None}
+
 
