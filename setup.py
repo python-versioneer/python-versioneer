@@ -141,7 +141,7 @@ class my_build_scripts(build_scripts):
         with open(installer, "w") as f:
             f.write(s)
 
-        self.scripts = [installer]
+        self.scripts = [installer, 'scripts/versioneer.bat']
         rc = build_scripts.run(self)
         os.unlink(installer)
         os.rmdir(tempdir)
@@ -153,6 +153,7 @@ class my_build_scripts(build_scripts):
 # https://bitbucket.org/pypa/wheel/issue/116/packages-with-only-filesdata_files-get
 class Distribution(_Distribution):
     def is_pure(self): return True
+
 
 setup(
     name = "versioneer",
