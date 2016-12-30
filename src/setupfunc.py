@@ -59,13 +59,13 @@ def do_setup(stdout=sys.stdout, stderr=sys.stderr):
     except (EnvironmentError, configparser.NoSectionError,
             configparser.NoOptionError) as e:
         if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
-            print("Adding sample versioneer config to setup.cfg", file=stderr)
+            print(u"Adding sample versioneer config to setup.cfg", file=stderr)
             with open(os.path.join(root, "setup.cfg"), "a") as f:
                 f.write(SAMPLE_CONFIG)
         print(CONFIG_ERROR, file=stderr)
         return 1
 
-    print(" creating %s" % cfg.versionfile_source, file=stdout)
+    print(u" creating %s" % cfg.versionfile_source, file=stdout)
     with open(os.path.join(root, cfg.versionfile_source), "w") as f:
         LONG = LONG_VERSION_PY[cfg.VCS]
         f.write(LONG % {"DOLLAR": "$",
@@ -84,13 +84,13 @@ def do_setup(stdout=sys.stdout, stderr=sys.stderr):
         except EnvironmentError:
             old = ""
         if INIT_PY_SNIPPET not in old:
-            print(" appending to %s" % ipy, file=stdout)
+            print(u" appending to %s" % ipy, file=stdout)
             with open(ipy_abs, "a") as f:
                 f.write(INIT_PY_SNIPPET)
         else:
-            print(" %s unmodified" % ipy, file=stdout)
+            print(u" %s unmodified" % ipy, file=stdout)
     else:
-        print(" %s doesn't exist, ok" % ipy, file=stdout)
+        print(u" %s doesn't exist, ok" % ipy, file=stdout)
         ipy = None
 
     # Make sure both the top-level "versioneer.py" and versionfile_source
@@ -112,18 +112,18 @@ def do_setup(stdout=sys.stdout, stderr=sys.stderr):
     # it might give some false negatives. Appending redundant 'include'
     # lines is safe, though.
     if "versioneer.py" not in simple_includes:
-        print(" appending 'versioneer.py' to MANIFEST.in", file=stdout)
+        print(u" appending 'versioneer.py' to MANIFEST.in", file=stdout)
         with open(manifest_in, "a") as f:
             f.write("include versioneer.py\n")
     else:
-        print(" 'versioneer.py' already in MANIFEST.in", file=stdout)
+        print(u" 'versioneer.py' already in MANIFEST.in", file=stdout)
     if cfg.versionfile_source not in simple_includes:
-        print(" appending versionfile_source ('%s') to MANIFEST.in" %
+        print(u" appending versionfile_source ('%s') to MANIFEST.in" %
               cfg.versionfile_source, file=stdout)
         with open(manifest_in, "a") as f:
             f.write("include %s\n" % cfg.versionfile_source)
     else:
-        print(" versionfile_source already in MANIFEST.in", file=stdout)
+        print(u" versionfile_source already in MANIFEST.in", file=stdout)
 
     # Make VCS-specific changes. For git, this means creating/changing
     # .gitattributes to mark _version.py for export-subst keyword
