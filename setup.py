@@ -3,7 +3,7 @@
 import os, base64, tempfile, io
 from os import path
 from setuptools import setup, Command
-from distutils.command.build_scripts import build_scripts
+from setuptools.command.build_py import build_py
 from setuptools.dist import Distribution as _Distribution
 
 LONG="""
@@ -125,7 +125,7 @@ class make_long_version_py_git(Command):
                      })
         return 0
 
-class my_build_scripts(build_scripts):
+class my_build_py(build_py):
     def run(self):
         v = generate_versioneer_py()
         v_b64 = base64.b64encode(v).decode("ascii")
@@ -137,15 +137,17 @@ class my_build_scripts(build_scripts):
         s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
 
         tempdir = tempfile.mkdtemp()
-        installer = os.path.join(tempdir, "versioneer")
+        installer = os.path.join(tempdir, "versioneer.py")
         with open(installer, "w") as f:
             f.write(s)
 
-        self.scripts = [installer]
-        rc = build_scripts.run(self)
+        self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
+        self.package_dir.update({'': os.path.dirname(installer)})
+        rc = build_py.run(self)
         os.unlink(installer)
         os.rmdir(tempdir)
         return rc
+
 
 # python's distutils treats module-less packages as binary-specific (not
 # "pure"), so "setup.py bdist_wheel" creates binary-specific wheels. Override
@@ -165,10 +167,15 @@ setup(
     # "fake" is replaced with versioneer-installer in build_scripts. We need
     # a non-empty list to provoke "setup.py build" into making scripts,
     # otherwise it skips that step.
-    scripts = ["fake"],
+    py_modules = ["fake"],
+    entry_points={
+        'console_scripts': [
+            'versioneer = versioneer:main',
+        ],
+    },
     long_description = LONG,
     distclass=Distribution,
-    cmdclass = { "build_scripts": my_build_scripts,
+    cmdclass = { "build_py": my_build_py,
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
                  },
