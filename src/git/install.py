@@ -1,12 +1,13 @@
-import sys # --STRIP DURING BUILD
+import os, sys # --STRIP DURING BUILD
 def run_command(): pass # --STRIP DURING BUILD
 
-def do_vcs_install(manifest_in, versionfile_source, ipy):
+def do_vcs_install(root, manifest_in, versionfile_source, ipy):
     """Git-specific installation logic for Versioneer.
 
     For Git, this means creating/changing .gitattributes to mark _version.py
     for export-subst keyword substitution.
     """
+    # manifest_in and ipy must be relative to root
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
@@ -22,8 +23,9 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
         versioneer_file = "versioneer.py"
     files.append(versioneer_file)
     present = False
+    gitattributes = os.path.join(root, ".gitattributes")
     try:
-        f = open(".gitattributes", "r")
+        f = open(gitattributes, "r")
         for line in f.readlines():
             if line.strip().startswith(versionfile_source):
                 if "export-subst" in line.strip().split()[1:]:
@@ -32,10 +34,10 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
     except EnvironmentError:
         pass
     if not present:
-        f = open(".gitattributes", "a+")
+        f = open(gitattributes, "a+")
         f.write("%s export-subst\n" % versionfile_source)
         f.close()
         files.append(".gitattributes")
-    run_command(GITS, ["add", "--"] + files)
+    run_command(GITS, ["add", "--"] + files, cwd=root)
 
 
