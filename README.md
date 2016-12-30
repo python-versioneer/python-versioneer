@@ -146,8 +146,8 @@ that this commit is two revisions ("+2") beyond the "0.11" tag. For released
 software (exactly equal to a known tag), the identifier will only contain the
 stripped tag, e.g. "0.11".
 
-Other styles are available. See details.md in the Versioneer source tree for
-descriptions.
+Other styles are available. See [details.md](details.md) in the Versioneer
+source tree for descriptions.
 
 ## Debugging
 
