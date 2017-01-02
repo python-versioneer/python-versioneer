@@ -7,8 +7,12 @@ def get_config_from_root(): pass # --STRIP DURING BUILD
 def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
-def get_cmdclass():
-    """Get the custom setuptools/distutils subclasses used by Versioneer."""
+def get_cmdclass(cmdclass=None):
+    """Get the custom setuptools/distutils subclasses used by Versioneer.
+
+    If the package uses a different cmdclass (e.g. one from numpy), it
+    should be provide as an argument.
+    """
     if "versioneer" in sys.modules:
         del sys.modules["versioneer"]
         # this fixes the "python setup.py develop" case (also 'install' and
@@ -24,7 +28,7 @@ def get_cmdclass():
         # happens, we protect the child from the parent's versioneer too.
         # Also see https://github.com/warner/python-versioneer/issues/52
 
-    cmds = {}
+    cmds = {} if cmdclass is None else cmdclass.copy()
 
     # we add "version" to both distutils and setuptools
     from distutils.core import Command
@@ -66,7 +70,9 @@ def get_cmdclass():
     #  setup.py egg_info -> ?
 
     # we override different "build_py" commands for both environments
-    if "setuptools" in sys.modules:
+    if 'build_py' in cmds:
+        _build_py = cmds['build_py']
+    elif "setuptools" in sys.modules:
         from setuptools.command.build_py import build_py as _build_py
     else:
         from distutils.command.build_py import build_py as _build_py
@@ -147,7 +153,9 @@ def get_cmdclass():
         cmds["py2exe"] = cmd_py2exe
 
     # we override different "sdist" commands for both environments
-    if "setuptools" in sys.modules:
+    if 'sdist' in cmds:
+        _sdist = cmds['sdist']
+    elif "setuptools" in sys.modules:
         from setuptools.command.sdist import sdist as _sdist
     else:
         from distutils.command.sdist import sdist as _sdist

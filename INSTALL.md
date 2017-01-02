@@ -97,6 +97,12 @@ To versioneer-enable your project:
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
 
+  If your project uses a special `cmdclass`, pass that `cmdclass` as
+  a parameter. For example:
+
+        from numpy.distutils.core import numpy_cmdclass
+        cmdclass=versioneer.get_cmdclass(numpy_cmdclass),
+
 * 4: commit these changes to your VCS. To make sure you won't forget,
   `versioneer install` will mark everything it touched for addition using
   `git add`. Don't forget to add `setup.py` and `setup.cfg` too.
