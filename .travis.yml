@@ -13,7 +13,8 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-  - "3.6-dev"
+  - "3.6"
+  - "nightly"
   - "pypy"
   - "pypy3"
 install:
