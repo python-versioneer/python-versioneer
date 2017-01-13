@@ -13,14 +13,14 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-  - "3.6-dev"
+  - "3.6"
   - "pypy"
   - "pypy3"
 install:
 # virtualenv>=14.0.0 is incompatible with python 3.2
   - if [[ $TRAVIS_PYTHON_VERSION != '3.2' ]]; then pip install -U tox virtualenv; else travis_retry pip install tox "virtualenv<14.0.0"; fi
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.6-dev' ]]; then tox -e py3.6; else tox -e py${TRAVIS_PYTHON_VERSION}; fi
+  - tox -e py${TRAVIS_PYTHON_VERSION}
 matrix:
   allow_failures:
     - python: "pypy3"
