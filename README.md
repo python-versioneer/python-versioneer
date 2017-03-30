@@ -267,6 +267,6 @@ https://creativecommons.org/publicdomain/zero/1.0/ .
 
 [pypi-image]: https://img.shields.io/pypi/v/versioneer.svg
 [pypi-url]: https://pypi.python.org/pypi/versioneer/
-[travis-image]: 
+[travis-image]:
 https://img.shields.io/travis/warner/python-versioneer/master.svg
 [travis-url]: https://travis-ci.org/warner/python-versioneer
