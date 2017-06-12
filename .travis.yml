@@ -17,10 +17,9 @@ python:
   - "pypy"
   - "pypy3"
 install:
-# virtualenv>=14.0.0 is incompatible with python 3.2
-  - if [[ $TRAVIS_PYTHON_VERSION != '3.2' ]]; then pip install -U tox virtualenv; else travis_retry pip install tox "virtualenv<14.0.0"; fi
+  - pip install tox-travis
 script:
-  - tox -e py${TRAVIS_PYTHON_VERSION}
+  - tox
 matrix:
   allow_failures:
     - python: "pypy3"
