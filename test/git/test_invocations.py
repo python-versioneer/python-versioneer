@@ -119,7 +119,7 @@ class _Invocations(common.Common):
         self.git("init", workdir=libdir)
         self.python("versioneer.py", "setup", workdir=libdir)
         self.git("add", "--all", workdir=libdir)
-        self.git("commit", "-m", "commemt", workdir=libdir)
+        self.git("commit", "-m", "comment", workdir=libdir)
         self.git("tag", "demolib-1.0", workdir=libdir)
         self.python("setup.py", "sdist", "--format=tar", workdir=libdir)
         created = os.path.join(libdir, "dist", "demolib-1.0.tar")
@@ -154,7 +154,7 @@ class _Invocations(common.Common):
         self.git("init", workdir=repodir)
         self.python("versioneer.py", "setup", workdir=repodir)
         self.git("add", "--all", workdir=repodir)
-        self.git("commit", "-m", "commemt", workdir=repodir)
+        self.git("commit", "-m", "comment", workdir=repodir)
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return repodir
 
@@ -169,7 +169,7 @@ class _Invocations(common.Common):
         self.git("init", workdir=repodir)
         self.python("versioneer.py", "setup", workdir=projectdir)
         self.git("add", "--all", workdir=repodir)
-        self.git("commit", "-m", "commemt", workdir=repodir)
+        self.git("commit", "-m", "comment", workdir=repodir)
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return projectdir
 
@@ -253,7 +253,7 @@ class _Invocations(common.Common):
         self.git("init", workdir=repodir)
         self.python("versioneer.py", "setup", workdir=repodir)
         self.git("add", "--all", workdir=repodir)
-        self.git("commit", "-m", "commemt", workdir=repodir)
+        self.git("commit", "-m", "comment", workdir=repodir)
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return repodir
 
@@ -268,7 +268,7 @@ class _Invocations(common.Common):
         self.git("init", workdir=repodir)
         self.python("versioneer.py", "setup", workdir=projectdir)
         self.git("add", "--all", workdir=repodir)
-        self.git("commit", "-m", "commemt", workdir=repodir)
+        self.git("commit", "-m", "comment", workdir=repodir)
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return projectdir
 
