@@ -4,6 +4,7 @@ SHORT_VERSION_PY = """
 # unpacked source archive. Distribution tarballs contain a pre-generated copy
 # of this file.
 
+from __future__ import absolute_import
 import json
 
 version_json = '''
