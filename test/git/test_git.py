@@ -156,7 +156,7 @@ closest-tag: 1.0
 distance: 1
 dirty: False
 pep440: 1.0+1.g250b7ca
-pep440-pre: 1.0.post.dev1
+pep440-pre: 1.0.post0.dev1
 pep440-post: 1.0.post1+g250b7ca
 pep440-old: 1.0.post1
 git-describe: 1.0-1-g250b7ca
@@ -166,7 +166,7 @@ closest-tag: 1.0
 distance: 1
 dirty: True
 pep440: 1.0+1.g250b7ca.dirty
-pep440-pre: 1.0.post.dev1
+pep440-pre: 1.0.post0.dev1
 pep440-post: 1.0.post1.dev0+g250b7ca
 pep440-old: 1.0.post1.dev0
 git-describe: 1.0-1-g250b7ca-dirty
@@ -177,7 +177,7 @@ closest-tag: 1.0+plus
 distance: 1
 dirty: False
 pep440: 1.0+plus.1.g250b7ca
-pep440-pre: 1.0+plus.post.dev1
+pep440-pre: 1.0+plus.post0.dev1
 pep440-post: 1.0+plus.post1.g250b7ca
 pep440-old: 1.0+plus.post1
 git-describe: 1.0+plus-1-g250b7ca
@@ -187,7 +187,7 @@ closest-tag: 1.0+plus
 distance: 1
 dirty: True
 pep440: 1.0+plus.1.g250b7ca.dirty
-pep440-pre: 1.0+plus.post.dev1
+pep440-pre: 1.0+plus.post0.dev1
 pep440-post: 1.0+plus.post1.dev0.g250b7ca
 pep440-old: 1.0+plus.post1.dev0
 git-describe: 1.0+plus-1-g250b7ca-dirty
@@ -198,7 +198,7 @@ closest-tag: None
 distance: 1
 dirty: False
 pep440: 0+untagged.1.g250b7ca
-pep440-pre: 0.post.dev1
+pep440-pre: 0.post0.dev1
 pep440-post: 0.post1+g250b7ca
 pep440-old: 0.post1
 git-describe: 250b7ca
@@ -208,7 +208,7 @@ closest-tag: None
 distance: 1
 dirty: True
 pep440: 0+untagged.1.g250b7ca.dirty
-pep440-pre: 0.post.dev1
+pep440-pre: 0.post0.dev1
 pep440-post: 0.post1.dev0+g250b7ca
 pep440-old: 0.post1.dev0
 git-describe: 250b7ca-dirty
