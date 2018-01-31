@@ -3,7 +3,7 @@ from setuptools import setup, Extension
 import versioneer
 commands = versioneer.get_cmdclass().copy()
 
-extension = Extension('demoappext.ext',
+extension = Extension('demo.ext',
                       sources=['demo/ext.c'],
 )
 

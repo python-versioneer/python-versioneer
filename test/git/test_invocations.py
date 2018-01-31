@@ -880,6 +880,19 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         created = os.path.join(repodir, "dist", wheelname)
         self.assertTrue(os.path.exists(created), created)
 
+    def test_extension_inplace(self):
+        # build extensions in place. No wheel package
+        # import ipdb; ipdb.set_trace()
+        unpacked = self.make_setuptools_extension_unpacked()
+        linkdir = self.make_linkdir()
+        venv = self.make_venv("setuptools-unpacked-pip-wheel-extension")
+        self.run_in_venv(venv, unpacked,
+                         "python", "setup.py", "build_ext", "-i")
+        # No wheel package is created, _version.py should exist in
+        # module dir only
+        version_file = os.path.join(unpacked, "demo", "_version.py")
+        self.assertTrue(os.path.exists(version_file))
+
     def test_extension_wheel_pip(self):
         # create an wheel of demoappext-setuptools at 2.0 with pip
         wheelname = self.make_binary_wheelname('demoappext')

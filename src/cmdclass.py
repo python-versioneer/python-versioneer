@@ -103,6 +103,12 @@ def get_cmdclass(cmdclass=None):
             cfg = get_config_from_root(root)
             versions = get_versions()
             _build_ext.run(self)
+            if self.inplace:
+                # build_ext --inplace will only build extensions in
+                # build/lib<..> dir with no _version.py to write to.
+                # As in place builds will already have a _version.py
+                # in the module dir, we do not need to write one.
+                return
             # now locate _version.py in the new build/ directory and replace
             # it with an updated value
             target_versionfile = os.path.join(self.build_lib,
