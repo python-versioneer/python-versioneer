@@ -1,8 +1,5 @@
 import re  # --STRIP DURING BUILD
 
-# Default matches v1.2.x, maint/1.2.x, 1.2.x, 1.x etc.
-default_maint_branch_regexp = ".*([0-9]+\.)+x$"
-
 
 def plus_or_dot(pieces):
     """Return a + if we don't already have one, else return a ."""
@@ -141,77 +138,43 @@ def render_git_describe_long(pieces):
     return rendered
 
 
-def add_one_to_version(version_string, number_index_to_increment=-1):
-    """
-    Add one to a version string at the given numeric indices.
-
-    >>> add_one_to_version('v1.2.3')
-    'v1.2.4'
-
-    """
-    # Break up the tag by number groups (preserving multi-digit
-    # numbers as multidigit)
-    parts = re.split("([0-9]+)", version_string)
-
-    digit_parts = [(i, part) for i, part in enumerate(parts)
-                   if part.isdigit()]
-
-    # Deal with negative indexing.
-    increment_at_index = ((number_index_to_increment + len(digit_parts))
-                          % len(digit_parts))
-    for n_seen, (i, part) in enumerate(digit_parts):
-        if n_seen == increment_at_index:
-            parts[i] = str(int(part) + 1)
-        elif n_seen > increment_at_index:
-            parts[i] = '0'
-    return ''.join(parts)
-
-
 def render_pep440_branch_based(pieces):
-    # [TAG+1 of minor number][.devDISTANCE][+gHEX]. The git short is
-    # included for dirty.
+    """Build up version string, with post-release "local version identifier".
 
-    # exceptions:
-    # 1: no tags. 0.0.0.devDISTANCE[+gHEX]
+    Our goal: TAG[+DISTANCE.BRANCH_gHEX[.dirty]] . Note that if you
+    get a tagged build and then dirty it, you'll get TAG+0.BRANCH_gHEX.dirty
 
+    Exceptions:
+    1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.BRANCH_gHEX[.dirty]
+    """
     replacements = ([' ', '.'], ['(', ''], [')', ''])
     branch_name = pieces.get('branch') or ''
-    for old, new in replacements:
-        branch_name = branch_name.replace(old, new)
-    master = branch_name == 'master'
-    maint = re.match(default_maint_branch_regexp, branch_name)
-
-    # If we are on a tag, just pep440-pre it.
-    if pieces["closest-tag"] and not (pieces["distance"] or
-                                      pieces["dirty"]):
-        rendered = pieces["closest-tag"]
+    if branch_name:
+        for old, new in replacements:
+            branch_name = branch_name.replace(old, new)
     else:
-        # Put a default closest-tag in.
-        if not pieces["closest-tag"]:
-            pieces["closest-tag"] = '0.0.0'
+        branch_name = 'unknown_branch'
 
+    if pieces["closest-tag"]:
+        rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
-            if maint:
-                rendered = pieces["closest-tag"]
-                if pieces["distance"]:
-                    rendered += ".post%d" % pieces["distance"]
-            else:
-                rendered = add_one_to_version(pieces["closest-tag"])
-                if pieces["distance"]:
-                    rendered += ".dev%d" % pieces["distance"]
-
-            suffix = []
-            # Put the branch name in if it isn't master nor a
-            # maintenance branch.
-            if not (master or maint):
-                suffix.append('%s' % (branch_name or 'unknown_branch'))
-
+            rendered += plus_or_dot(pieces)
+            rendered += "%d.%s.g%s" % (
+                pieces["distance"],
+                branch_name,
+                pieces['short']
+            )
             if pieces["dirty"]:
-                suffix.append('g%s' % pieces["short"])
-            if suffix:
-                rendered += '+%s' % '_'.join(suffix)
-        else:
-            rendered = pieces["closest-tag"]
+                rendered += ".dirty"
+    else:
+        # exception #1
+        rendered = "0+untagged.%d.%s.g%s" % (
+            pieces["distance"],
+            branch_name,
+            pieces['short']
+        )
+        if pieces["dirty"]:
+            rendered += ".dirty"
     return rendered
 
 
