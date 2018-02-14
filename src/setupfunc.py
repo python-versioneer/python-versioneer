@@ -149,7 +149,7 @@ def scan_setup_py():
         for line in f.readlines():
             if "import versioneer" in line:
                 found.add("import")
-            if "versioneer.get_cmdclass()" in line:
+            if "versioneer.get_cmdclass(" in line:
                 found.add("cmdclass")
             if "versioneer.get_version()" in line:
                 found.add("get_version")
