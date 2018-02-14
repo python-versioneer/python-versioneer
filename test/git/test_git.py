@@ -681,12 +681,12 @@ class Test_GitRepo(common.Common, unittest.TestCase):
                  }
 
     def assert_case(self, case_name, dirty=False):
-        tag_prefix = 'v'
-        pieces = from_vcs.git_pieces_from_vcs(tag_prefix, self.repo_root,
+        pieces = from_vcs.git_pieces_from_vcs(self.tag_prefix, self.gitdir,
                                               verbose=False,
                                               run_command=run_command)
         pieces.pop('short')
         pieces.pop('long')
+        pieces.pop('date')
         expected = self.expecteds.get(case_name, {})
 
         if dirty:
@@ -697,27 +697,31 @@ class Test_GitRepo(common.Common, unittest.TestCase):
         self.assertEqual(expected, pieces)
 
     def write_file(self, fname, content):
-        with open(os.path.join(self.repo_root, fname), 'w') as fh:
+        with open(os.path.join(self.gitdir, fname), 'w') as fh:
             fh.write(content)
 
+
+    def tearDown(self):
+        if os.path.exists(self.gitdir):
+            import shutil
+            shutil.rmtree(self.gitdir)
+
     def test(self):
-        tag_prefix = 'v'
+        self.tag_prefix = 'v'
 
         self.testdir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                    'git_test_repo')
-        self.repo_root = os.path.join(self.testdir, 'demoapp')
+                                   'git_test_repo')
+        self.gitdir = os.path.join(self.testdir, 'demoapp')
 
         # Cleanup
-        if os.path.exists(self.repo_root):
-            import shutil
-            shutil.rmtree(self.repo_root)
-        os.makedirs(self.repo_root)
+        self.tearDown()
+        os.makedirs(self.gitdir)
 
         # S1
         self.git("init")
         self.assertRaises(from_vcs.NotThisMethod,
                           from_vcs.git_pieces_from_vcs,
-                          tag_prefix, self.repo_root, run_command=run_command,
+                          self.tag_prefix, self.gitdir, run_command=run_command,
                           verbose=False)
 
         # S2
