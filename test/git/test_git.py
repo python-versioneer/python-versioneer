@@ -43,7 +43,7 @@ class Test_ParseGitDescribe(unittest.TestCase):
                 if args[0] == "show":
                     return "12345\n", 0
                 elif args[0:2] == ["branch", "--contains"]:
-                    return ''
+                    return '', 0
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,
@@ -92,7 +92,8 @@ class Test_ParseGitDescribe(unittest.TestCase):
                           "dirty": True, "error": None,
                           "distance": 1,
                           "long": "longlong",
-                          "short": "1f"})
+                          "short": "1f",
+                          "date": "12345"})
         self.assertEqual(pv("v1.0-1-g1f-dirty", branch_name="v1.0.x"),
                          {"branch": 'v1.0.x', "closest-tag": "1.0",
                           "dirty": True, "error": None,
@@ -343,7 +344,7 @@ class Test_RepoIntegration(common.Common, unittest.TestCase):
     # or test/demoapp-script-only/)
 
     def test_full(self):
-        self.run_test("test/demoapp", False, ".")
+        self.run_case("test/demoapp", False, ".")
 
     def test_script_only(self):
         # This test looks at an application that consists entirely of a
@@ -352,12 +353,12 @@ class Test_RepoIntegration(common.Common, unittest.TestCase):
         # anything executable. So of the 3 runtime situations examined by
         # Repo.test_full above, we only care about RB. (RA1 is valid too, but
         # covered by Repo).
-        self.run_test("test/demoapp-script-only", True, ".")
+        self.run_case("test/demoapp-script-only", True, ".")
 
     def test_project_in_subdir(self):
         # This test sets of the git repository so that the python project --
         # i.e. setup.py -- is not located in the root directory
-        self.run_test("test/demoapp", False, "project")
+        self.run_case("test/demoapp", False, "project")
 
     def run_case(self, demoapp_dir, script_only, project_sub_dir):
         self.testdir = tempfile.mkdtemp()
