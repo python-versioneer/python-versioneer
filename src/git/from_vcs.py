@@ -53,14 +53,16 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     pieces["error"] = None
 
     # abbrev-ref available with git >= 1.7
-    branch_name = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
-                              cwd=root).strip()
+    branch_name_out, rc = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
+                                      cwd=root)
+    branch_name = branch_name_out.strip()
     if branch_name == 'HEAD':
         # If we aren't exactly on a branch, pick a branch which represents
         # the current commit. If all else fails, we are on a branchless
         # commit.
-        branches = run_command(GITS, ["branch", "--contains"],
-                               cwd=root).split('\n')
+        branches_out, rc = run_command(GITS, ["branch", "--contains"],
+                                       cwd=root)
+        branches = branches_out.split('\n')
         # Strip off the leading "* " from the list of branches.
         branches = [branch[2:] for branch in branches
                     if branch and branch[4:5] != '(']
