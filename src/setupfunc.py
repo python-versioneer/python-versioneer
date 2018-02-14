@@ -1,6 +1,6 @@
 
 from __future__ import print_function # --STRIP DURING BUILD
-import os, sys  # --STRIP DURING BUILD
+import os, re, sys  # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
@@ -50,6 +50,13 @@ __version__ = get_versions()['version']
 del get_versions
 """
 
+INIT_PY_SNIPPET_RE = re.compile(INIT_PY_SNIPPET.replace(
+    '(', r'\(').replace(
+    ')', r'\)').replace(
+    '[', r'\[').replace(
+    ']', r'\]').replace(
+    ' ._version', r' ([\w\._]+)?._version'), re.MULTILINE)
+
 
 def do_setup():
     """Do main VCS-independent setup function for installing Versioneer."""
@@ -84,7 +91,7 @@ def do_setup():
                 old = f.read()
         except EnvironmentError:
             old = ""
-        if INIT_PY_SNIPPET not in old:
+        if INIT_PY_SNIPPET_RE.search(old) is None:
             print(" appending to %s" % ipy)
             with open(ipy, "a") as f:
                 f.write(INIT_PY_SNIPPET)
