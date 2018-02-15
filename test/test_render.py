@@ -158,6 +158,12 @@ class renderer_case_mixin(object):
 
     """
     def define_pieces(self, closest_tag, distance=0, dirty=False):
+        branch = getattr(self, 'branch', 'master')
+        if branch:
+            replacements = ([' ', '.'], ['(', ''], [')', ''], ['\\', '-'], ['/', '-'])
+            for old, new in replacements:
+                branch = branch.replace(old, new)
+
         return {"error": '',
                 "closest-tag": closest_tag,
                 "distance": distance,
@@ -165,7 +171,7 @@ class renderer_case_mixin(object):
                 "short": "abc" if distance else '',
                 "long": "abcdefg" if distance else '',
                 "date": "2016-05-31T13:02:11+0200",
-                "branch": getattr(self, 'branch', 'master')}
+                "branch": branch}
 
     def assert_rendered(self, pieces, test_case_name):
         version = render(pieces, self.style)['version']
@@ -345,6 +351,70 @@ class Test_pep440_branch_based__no_branch_info(unittest.TestCase,
                 'untagged_0_commits_dirty': '0+untagged.0.unknown_branch.g.dirty',
                 'untagged_1_commits_clean': '0+untagged.1.unknown_branch.gabc',
                 'untagged_1_commits_dirty': '0+untagged.1.unknown_branch.gabc.dirty',
+                'error_getting_parts': 'unknown'
+                }
+
+
+class Test_pep440_branch_based__space_in_branch(unittest.TestCase,
+                                              renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'foo bar'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.3+0.foo.bar.g.dirty',
+                'tagged_1_commits_clean': 'v1.2.3+1.foo.bar.gabc',
+                'tagged_1_commits_dirty': 'v1.2.3+1.foo.bar.gabc.dirty',
+                'untagged_0_commits_clean': '0+untagged.0.foo.bar.g',
+                'untagged_0_commits_dirty': '0+untagged.0.foo.bar.g.dirty',
+                'untagged_1_commits_clean': '0+untagged.1.foo.bar.gabc',
+                'untagged_1_commits_dirty': '0+untagged.1.foo.bar.gabc.dirty',
+                'error_getting_parts': 'unknown'
+                }
+
+
+class Test_pep440_branch_based__forward_slash_in_branch(unittest.TestCase,
+                                                        renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'foo/bar'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.3+0.foo-bar.g.dirty',
+                'tagged_1_commits_clean': 'v1.2.3+1.foo-bar.gabc',
+                'tagged_1_commits_dirty': 'v1.2.3+1.foo-bar.gabc.dirty',
+                'untagged_0_commits_clean': '0+untagged.0.foo-bar.g',
+                'untagged_0_commits_dirty': '0+untagged.0.foo-bar.g.dirty',
+                'untagged_1_commits_clean': '0+untagged.1.foo-bar.gabc',
+                'untagged_1_commits_dirty': '0+untagged.1.foo-bar.gabc.dirty',
+                'error_getting_parts': 'unknown'
+                }
+
+
+class Test_pep440_branch_based__back_slash_in_branch(unittest.TestCase,
+                                                        renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'foo\\bar'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.3+0.foo-bar.g.dirty',
+                'tagged_1_commits_clean': 'v1.2.3+1.foo-bar.gabc',
+                'tagged_1_commits_dirty': 'v1.2.3+1.foo-bar.gabc.dirty',
+                'untagged_0_commits_clean': '0+untagged.0.foo-bar.g',
+                'untagged_0_commits_dirty': '0+untagged.0.foo-bar.g.dirty',
+                'untagged_1_commits_clean': '0+untagged.1.foo-bar.gabc',
+                'untagged_1_commits_dirty': '0+untagged.1.foo-bar.gabc.dirty',
+                'error_getting_parts': 'unknown'
+                }
+
+
+class Test_pep440_branch_based__parenthesis_in_branch(unittest.TestCase,
+                                                        renderer_case_mixin):
+    style = 'pep440-branch-based'
+    branch = 'foo(bar)'
+    expected = {'tagged_0_commits_clean': 'v1.2.3',
+                'tagged_0_commits_dirty': 'v1.2.3+0.foobar.g.dirty',
+                'tagged_1_commits_clean': 'v1.2.3+1.foobar.gabc',
+                'tagged_1_commits_dirty': 'v1.2.3+1.foobar.gabc.dirty',
+                'untagged_0_commits_clean': '0+untagged.0.foobar.g',
+                'untagged_0_commits_dirty': '0+untagged.0.foobar.g.dirty',
+                'untagged_1_commits_clean': '0+untagged.1.foobar.gabc',
+                'untagged_1_commits_dirty': '0+untagged.1.foobar.gabc.dirty',
                 'error_getting_parts': 'unknown'
                 }
 

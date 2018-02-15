@@ -147,7 +147,7 @@ def render_pep440_branch_based(pieces):
     Exceptions:
     1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.BRANCH_gHEX[.dirty]
     """
-    replacements = ([' ', '.'], ['(', ''], [')', ''])
+    replacements = ([' ', '.'], ['(', ''], [')', ''], ['\\', '-'], ['/', '-'])
     branch_name = pieces.get('branch') or ''
     if branch_name:
         for old, new in replacements:
