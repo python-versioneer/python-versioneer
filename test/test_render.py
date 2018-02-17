@@ -376,13 +376,13 @@ class Test_pep440_branch_based__forward_slash_in_branch(unittest.TestCase,
     style = 'pep440-branch-based'
     branch = 'foo/bar'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
-                'tagged_0_commits_dirty': 'v1.2.3+0.foo-bar.g.dirty',
-                'tagged_1_commits_clean': 'v1.2.3+1.foo-bar.gabc',
-                'tagged_1_commits_dirty': 'v1.2.3+1.foo-bar.gabc.dirty',
-                'untagged_0_commits_clean': '0+untagged.0.foo-bar.g',
-                'untagged_0_commits_dirty': '0+untagged.0.foo-bar.g.dirty',
-                'untagged_1_commits_clean': '0+untagged.1.foo-bar.gabc',
-                'untagged_1_commits_dirty': '0+untagged.1.foo-bar.gabc.dirty',
+                'tagged_0_commits_dirty': 'v1.2.3+0.foo.bar.g.dirty',
+                'tagged_1_commits_clean': 'v1.2.3+1.foo.bar.gabc',
+                'tagged_1_commits_dirty': 'v1.2.3+1.foo.bar.gabc.dirty',
+                'untagged_0_commits_clean': '0+untagged.0.foo.bar.g',
+                'untagged_0_commits_dirty': '0+untagged.0.foo.bar.g.dirty',
+                'untagged_1_commits_clean': '0+untagged.1.foo.bar.gabc',
+                'untagged_1_commits_dirty': '0+untagged.1.foo.bar.gabc.dirty',
                 'error_getting_parts': 'unknown'
                 }
 
@@ -392,13 +392,13 @@ class Test_pep440_branch_based__back_slash_in_branch(unittest.TestCase,
     style = 'pep440-branch-based'
     branch = 'foo\\bar'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
-                'tagged_0_commits_dirty': 'v1.2.3+0.foo-bar.g.dirty',
-                'tagged_1_commits_clean': 'v1.2.3+1.foo-bar.gabc',
-                'tagged_1_commits_dirty': 'v1.2.3+1.foo-bar.gabc.dirty',
-                'untagged_0_commits_clean': '0+untagged.0.foo-bar.g',
-                'untagged_0_commits_dirty': '0+untagged.0.foo-bar.g.dirty',
-                'untagged_1_commits_clean': '0+untagged.1.foo-bar.gabc',
-                'untagged_1_commits_dirty': '0+untagged.1.foo-bar.gabc.dirty',
+                'tagged_0_commits_dirty': 'v1.2.3+0.foo.bar.g.dirty',
+                'tagged_1_commits_clean': 'v1.2.3+1.foo.bar.gabc',
+                'tagged_1_commits_dirty': 'v1.2.3+1.foo.bar.gabc.dirty',
+                'untagged_0_commits_clean': '0+untagged.0.foo.bar.g',
+                'untagged_0_commits_dirty': '0+untagged.0.foo.bar.g.dirty',
+                'untagged_1_commits_clean': '0+untagged.1.foo.bar.gabc',
+                'untagged_1_commits_dirty': '0+untagged.1.foo.bar.gabc.dirty',
                 'error_getting_parts': 'unknown'
                 }
 
