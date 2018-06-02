@@ -13,7 +13,8 @@ def render_pep440(pieces):
     get a tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
 
     Exceptions:
-    1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
+    1: no tags. git_describe was just HEX.
+       fallback_version+untagged.DISTANCE.gHEX[.dirty]
     """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
@@ -24,8 +25,9 @@ def render_pep440(pieces):
                 rendered += ".dirty"
     else:
         # exception #1
-        rendered = "0+untagged.%d.g%s" % (pieces["distance"],
-                                          pieces["short"])
+        rendered = (fallback_version +
+                    ("+untagged.%d.g%s" % (pieces["distance"],
+                                           pieces["short"])))
         if pieces["dirty"]:
             rendered += ".dirty"
     return rendered
@@ -166,4 +168,3 @@ def render(pieces, style):
     return {"version": rendered, "full-revisionid": pieces["long"],
             "dirty": pieces["dirty"], "error": None,
             "date": pieces.get("date")}
-

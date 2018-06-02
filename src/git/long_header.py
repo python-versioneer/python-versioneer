@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 
+fallback_version = "0"
 
 def get_keywords():
     """Get the keywords needed to look up the version information."""
@@ -64,5 +65,3 @@ def register_vcs_handler(vcs, method):  # decorator
         HANDLERS[vcs][method] = f
         return f
     return decorate
-
-

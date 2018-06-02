@@ -119,14 +119,14 @@ class Keywords(unittest.TestCase):
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
-        self.assertEqual(v["version"], "0+unknown")
+        self.assertEqual(v["version"], fallback_version + "+unknown")
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
-        self.assertEqual(v["version"], "0+unknown")
+        self.assertEqual(v["version"], fallback_version + "+unknown")
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
