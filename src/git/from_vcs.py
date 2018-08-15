@@ -14,7 +14,7 @@ def run_command(): pass  # --STRIP DURING BUILD
 class NotThisMethod(Exception):  # --STRIP DURING BUILD
     pass  # --STRIP DURING BUILD
 @register_vcs_handler("git", "pieces_from_vcs")
-def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
+def git_pieces_from_vcs(tag_prefix, tag_regex, root, verbose, run_command=run_command):
     """Get version from 'git describe' in the root of the source tree.
 
     This only gets called if the git-archive 'subst' keywords were *not*
@@ -36,7 +36,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",
                                           "--always", "--long",
-                                          "--match", "%s*" % tag_prefix],
+                                          "--match", "%s%s" % (tag_prefix, tag_regex)],
                                    cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:

@@ -120,6 +120,7 @@ class make_long_version_py_git(Command):
                     {"DOLLAR": "$",
                      "STYLE": "pep440",
                      "TAG_PREFIX": "tag-",
+                     "TAG_REGEX": "*",
                      "PARENTDIR_PREFIX": "parentdir_prefix",
                      "VERSIONFILE_SOURCE": "versionfile_source",
                      })
