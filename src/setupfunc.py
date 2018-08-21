@@ -72,6 +72,7 @@ def do_setup():
         f.write(LONG % {"DOLLAR": "$",
                         "STYLE": cfg.style,
                         "TAG_PREFIX": cfg.tag_prefix,
+                        "TAG_REGEX": cfg.tag_regex,
                         "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                         "VERSIONFILE_SOURCE": cfg.versionfile_source,
                         })
