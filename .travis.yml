@@ -17,7 +17,7 @@ python:
   - "pypy"
   - "pypy3"
 install:
-  - pip install tox-travis
+  - pip install "tox<3.0.0" tox-travis
 script:
   - tox
 matrix:
