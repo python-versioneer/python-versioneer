@@ -18,6 +18,9 @@ python:
   - "pypy3"
 install:
   - pip install "tox<3.0.0" tox-travis
+  # work around for travis weirdness on Python 3.3
+  # https://github.com/aws/base64io-python/issues/4#issuecomment-397857642
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install virtualenv==15.2.0; fi
 script:
   - tox
 matrix:
