@@ -158,7 +158,7 @@ def render_pep440_branch_based(pieces):
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
-            rendered += plus_or_dot(pieces)
+            rendered += '.dev0' + plus_or_dot(pieces)
             rendered += "%d.%s.g%s" % (
                 pieces["distance"],
                 branch_name,
