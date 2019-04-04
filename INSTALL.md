@@ -4,9 +4,9 @@ First, decide on values for the following configuration variables:
 
 * `VCS`: the version control system you use. Currently accepts "git".
 
-* `style`: the style of version string to be produced. See "Styles" below for
-  details. Defaults to "pep440", which looks like
-  `TAG[+DISTANCE.gSHORTHASH[.dirty]]`.
+* `style`: the style of version string to be produced.
+  See [Styles](./README.md#styles) for details.
+  Defaults to "pep440", which looks like `TAG[+DISTANCE.gSHORTHASH[.dirty]]`.
 
 * `versionfile_source`:
 
