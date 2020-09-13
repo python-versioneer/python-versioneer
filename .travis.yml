@@ -14,11 +14,11 @@ python:
   - 3.6
   - 3.7
   - 3.8
-  - pypy
+  - pypy2
   - pypy3
 
 install:
-  - pip install "tox<3.0.0" tox-travis
+  - pip install tox-travis
 
 script:
   - tox
