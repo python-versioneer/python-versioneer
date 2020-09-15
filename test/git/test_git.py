@@ -8,7 +8,7 @@ import unittest
 import tempfile
 
 
-from pkg_resources import parse_version, SetuptoolsLegacyVersion
+from pkg_resources import parse_version
 
 sys.path.insert(0, "src")
 import common
@@ -590,7 +590,8 @@ class Repo(common.Common, unittest.TestCase):
     def assertPEP440(self, got, state, tree, runtime):
         where = "/".join([state, tree, runtime])
         pv = parse_version(got)
-        self.assertFalse(isinstance(pv, SetuptoolsLegacyVersion),
+        # rather than using an undocumented API, setuptools dev recommends this
+        self.assertFalse("Legacy" in pv.__class__.__name__,
                          "%s: '%s' was not pep440-compatible"
                          % (where, got))
         self.assertEqual(str(pv), got,
