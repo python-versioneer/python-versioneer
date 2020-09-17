@@ -882,7 +882,6 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
 
     def test_extension_inplace(self):
         # build extensions in place. No wheel package
-        # import ipdb; ipdb.set_trace()
         unpacked = self.make_setuptools_extension_unpacked()
         venv = self.make_venv("setuptools-unpacked-pip-wheel-extension")
         self.run_in_venv(venv, unpacked,
