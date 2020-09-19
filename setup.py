@@ -163,7 +163,7 @@ setup(
     description = "Easy VCS-based management of project version strings",
     author = "Brian Warner",
     author_email = "warner-versioneer@lothar.com",
-    url = "https://github.com/warner/python-versioneer",
+    url = "https://github.com/python-versioneer/python-versioneer",
     # "fake" is replaced with versioneer-installer in build_scripts. We need
     # a non-empty list to provoke "setup.py build" into making scripts,
     # otherwise it skips that step.
