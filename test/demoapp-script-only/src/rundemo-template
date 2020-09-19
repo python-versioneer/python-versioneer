@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#versions
+versions = None
 
 print("__version__:%s" % versions['version'])
 for k in sorted(versions.keys()):

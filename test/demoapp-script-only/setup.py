@@ -12,7 +12,7 @@ class my_build_scripts(build_scripts):
         generated = os.path.join(tempdir, "rundemo")
         with open(generated, "wb") as f:
             for line in open("src/rundemo-template", "rb"):
-                if line.strip().decode("ascii") == "#versions":
+                if line.strip().decode("ascii") == "versions = None":
                     f.write(('versions = %r\n' % (versions,)).encode("ascii"))
                 else:
                     f.write(line)
