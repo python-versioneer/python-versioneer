@@ -47,4 +47,3 @@ def write_to_version_file(filename, versions):
         f.write(SHORT_VERSION_PY % contents)
 
     print("set %s to '%s'" % (filename, versions["version"]))
-

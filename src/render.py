@@ -1,3 +1,5 @@
+import re  # --STRIP DURING BUILD
+
 
 def plus_or_dot(pieces):
     """Return a + if we don't already have one, else return a ."""
@@ -136,6 +138,46 @@ def render_git_describe_long(pieces):
     return rendered
 
 
+def render_pep440_branch_based(pieces):
+    """Build up version string, with post-release "local version identifier".
+
+    Our goal: TAG[+DISTANCE.BRANCH_gHEX[.dirty]] . Note that if you
+    get a tagged build and then dirty it, you'll get TAG+0.BRANCH_gHEX.dirty
+
+    Exceptions:
+    1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.BRANCH_gHEX[.dirty]
+    """
+    replacements = ([' ', '.'], ['(', ''], [')', ''], ['\\', '.'], ['/', '.'])
+    branch_name = pieces.get('branch') or ''
+    if branch_name:
+        for old, new in replacements:
+            branch_name = branch_name.replace(old, new)
+    else:
+        branch_name = 'unknown_branch'
+
+    if pieces["closest-tag"]:
+        rendered = pieces["closest-tag"]
+        if pieces["distance"] or pieces["dirty"]:
+            rendered += '.dev0' + plus_or_dot(pieces)
+            rendered += "%d.%s.g%s" % (
+                pieces["distance"],
+                branch_name,
+                pieces['short']
+            )
+            if pieces["dirty"]:
+                rendered += ".dirty"
+    else:
+        # exception #1
+        rendered = "0+untagged.%d.%s.g%s" % (
+            pieces["distance"],
+            branch_name,
+            pieces['short']
+        )
+        if pieces["dirty"]:
+            rendered += ".dirty"
+    return rendered
+
+
 def render(pieces, style):
     """Render the given version pieces into the requested style."""
     if pieces["error"]:
@@ -156,6 +198,8 @@ def render(pieces, style):
         rendered = render_pep440_post(pieces)
     elif style == "pep440-old":
         rendered = render_pep440_old(pieces)
+    elif style == "pep440-branch-based":
+        rendered = render_pep440_branch_based(pieces)
     elif style == "git-describe":
         rendered = render_git_describe(pieces)
     elif style == "git-describe-long":
@@ -166,4 +210,3 @@ def render(pieces, style):
     return {"version": rendered, "full-revisionid": pieces["long"],
             "dirty": pieces["dirty"], "error": None,
             "date": pieces.get("date")}
-

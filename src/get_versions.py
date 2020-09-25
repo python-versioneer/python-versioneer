@@ -7,6 +7,7 @@ def render(): pass # --STRIP DURING BUILD
 HANDLERS = {} # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
 
+
 class VersioneerBadRootError(Exception):
     """The project root directory is unknown or missing key files."""
 

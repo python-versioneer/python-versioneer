@@ -97,6 +97,30 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
                                     cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits
 
+    # abbrev-ref available with git >= 1.7
+    branch_name_out, rc = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
+                                      cwd=root)
+    branch_name = branch_name_out.strip()
+    if branch_name == 'HEAD':
+        # If we aren't exactly on a branch, pick a branch which represents
+        # the current commit. If all else fails, we are on a branchless
+        # commit.
+        branches_out, rc = run_command(GITS, ["branch", "--contains"],
+                                       cwd=root)
+        branches = branches_out.split('\n')
+        # Strip off the leading "* " from the list of branches.
+        branches = [branch[2:] for branch in branches
+                    if branch and branch[4:5] != '(']
+        if 'master' in branches:
+            branch_name = 'master'
+        elif not branches:
+            branch_name = None
+        else:
+            # Pick the first branch that is returned. Good or bad.
+            branch_name = branches[0]
+
+    pieces['branch'] = branch_name
+
     # commit date: see ISO-8601 comment in git_versions_from_keywords()
     date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"],
                        cwd=root)[0].strip()
