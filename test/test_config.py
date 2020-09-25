@@ -1,9 +1,6 @@
 import unittest
 import os, tempfile, shutil
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 from versioneer import get_config_from_root
 
