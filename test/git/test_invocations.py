@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os, sys, shutil, unittest, tempfile, tarfile, virtualenv, warnings
 
 sys.path.insert(0, "src")
@@ -9,23 +7,6 @@ import common
 pyver_major = "py%d" % sys.version_info[0]
 pyver = "py%d.%d" % sys.version_info[:2]
 
-if not hasattr(unittest, "skip"): # py26
-    def _skip(reason):
-        def _skip_decorator(f):
-            def _skipped_test(*args, **kwargs):
-                print("skipping: %s" % reason)
-            return _skipped_test
-        return _skip_decorator
-    unittest.skip = _skip
-
-if not hasattr(unittest, "expectedFailure"):
-    def _expectedFailure(reason="expected to fail"):
-        def _ef_decorator(f):
-            def _ef(*args, **kwargs):
-                print("skipping: %s" % reason)
-            return _ef
-        return _ef_decorator
-    unittest.expectedFailure = _expectedFailure
 
 class _Invocations(common.Common):
     def setUp(self):
@@ -74,14 +55,7 @@ class _Invocations(common.Common):
                 "easy_install": os.path.join(venv, "bin", "easy_install"),
                 }
         if command == "pip":
-            args = ["--no-cache-dir"] + list(args)
-            maj, min = sys.version_info[0:2]
-            if ((maj == 2 and min >= 7) or
-                (maj == 3 and min >= 4) or
-                maj > 3):
-                # We prefer pip --isolated, but py2.6/py3.2/py3.3 (at least
-                # on travis) can't handle the --no-user-cfg that it uses
-                args = ["--isolated"] + list(args)
+            args = ["--isolated", "--no-cache-dir"] + list(args)
         return self.command(bins[command], *args, workdir=workdir)
 
     def check_in_venv(self, venv):
