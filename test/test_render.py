@@ -113,12 +113,12 @@ class Test_pep440_pre(unittest.TestCase, Testing_renderer_case_mixin):
     style = 'pep440-pre'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3',
-                'tagged_1_commits_clean': 'v1.2.3.post.dev1',
-                'tagged_1_commits_dirty': 'v1.2.3.post.dev1',
-                'untagged_0_commits_clean': '0.post.dev0',
-                'untagged_0_commits_dirty': '0.post.dev0',
-                'untagged_1_commits_clean': '0.post.dev1',
-                'untagged_1_commits_dirty': '0.post.dev1',
+                'tagged_1_commits_clean': 'v1.2.3.post0.dev1',
+                'tagged_1_commits_dirty': 'v1.2.3.post0.dev1',
+                'untagged_0_commits_clean': '0.post0.dev0',
+                'untagged_0_commits_dirty': '0.post0.dev0',
+                'untagged_1_commits_clean': '0.post0.dev1',
+                'untagged_1_commits_dirty': '0.post0.dev1',
                 'error_getting_parts': 'unknown'
                 }
 
