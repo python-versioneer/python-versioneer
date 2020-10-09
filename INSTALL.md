@@ -15,7 +15,7 @@ First, decide on values for the following configuration variables:
   `__init__.py` file, so it can be imported at runtime. If your project uses
   `src/myproject/__init__.py`, this should be `src/myproject/_version.py`.
   This file should be checked in to your VCS as usual: the copy created below
-  by `setup.py setup_versioneer` will include code that parses expanded VCS
+  by `versioneer install` will include code that parses expanded VCS
   keywords in generated tarballs. The 'build' and 'sdist' commands will
   replace it with a copy that has just the calculated version string.
 
@@ -23,7 +23,7 @@ First, decide on values for the following configuration variables:
   therefore never import `_version.py`), since "setup.py sdist" -based trees
   still need somewhere to record the pre-calculated version strings. Anywhere
   in the source tree should do. If there is a `__init__.py` next to your
-  `_version.py`, the `setup.py setup_versioneer` command (described below)
+  `_version.py`, the `versioneer install` command (described below)
   will append some `__version__`-setting assignments, if they aren't already
   present.
 
