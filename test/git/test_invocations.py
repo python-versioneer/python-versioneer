@@ -14,7 +14,11 @@ pyver = "py%d.%d" % sys.version_info[:2]
 
 # For binary wheels with native code
 impl, impl_ver = get_abbr_impl(), get_impl_ver()
-abi, plat = get_abi_tag(), get_platform()
+abi = get_abi_tag()
+try:
+    plat = get_platform(None)
+except TypeError:  # wheel < 0.34
+    plat = get_platform()
 
 
 if not hasattr(unittest, "skip"): # py26
