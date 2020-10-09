@@ -13,7 +13,7 @@ pyver_major = "py%d" % sys.version_info[0]
 pyver = "py%d.%d" % sys.version_info[:2]
 
 # For binary wheels with native code
-impl, impl_ver = get_abbr_impl(), get_impl_ver()
+impl, impl_ver = interpreter_name(), interpreter_version()
 abi = get_abi_tag()
 try:
     plat = get_platform(None)
