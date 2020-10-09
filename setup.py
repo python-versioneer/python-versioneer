@@ -23,28 +23,16 @@ def get(fn, add_ver=False, unquote=False, do_strip=False, do_readme=False):
     with open(fn) as f:
         text = f.read()
 
-    # If we're in Python <3 and have a separate Unicode type, we would've
-    # read a non-unicode string. Else, all strings will be unicode strings.
-    try:
-        __builtins__.unicode
-    except AttributeError:
-        pass
-    else:
-        text =  text.decode('ASCII')
     if add_ver:
         text = ver(text)
     if unquote:
         text = text.replace("%", "%%")
     if do_strip:
-        lines = [line for line in text.split("\n")
-                 if not line.endswith("# --STRIP DURING BUILD")]
-        text = "\n".join(lines)
+        text = "".join(line for line in text.splitlines(keepends=True)
+                         if not line.endswith("# --STRIP DURING BUILD\n"))
     if do_readme:
         text = text.replace("@README@", get("README.md"))
     return text
-
-def u(s): # so u("foo") yields unicode on all of py2.6/py2.7/py3.2/py3.3
-    return s.encode("ascii").decode("ascii")
 
 def get_vcs_list():
     project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
@@ -55,13 +43,13 @@ def get_vcs_list():
 
 def generate_long_version_py(VCS):
     s = io.StringIO()
-    s.write(get("src/%s/long_header.py" % VCS, add_ver=True, do_strip=True))
+    s.write(get(f"src/{VCS}/long_header.py", add_ver=True, do_strip=True))
     for piece in ["src/subprocess_helper.py",
                   "src/from_parentdir.py",
-                  "src/%s/from_keywords.py" % VCS,
-                  "src/%s/from_vcs.py" % VCS,
+                  f"src/{VCS}/from_keywords.py",
+                  f"src/{VCS}/from_vcs.py",
                   "src/render.py",
-                  "src/%s/long_get_versions.py" % VCS]:
+                  f"src/{VCS}/long_get_versions.py"]:
         s.write(get(piece, unquote=True, do_strip=True))
     return s.getvalue()
 
@@ -71,15 +59,15 @@ def generate_versioneer_py():
     s.write(get("src/subprocess_helper.py", do_strip=True))
 
     for VCS in get_vcs_list():
-        s.write(u("LONG_VERSION_PY['%s'] = r'''\n" % VCS))
+        s.write(f"LONG_VERSION_PY['{VCS}'] = r'''\n")
         s.write(generate_long_version_py(VCS))
-        s.write(u("'''\n"))
-        s.write(u("\n\n"))
+        s.write("'''\n")
+        s.write("\n\n")
 
-        s.write(get("src/%s/from_keywords.py" % VCS, do_strip=True))
-        s.write(get("src/%s/from_vcs.py" % VCS, do_strip=True))
+        s.write(get(f"src/{VCS}/from_keywords.py", do_strip=True))
+        s.write(get(f"src/{VCS}/from_vcs.py", do_strip=True))
 
-        s.write(get("src/%s/install.py" % VCS, do_strip=True))
+        s.write(get(f"src/{VCS}/install.py", do_strip=True))
 
     s.write(get("src/from_parentdir.py", do_strip=True))
     s.write(get("src/from_file.py", add_ver=True, do_strip=True))
@@ -136,16 +124,14 @@ class my_build_py(build_py):
             s = f.read()
         s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
 
-        tempdir = tempfile.mkdtemp()
-        installer = os.path.join(tempdir, "versioneer.py")
-        with open(installer, "w") as f:
-            f.write(s)
+        with tempfile.TemporaryDirectory() as tempdir:
+            installer = os.path.join(tempdir, "versioneer.py")
+            with open(installer, "w") as f:
+                f.write(s)
 
-        self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
-        self.package_dir.update({'': os.path.dirname(installer)})
-        rc = build_py.run(self)
-        os.unlink(installer)
-        os.rmdir(tempdir)
+            self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
+            self.package_dir.update({'': os.path.dirname(installer)})
+            rc = build_py.run(self)
         return rc
 
 
