@@ -522,9 +522,8 @@ class Repo(common.Common, unittest.TestCase):
         self.git("archive", "--format=tar", "--prefix=demoapp-TD/",
                  "--output=../demo.tar", "HEAD")
         os.mkdir(self.subpath("out/TD"))
-        t = tarfile.TarFile(self.subpath("demo.tar"))
-        t.extractall(path=self.subpath("out/TD"))
-        t.close()
+        with tarfile.TarFile(self.subpath("demo.tar")) as t:
+            t.extractall(path=self.subpath("out/TD"))
         self.check_version(os.path.join(target, self.project_sub_dir),
                            state, "TD", exps["TD"])
 
@@ -539,9 +538,8 @@ class Repo(common.Common, unittest.TestCase):
         self.assertEqual(distfile, "demo-%s.tar" % exps["TE"][0])
         fn = os.path.join(dist_path, distfile)
         os.mkdir(self.subpath("out/TE"))
-        t = tarfile.TarFile(fn)
-        t.extractall(path=self.subpath("out/TE"))
-        t.close()
+        with tarfile.TarFile(fn) as t:
+            t.extractall(path=self.subpath("out/TE"))
         target = self.subpath("out/TE/demo-%s" % exps["TE"][0])
         self.assertTrue(os.path.isdir(target))
         self.check_version(target, state, "TE", exps["TE"])
