@@ -1,5 +1,4 @@
 
-from __future__ import print_function # --STRIP DURING BUILD
 import os, sys  # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD

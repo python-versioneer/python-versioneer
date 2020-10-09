@@ -163,7 +163,7 @@ setup(
     description = "Easy VCS-based management of project version strings",
     author = "Brian Warner",
     author_email = "warner-versioneer@lothar.com",
-    url = "https://github.com/warner/python-versioneer",
+    url = "https://github.com/python-versioneer/python-versioneer",
     # "fake" is replaced with versioneer-installer in build_scripts. We need
     # a non-empty list to provoke "setup.py build" into making scripts,
     # otherwise it skips that step.
@@ -179,15 +179,12 @@ setup(
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
                  },
+    python_requires=">=3.6",
     classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5"
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         ],
     )
