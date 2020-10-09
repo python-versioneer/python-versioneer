@@ -1,8 +1,8 @@
 from __future__ import print_function
 
 import os, sys, shutil, unittest, tempfile, tarfile, virtualenv, warnings
-from wheel.pep425tags import get_abbr_impl, get_impl_ver, get_abi_tag, \
-    get_platform
+from wheel.bdist_wheel import get_abi_tag, get_platform
+from packaging.tags import interpreter_name, interpreter_version
 
 sys.path.insert(0, "src")
 from from_file import versions_from_file
