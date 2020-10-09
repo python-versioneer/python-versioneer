@@ -1,11 +1,23 @@
 import os, sys, shutil, unittest, tempfile, tarfile, virtualenv, warnings
+from wheel.bdist_wheel import get_abi_tag, get_platform
+from packaging.tags import interpreter_name, interpreter_version
 
 sys.path.insert(0, "src")
 from from_file import versions_from_file
 import common
 
+
 pyver_major = "py%d" % sys.version_info[0]
 pyver = "py%d.%d" % sys.version_info[:2]
+
+
+# For binary wheels with native code
+impl, impl_ver = interpreter_name(), interpreter_version()
+abi = get_abi_tag()
+try:
+    plat = get_platform(None)
+except TypeError:  # wheel < 0.34
+    plat = get_platform()
 
 
 class _Invocations(common.Common):
@@ -231,6 +243,47 @@ class _Invocations(common.Common):
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return repodir
 
+    def make_setuptools_extension_unpacked(self):
+        sdist = self.make_setuptools_extension_sdist()
+        unpack_into = self.subpath("demoappext-setuptools-unpacked")
+        if os.path.exists(unpack_into):
+            shutil.rmtree(unpack_into)
+        os.mkdir(unpack_into)
+        t = tarfile.TarFile(sdist)
+        t.extractall(path=unpack_into)
+        t.close()
+        unpacked = os.path.join(unpack_into, "demoappext-2.0")
+        self.assertTrue(os.path.exists(unpacked))
+        return unpacked
+
+    def make_setuptools_extension_sdist(self):
+        # create an sdist tarball of demoappext-setuptools at 2.0
+        demoappext_setuptools_sdist = self.subpath("cache", "setuptools",
+                                                   "demoappext-2.0.tar")
+        if os.path.exists(demoappext_setuptools_sdist):
+            return demoappext_setuptools_sdist
+        repodir = self.make_setuptools_extension_repo()
+        self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
+        created = os.path.join(repodir, "dist", "demoappext-2.0.tar")
+        self.assertTrue(os.path.exists(created), created)
+        shutil.copyfile(created, demoappext_setuptools_sdist)
+        return demoappext_setuptools_sdist
+
+    def make_setuptools_extension_repo(self):
+        # create a clean repo of demoappext-setuptools at 2.0
+        repodir = self.subpath("demoappext-setuptools-repo")
+        if os.path.exists(repodir):
+            shutil.rmtree(repodir)
+        # import ipdb; ipdb.set_trace()
+        shutil.copytree("test/demoappext-setuptools", repodir)
+        shutil.copy("versioneer.py", repodir)
+        self.git("init", workdir=repodir)
+        self.python("versioneer.py", "setup", workdir=repodir)
+        self.git("add", "--all", workdir=repodir)
+        self.git("commit", "-m", "comment", workdir=repodir)
+        self.git("tag", "demoappext-2.0", workdir=repodir)
+        return repodir
+
     def make_setuptools_repo_subproject(self):
         # create a clean repo of demoapp2-setuptools at 2.0
         repodir = self.subpath("demoapp2-setuptools-repo-subproject")
@@ -346,6 +399,10 @@ class _Invocations(common.Common):
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_wheel)
         return demoapp2_setuptools_wheel
+
+    def make_binary_wheelname(self, app):
+        return "%s-2.0-%s-%s-%s.whl" % (app,
+            "".join([impl, impl_ver]), abi, plat)
 
 
 class DistutilsRepo(_Invocations, unittest.TestCase):
@@ -786,6 +843,50 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", repodir,
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
+
+    def test_extension_wheel_setuptools(self):
+        # create an wheel of demoappext-setuptools at 2.0
+        wheelname = self.make_binary_wheelname('demoappext')
+        demoappext_setuptools_wheel = self.subpath("cache", "setuptools",
+                                                   wheelname)
+        if os.path.exists(demoappext_setuptools_wheel):
+            # there are two ways to make this .whl, and we need to exercise
+            # both, so don't actually cache the results
+            os.unlink(demoappext_setuptools_wheel)
+        repodir = self.make_setuptools_extension_repo()
+        self.python("setup.py", "bdist_wheel", workdir=repodir)
+        created = os.path.join(repodir, "dist", wheelname)
+        self.assertTrue(os.path.exists(created), created)
+
+    def test_extension_inplace(self):
+        # build extensions in place. No wheel package
+        unpacked = self.make_setuptools_extension_unpacked()
+        venv = self.make_venv("setuptools-unpacked-pip-wheel-extension")
+        self.run_in_venv(venv, unpacked,
+                         "python", "setup.py", "build_ext", "-i")
+        # No wheel package is created, _version.py should exist in
+        # module dir only
+        version_file = os.path.join(unpacked, "demo", "_version.py")
+        self.assertTrue(os.path.exists(version_file))
+
+    def test_extension_wheel_pip(self):
+        # create an wheel of demoappext-setuptools at 2.0 with pip
+        wheelname = self.make_binary_wheelname('demoappext')
+        demoappext_setuptools_wheel = self.subpath("cache", "setuptools",
+                                                   wheelname)
+        if os.path.exists(demoappext_setuptools_wheel):
+            # there are two ways to make this .whl, and we need to exercise
+            # both, so don't actually cache the results
+            os.unlink(demoappext_setuptools_wheel)
+        unpacked = self.make_setuptools_extension_unpacked()
+        linkdir = self.make_linkdir()
+        venv = self.make_venv("setuptools-unpacked-pip-wheel-extension")
+        self.run_in_venv(venv, unpacked,
+                         "pip", "wheel", "--wheel-dir", "wheelhouse",
+                         "--no-index", "--find-links", linkdir,
+                         ".")
+        created = os.path.join(unpacked, "wheelhouse", wheelname)
+        self.assertTrue(os.path.exists(created), created)
 
 
 if __name__ == '__main__':
