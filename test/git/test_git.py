@@ -95,7 +95,7 @@ class ParseGitDescribe(unittest.TestCase):
 
 
 class Keywords(unittest.TestCase):
-    def parse(self, refnames, full, date=None, prefix=""):
+    def parse(self, refnames, full, prefix="", date=None):
         return from_keywords.git_versions_from_keywords(
             {"refnames": refnames, "full": full, "date": date}, prefix, False)
 
