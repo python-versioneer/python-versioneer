@@ -18,9 +18,10 @@ system, and maybe making new tarballs.
 
 ## Quick Install
 
-* `pip install versioneer` to somewhere to your $PATH
-* add a `[versioneer]` section to your setup.cfg (see below)
+* `pip install versioneer` to somewhere in your $PATH
+* add a `[versioneer]` section to your setup.cfg (see [Install](INSTALL.md))
 * run `versioneer install` in your source tree, commit the results
+* Verify version information with `python setup.py version`
 
 ## Version Identifiers
 
@@ -218,18 +219,6 @@ a different virtualenv), so this can be surprising.
 [Bug #83](https://github.com/python-versioneer/python-versioneer/issues/83) describes
 this one, but upgrading to a newer version of setuptools should probably
 resolve it.
-
-### Unicode version strings
-
-While Versioneer works (and is continually tested) with both Python 2 and
-Python 3, it is not entirely consistent with bytes-vs-unicode distinctions.
-Newer releases probably generate unicode version strings on py2. It's not
-clear that this is wrong, but it may be surprising for applications when then
-write these strings to a network connection or include them in bytes-oriented
-APIs like cryptographic checksums.
-
-[Bug #71](https://github.com/python-versioneer/python-versioneer/issues/71) investigates
-this question.
 
 
 ## Updating Versioneer

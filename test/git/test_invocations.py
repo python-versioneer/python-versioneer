@@ -209,9 +209,8 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        t = tarfile.TarFile(sdist)
-        t.extractall(path=unpack_into)
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoapp2-2.0")
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
@@ -222,9 +221,8 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        t = tarfile.TarFile(sdist)
-        t.extractall(path=unpack_into)
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoapp2-2.0")
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
@@ -249,9 +247,8 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        t = tarfile.TarFile(sdist)
-        t.extractall(path=unpack_into)
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoappext-2.0")
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
@@ -330,9 +327,8 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        t = tarfile.TarFile(sdist)
-        t.extractall(path=unpack_into)
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoapp2-2.0")
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
@@ -343,9 +339,8 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        t = tarfile.TarFile(sdist)
-        t.extractall(path=unpack_into)
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoapp2-2.0")
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
@@ -434,19 +429,17 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
 
     def test_sdist(self):
         sdist = self.make_distutils_sdist() # asserts version as a side-effect
-        t = tarfile.TarFile(sdist)
         # make sure we used distutils/sdist, not setuptools/sdist
-        self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
-                         t.getnames())
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
+                             t.getnames())
 
     def test_sdist_subproject(self):
         sdist = self.make_distutils_sdist_subproject()
-        t = tarfile.TarFile(sdist)
         # make sure we used distutils/sdist, not setuptools/sdist
-        self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
-                         t.getnames())
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
+                             t.getnames())
 
     def test_pip_install(self):
         repodir = self.make_distutils_repo()
@@ -569,19 +562,15 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
 
     def test_sdist(self):
         sdist = self.make_setuptools_sdist() # asserts version as a side-effect
-        t = tarfile.TarFile(sdist)
         # make sure we used setuptools/sdist, not distutils/sdist
-        self.assertTrue("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
-                        t.getnames())
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO", t.getnames())
 
     def test_sdist_subproject(self):
         sdist = self.make_setuptools_sdist_subproject()
-        t = tarfile.TarFile(sdist)
         # make sure we used setuptools/sdist, not distutils/sdist
-        self.assertTrue("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
-                        t.getnames())
-        t.close()
+        with tarfile.TarFile(sdist) as t:
+            self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO", t.getnames())
 
     def test_pip_install(self):
         linkdir = self.make_linkdir()
