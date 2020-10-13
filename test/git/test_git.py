@@ -35,6 +35,8 @@ class ParseGitDescribe(unittest.TestCase):
                 if args[0] == "rev-list":
                     return "42\n", 0
                 if args[0] == "show":
+                    if do_error == "show":
+                        return "gpg: signature\n12345\n", 0
                     return "12345\n", 0
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
@@ -45,6 +47,12 @@ class ParseGitDescribe(unittest.TestCase):
         self.assertRaises(from_vcs.NotThisMethod,
                           pv, "ignored", do_error="rev-parse")
         self.assertEqual(pv("1f"),
+                         {"closest-tag": None, "dirty": False, "error": None,
+                          "distance": 42,
+                          "long": "longlong",
+                          "short": "longlon",
+                          "date": "12345"})
+        self.assertEqual(pv("1f", do_error="show"),
                          {"closest-tag": None, "dirty": False, "error": None,
                           "distance": 42,
                           "long": "longlong",
@@ -87,9 +95,9 @@ class ParseGitDescribe(unittest.TestCase):
 
 
 class Keywords(unittest.TestCase):
-    def parse(self, refnames, full, prefix=""):
+    def parse(self, refnames, full, prefix="", date=None):
         return from_keywords.git_versions_from_keywords(
-            {"refnames": refnames, "full": full}, prefix, False)
+            {"refnames": refnames, "full": full, "date": date}, prefix, False)
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
@@ -97,6 +105,7 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], None)
+        self.assertEqual(v["date"], None)
 
     def test_prefer_short(self):
         v = self.parse(" (HEAD, 2.0rc1, 2.0, 2.0rc2) ", " full ")
@@ -104,6 +113,7 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], None)
+        self.assertEqual(v["date"], None)
 
     def test_prefix(self):
         v = self.parse(" (HEAD, projectname-2.0) ", " full ", "projectname-")
@@ -111,6 +121,7 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], None)
+        self.assertEqual(v["date"], None)
 
     def test_unexpanded(self):
         self.assertRaises(from_keywords.NotThisMethod,
@@ -122,6 +133,7 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
+        self.assertEqual(v["date"], None)
 
     def test_no_prefix(self):
         v = self.parse("(HEAD, master, 1.23)", "full", "missingprefix-")
@@ -129,6 +141,24 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["full-revisionid"], "full")
         self.assertEqual(v["dirty"], False)
         self.assertEqual(v["error"], "no suitable tags")
+        self.assertEqual(v["date"], None)
+
+    def test_date(self):
+        date = "2017-07-24 16:03:40 +0200"
+        result = "2017-07-24T16:03:40+0200"
+        v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ",
+                       date=date)
+        self.assertEqual(v["date"], result)
+
+    def test_date_gpg(self):
+        date = """
+        gpg: Signature information
+        gpg: ...
+        2017-07-24 16:03:40 +0200"""
+        result = "2017-07-24T16:03:40+0200"
+        v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ",
+                       date=date)
+        self.assertEqual(v["date"], result)
 
 expected_renders = """
 closest-tag: 1.0
