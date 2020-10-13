@@ -39,7 +39,7 @@ def get_vcs_list():
     return [filename
             for filename
             in os.listdir(project_path)
-            if path.isdir(path.join(project_path, filename))]
+            if path.isdir(path.join(project_path, filename)) and filename != "__pycache__"]
 
 def generate_long_version_py(VCS):
     s = io.StringIO()
