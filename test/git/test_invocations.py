@@ -848,7 +848,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         repodir = self.make_setuptools_extension_repo()
         self.python("setup.py", "bdist_wheel", workdir=repodir)
         created = os.path.join(repodir, "dist", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
 
     def test_extension_inplace(self):
         # build extensions in place. No wheel package
@@ -878,7 +878,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir,
                          ".")
         created = os.path.join(unpacked, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created))
+        self.assertTrue(os.path.exists(created), created)
 
 
 if __name__ == '__main__':
