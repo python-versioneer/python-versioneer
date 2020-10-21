@@ -58,6 +58,9 @@ class _Invocations(common.Common):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             virtualenv.create_environment(venv_dir)
+            self.run_in_venv(venv_dir, venv_dir,
+                             'pip', 'install', '-U',
+                             'pip', 'wheel', 'packaging')
         return venv_dir
 
     def run_in_venv(self, venv, workdir, command, *args):
@@ -397,7 +400,7 @@ class _Invocations(common.Common):
 
     def make_binary_wheelname(self, app):
         return "%s-2.0-%s-%s-%s.whl" % (app,
-            "".join([impl, impl_ver]), abi, plat)
+            "".join([impl, impl_ver]), abi, plat.replace("-", "_"))
 
 
 class DistutilsRepo(_Invocations, unittest.TestCase):
