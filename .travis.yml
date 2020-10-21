@@ -22,7 +22,3 @@ install:
 
 script:
   - tox
-
-jobs:
-  allow_failures:
-    - python: pypy3
