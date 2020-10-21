@@ -397,7 +397,7 @@ class _Invocations(common.Common):
 
     def make_binary_wheelname(self, app):
         return "%s-2.0-%s-%s-%s.whl" % (app,
-            "".join([impl, impl_ver]), abi, plat)
+            "".join([impl, impl_ver]), abi, plat.replace("-", "_"))
 
 
 class DistutilsRepo(_Invocations, unittest.TestCase):
