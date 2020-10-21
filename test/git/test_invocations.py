@@ -1,4 +1,5 @@
 import os, sys, shutil, unittest, tempfile, tarfile, virtualenv, warnings
+from glob import glob
 from wheel.bdist_wheel import get_abi_tag, get_platform
 from packaging.tags import interpreter_name, interpreter_version
 
@@ -847,8 +848,9 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
             os.unlink(demoappext_setuptools_wheel)
         repodir = self.make_setuptools_extension_repo()
         self.python("setup.py", "bdist_wheel", workdir=repodir)
-        created = os.path.join(repodir, "dist", wheelname)
-        self.assertTrue(os.path.exists(created))
+        wheelhouse = os.path.join(repodir, "dist")
+        created = os.path.join(wheelhouse, wheelname)
+        self.assertIn(created, glob(os.path.join(wheelhouse, "*.whl")))
 
     def test_extension_inplace(self):
         # build extensions in place. No wheel package
@@ -877,8 +879,9 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
                          "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index", "--find-links", linkdir,
                          ".")
-        created = os.path.join(unpacked, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created))
+        wheelhouse = os.path.join(unpacked, "wheelhouse")
+        created = os.path.join(wheelhouse, wheelname)
+        self.assertIn(created, glob(os.path.join(wheelhouse, "*.whl")))
 
 
 if __name__ == '__main__':
