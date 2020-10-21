@@ -59,6 +59,9 @@ class _Invocations(common.Common):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             virtualenv.create_environment(venv_dir)
+            self.run_in_venv(venv_dir, venv_dir,
+                             'pip', 'install', '-U',
+                             'pip', 'wheel', 'packaging')
         return venv_dir
 
     def run_in_venv(self, venv, workdir, command, *args):
@@ -845,9 +848,8 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
             os.unlink(demoappext_setuptools_wheel)
         repodir = self.make_setuptools_extension_repo()
         self.python("setup.py", "bdist_wheel", workdir=repodir)
-        wheelhouse = os.path.join(repodir, "dist")
-        created = os.path.join(wheelhouse, wheelname)
-        self.assertIn(created, glob(os.path.join(wheelhouse, "*.whl")))
+        created = os.path.join(repodir, "dist", wheelname)
+        self.assertTrue(os.path.exists(created))
 
     def test_extension_inplace(self):
         # build extensions in place. No wheel package
@@ -876,9 +878,8 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
                          "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index", "--find-links", linkdir,
                          ".")
-        wheelhouse = os.path.join(unpacked, "wheelhouse")
-        created = os.path.join(wheelhouse, wheelname)
-        self.assertIn(created, glob(os.path.join(wheelhouse, "*.whl")))
+        created = os.path.join(unpacked, "wheelhouse", wheelname)
+        self.assertTrue(os.path.exists(created))
 
 
 if __name__ == '__main__':
