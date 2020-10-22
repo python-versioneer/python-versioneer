@@ -2,15 +2,12 @@
 
 import os, base64, tempfile, io
 from os import path
+from pathlib import Path
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
 from setuptools.dist import Distribution as _Distribution
 
-LONG="""
-Versioneer is a tool to automatically update version strings (in setup.py and
-the conventional 'from PROJECT import _version' pattern) by asking your
-version-control system about the current tree.
-"""
+LONG = Path.read_text(Path(__file__).parent / "README.md")
 
 # as nice as it'd be to versioneer ourselves, that sounds messy.
 VERSION = "0.19"
@@ -159,7 +156,8 @@ setup(
             'versioneer = versioneer:main',
         ],
     },
-    long_description = LONG,
+    long_description=LONG,
+    long_description_content_type="text/markdown",
     distclass=Distribution,
     cmdclass = { "build_py": my_build_py,
                  "make_versioneer": make_versioneer,
