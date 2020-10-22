@@ -247,8 +247,10 @@ number of intermediate scripts.
 
 ## Similar projects
 
-* [setuptools_scm](https://github.com/pypa/setuptools_scm/) - a non-vendored build-time dependency
-* [minver](https://github.com/jbweston/miniver) - a lightweight reimplementation of versioneer
+* [setuptools_scm](https://github.com/pypa/setuptools_scm/) - a non-vendored build-time
+  dependency
+* [minver](https://github.com/jbweston/miniver) - a lightweight reimplementation of
+  versioneer
 
 ## License
 
