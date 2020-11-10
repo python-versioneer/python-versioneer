@@ -6,7 +6,7 @@ when upgrading from an older release, you must make changes in your
 project.
 
 
-## Upgrading to 0.16 or 0.17 or 0.18
+## Upgrading to 0.16, 0.17, 0.18 or 0.19
 
 Nothing special.
 
