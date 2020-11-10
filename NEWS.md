@@ -1,4 +1,4 @@
-## Release 0.19 (TBD)
+## Release 0.19 (10-Nov-2020)
 
 Versioneer's 0.19 release is the first under new maintainership, and most of the work
 done has been maintenance along with a few features and bug fixes. No significant
