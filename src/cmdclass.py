@@ -92,7 +92,9 @@ def get_cmdclass(cmdclass=None):
                 write_to_version_file(target_versionfile, versions)
     cmds["build_py"] = cmd_build_py
 
-    if "setuptools" in sys.modules:
+    if 'build_ext' in cmds:
+        _build_ext = cmds['build_ext']
+    elif "setuptools" in sys.modules:
         from setuptools.command.build_ext import build_ext as _build_ext
     else:
         from distutils.command.build_ext import build_ext as _build_ext
