@@ -84,7 +84,7 @@ def get_config_from_root(root):
     cfg.parentdir_prefix = section.get("parentdir_prefix")
     cfg.verbose = section.get("verbose")
     cfg.override_variable = section.get("override_variable")
-    cfg.fallback_tag = section.get("fallback_tag", "0+untagged")
+    cfg.fallback_tag = section.get("fallback_tag", "0+unknown")
     return cfg
 
 

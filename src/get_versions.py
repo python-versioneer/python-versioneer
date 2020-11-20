@@ -23,6 +23,12 @@ def get_versions(verbose=False):
     root = get_root()
     cfg = get_config_from_root(root)
 
+    # override_variable allows users to skip the entire process
+    if cfg.override_variable and os.getenv(cfg.override_variable):
+        return {"version": os.getenv(cfg.override_variable),
+                "full-revisionid": None, "dirty": None,
+                "error": None, "date": None}
+
     assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
     handlers = HANDLERS.get(cfg.VCS)
     assert handlers, "unrecognized VCS '%s'" % cfg.VCS
@@ -82,7 +88,7 @@ def get_versions(verbose=False):
     if verbose:
         print("unable to compute version")
 
-    return {"version": "0+unknown", "full-revisionid": None,
+    return {"version": cfg.fallback_tag, "full-revisionid": None,
             "dirty": None, "error": "unable to compute version",
             "date": None}
 

@@ -17,6 +17,8 @@ a section like:
  versionfile_build = myproject/_version.py
  tag_prefix =
  parentdir_prefix = myproject-
+ override_variable = VERSIONEER_OVERRIDE
+ fallback_tag = 0+untagged
 
 You will also need to edit your setup.py to use the results:
 
@@ -40,6 +42,8 @@ SAMPLE_CONFIG = """
 #versionfile_build =
 #tag_prefix =
 #parentdir_prefix =
+#override_variable =
+#fallback_tag =
 
 """
 
