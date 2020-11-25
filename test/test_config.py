@@ -12,6 +12,7 @@ versionfile_source = petmail/_version.py
 versionfile_build = petmail/_version.py
 tag_prefix = v
 parentdir_prefix = petmail-
+fallback_version =
 """
 
 class Parser(unittest.TestCase):
@@ -30,6 +31,7 @@ class Parser(unittest.TestCase):
         self.assertEqual(cfg.tag_prefix, "v")
         self.assertEqual(cfg.parentdir_prefix, "petmail-")
         self.assertEqual(cfg.verbose, None)
+        self.assertEqual(cfg.fallback_version, "")
 
     def test_empty(self):
         self.assertRaises(configparser.NoSectionError,
@@ -48,6 +50,7 @@ class Parser(unittest.TestCase):
         self.assertEqual(cfg.tag_prefix, None)
         self.assertEqual(cfg.parentdir_prefix, None)
         self.assertEqual(cfg.verbose, None)
+        self.assertEqual(cfg.fallback_version, None)
 
     def test_empty_tag_prefixes(self):
         # all three of these should give an empty tag_prefix:
@@ -60,3 +63,15 @@ class Parser(unittest.TestCase):
         self.assertEqual(cfg.tag_prefix, "")
         cfg = self.parse("[versioneer]\nVCS=git\ntag_prefix=\"\"")
         self.assertEqual(cfg.tag_prefix, "")
+
+    def test_empty_fallback_versions(self):
+        # all three of these should give an empty fallback_version:
+        #  fallback_version =
+        #  fallback_version = ''
+        #  fallback_version = ""
+        cfg = self.parse("[versioneer]\nVCS=git\nfallback_version=")
+        self.assertEqual(cfg.fallback_version, "")
+        cfg = self.parse("[versioneer]\nVCS=git\nfallback_version=''")
+        self.assertEqual(cfg.fallback_version, "")
+        cfg = self.parse("[versioneer]\nVCS=git\nfallback_version=\"\"")
+        self.assertEqual(cfg.fallback_version, "")
