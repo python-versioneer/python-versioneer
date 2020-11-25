@@ -23,12 +23,6 @@ def get_versions(verbose=False):
     root = get_root()
     cfg = get_config_from_root(root)
 
-    # override_variable allows users to skip the entire process
-    if cfg.override_variable and os.getenv(cfg.override_variable):
-        return {"version": os.getenv(cfg.override_variable),
-                "full-revisionid": None, "dirty": None,
-                "error": None, "date": None}
-
     assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
     handlers = HANDLERS.get(cfg.VCS)
     assert handlers, "unrecognized VCS '%s'" % cfg.VCS
@@ -53,7 +47,7 @@ def get_versions(verbose=False):
             ver = from_keywords_f(keywords, cfg.tag_prefix, verbose)
             if verbose:
                 print("got version from expanded keyword %s" % ver)
-            return ver
+            return override_fallback_or_fail(ver, cfg=cfg, verbose=verbose)
         except NotThisMethod:
             pass
 
@@ -61,7 +55,7 @@ def get_versions(verbose=False):
         ver = versions_from_file(versionfile_abs)
         if verbose:
             print("got version from file %s %s" % (versionfile_abs, ver))
-        return ver
+        return override_fallback_or_fail(ver, cfg=cfg, verbose=verbose)
     except NotThisMethod:
         pass
 
@@ -72,7 +66,7 @@ def get_versions(verbose=False):
             ver = render(pieces, cfg.style)
             if verbose:
                 print("got version from VCS %s" % ver)
-            return ver
+            return override_fallback_or_fail(ver, cfg=cfg, verbose=verbose)
         except NotThisMethod:
             pass
 
@@ -81,16 +75,52 @@ def get_versions(verbose=False):
             ver = versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
             if verbose:
                 print("got version from parentdir %s" % ver)
-            return ver
+            return override_fallback_or_fail(ver, cfg=cfg, verbose=verbose)
     except NotThisMethod:
         pass
 
     if verbose:
         print("unable to compute version")
 
-    return {"version": cfg.fallback_tag, "full-revisionid": None,
-            "dirty": None, "error": "unable to compute version",
-            "date": None}
+    return override_fallback_or_fail(
+        {"version": "0+unknown",
+         "full-revisionid": None,
+         "error": "unable to compute version",
+         "dirty": None,
+         "date": None},
+        cfg=cfg, verbose=verbose)
+
+
+def override_fallback_or_fail(versions, cfg, verbose=False):
+    """ Finalize versions dictionary with override or fallback, if applicable
+
+    If ``VERSIONEER_OVERRIDE`` is defined in the environment, any version
+    string is overridden.
+
+    If the calling method was unable to provide a valid version, and
+    ``fallback_version`` is defined in the configuration file, then the fallback
+    version will be used.
+
+    If neither case applies and no version was found, resort to ``0+unknown``.
+
+    Modifies dictionary in-place and returns it.
+    """
+    # If override environment variable is set, set version,
+    # and ignore errors or dirty repositories
+    override = os.getenv("VERSIONEER_OVERRIDE")
+    if override:
+        if verbose:
+            print(f"got version from environment variable (VERSIONEER_OVERRIDE={override})")
+        versions.update({"version": override, "dirty": False, "error": None})
+
+    # If no version information can be found, apply fallback version
+    if versions.get("version") in (None, "0+unknown"):
+        if cfg.fallback_version:
+            if verbose:
+                print(f"Falling back to version {cfg.fallback_version}")
+            versions.update({"version": cfg.fallback_version, "error": None})
+
+    return versions
 
 
 def get_version():
