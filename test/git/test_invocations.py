@@ -63,7 +63,7 @@ class _Invocations(common.Common):
                              'pip', 'wheel', 'packaging')
         return venv_dir
 
-    def run_in_venv(self, venv, workdir, command, *args):
+    def run_in_venv(self, venv, workdir, command, *args, env=None):
         bins = {"python": os.path.join(venv, "bin", "python"),
                 "pip": os.path.join(venv, "bin", "pip"),
                 "rundemo": os.path.join(venv, "bin", "rundemo"),
@@ -71,10 +71,10 @@ class _Invocations(common.Common):
                 }
         if command == "pip":
             args = ["--isolated", "--no-cache-dir"] + list(args)
-        return self.command(bins[command], *args, workdir=workdir)
+        return self.command(bins[command], *args, workdir=workdir, env=env)
 
-    def check_in_venv(self, venv):
-        out = self.run_in_venv(venv, venv, "rundemo")
+    def check_in_venv(self, venv, env=None):
+        out = self.run_in_venv(venv, venv, "rundemo", env=env)
         v = dict(line.split(":", 1) for line in out.splitlines())
         self.assertEqual(v["version"], "2.0")
         return v
@@ -82,6 +82,10 @@ class _Invocations(common.Common):
     def check_in_venv_withlib(self, venv):
         v = self.check_in_venv(venv)
         self.assertEqual(v["demolib"], "1.0")
+
+    def check_in_venv_withlib_override(self, venv):
+        v = self.check_in_venv(venv, env={"VERSIONEER_OVERRIDE": "2.0"})
+        self.assertEqual(v["demolib"], "2.0")
 
     # "demolib" has a version of 1.0 and is built with distutils
     # "demoapp2-distutils" is v2.0, uses distutils, and has no deps
@@ -492,6 +496,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
+        self.check_in_venv_withlib_override(venv)
 
     def test_install_subproject(self):
         projectdir = self.make_setuptools_repo_subproject()
@@ -502,6 +507,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
+        self.check_in_venv_withlib_override(venv)
 
     @unittest.skip("setuptools 'easy_install .': known to be broken")
     def test_easy_install(self):
