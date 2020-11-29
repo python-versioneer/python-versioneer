@@ -6,17 +6,17 @@ if sys.platform == "win32":
     GITS = ["git.cmd", "git.exe"]
 
 class Common:
-    def command(self, cmd, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.projdir)
-        assert not kwargs, kwargs.keys()
-        output, rc = run_command([cmd], list(args), workdir, True)
+    def command(self, cmd, *args, workdir=None, env=None):
+        if workdir is None:
+            workdir = self.projdir
+        output, rc = run_command([cmd], list(args), workdir, True, env=env)
         if output is None:
             self.fail("problem running command %s" % cmd)
         return output
 
-    def git(self, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.gitdir)
-        assert not kwargs, kwargs.keys()
+    def git(self, *args, workdir=None):
+        if workdir is None:
+            workdir = self.gitdir
         env = os.environ.copy()
         env["EMAIL"] = "foo@example.com"
         env["GIT_AUTHOR_NAME"] = "foo"
@@ -27,10 +27,9 @@ class Common:
             self.fail("problem running git (workdir: %s)" % workdir)
         return output
 
-    def python(self, *args, **kwargs):
-        workdir = kwargs.pop("workdir", self.projdir)
-        exe = kwargs.pop("python", sys.executable)
-        assert not kwargs, kwargs.keys()
+    def python(self, *args, workdir=None, exe=sys.executable):
+        if workdir is None:
+            workdir = self.projdir
         output, rc = run_command([exe], list(args), workdir, True)
         if output is None:
             self.fail("problem running python (workdir: %s)" % workdir)
