@@ -64,7 +64,9 @@ and runs `versioneer.py setup` to finish the installation.
 
 To versioneer-enable your project:
 
-* 1: Modify your `setup.cfg`, adding a section named `[versioneer]` and
+* 1: Install versioneer with `pip install versioneer`
+
+* 2: Modify your `setup.cfg`, adding a section named `[versioneer]` and
   populating it with the configuration values you decided earlier (note that
   the option names are not case-sensitive):
 
@@ -78,7 +80,7 @@ To versioneer-enable your project:
   parentdir_prefix = myproject-
   ````
 
-* 2: Run `versioneer install`. This will do the following:
+* 3: Run `versioneer install`. This will do the following:
 
   * copy `versioneer.py` into the top of your source tree
   * create `_version.py` in the right place (`versionfile_source`)
@@ -91,7 +93,7 @@ To versioneer-enable your project:
   `setup.py` or `setup.cfg`. Run it multiple times until you have fixed all
   the problems.
 
-* 3: add a `import versioneer` to your setup.py, and add the following
+* 4: add a `import versioneer` to your setup.py, and add the following
   arguments to the setup() call:
 
         version=versioneer.get_version(),
@@ -103,7 +105,7 @@ To versioneer-enable your project:
         from numpy.distutils.core import numpy_cmdclass
         cmdclass=versioneer.get_cmdclass(numpy_cmdclass),
 
-* 4: commit these changes to your VCS. To make sure you won't forget,
+* 5: commit these changes to your VCS. To make sure you won't forget,
   `versioneer install` will mark everything it touched for addition using
   `git add`. Don't forget to add `setup.py` and `setup.cfg` too.
 
