@@ -409,10 +409,10 @@ class Repo(common.Common, unittest.TestCase):
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         def pf(fn):
             return os.path.normpath(os.path.join(self.project_sub_dir, fn))
-        expected = set(["A  %s" % pf(".gitattributes"),
-                        "M  %s" % pf("MANIFEST.in"),
-                        "A  %s" % pf("src/demo/_version.py"),
-                        ])
+        expected = {"A  %s" % pf(".gitattributes"),
+                    "M  %s" % pf("MANIFEST.in"),
+                    "A  %s" % pf("src/demo/_version.py"),
+                    }
         if not script_only:
             expected.add("M  %s" % pf("src/demo/__init__.py"))
         self.assertEqual(out, expected)
@@ -434,7 +434,7 @@ class Repo(common.Common, unittest.TestCase):
         self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
         self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
-        self.assertEqual(out, set([]))
+        self.assertEqual(out, set())
 
         UNABLE = "unable to compute version"
         NOTAG = "no suitable tags"
@@ -596,7 +596,7 @@ class Repo(common.Common, unittest.TestCase):
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
         out = self.python("rundemo", "--version", workdir=build_lib)
-        data = dict([line.split(":",1) for line in out.splitlines()])
+        data = dict(line.split(":",1) for line in out.splitlines())
         self.compare(data["__version__"], exp_version, state, tree, "RB")
         self.assertPEP440(data["__version__"], state, tree, "RB")
         self.compare(data["version"], exp_version, state, tree, "RB")

@@ -75,7 +75,7 @@ class _Invocations(common.Common):
 
     def check_in_venv(self, venv):
         out = self.run_in_venv(venv, venv, "rundemo")
-        v = dict([line.split(":", 1) for line in out.splitlines()])
+        v = dict(line.split(":", 1) for line in out.splitlines())
         self.assertEqual(v["version"], "2.0")
         return v
 
