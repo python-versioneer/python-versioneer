@@ -417,9 +417,8 @@ class Repo(common.Common, unittest.TestCase):
             expected.add("M  %s" % pf("src/demo/__init__.py"))
         self.assertEqual(out, expected)
         if not script_only:
-            f = open(self.project_file("src/demo/__init__.py"))
-            i = f.read().splitlines()
-            f.close()
+            with open(self.project_file("src/demo/__init__.py")) as fobj:
+                i = fobj.read().splitlines()
             self.assertEqual(i[-3], "from ._version import get_versions")
             self.assertEqual(i[-2], "__version__ = get_versions()['version']")
             self.assertEqual(i[-1], "del get_versions")
@@ -457,9 +456,8 @@ class Repo(common.Common, unittest.TestCase):
         # necessarily clean.
 
         # S2: dirty the pre-tagged tree
-        f = open(self.project_file("setup.py"), "a")
-        f.write("# dirty\n")
-        f.close()
+        with open(self.project_file("setup.py"), "a") as fobj:
+            fobj.write("# dirty\n")
         full = self.git("rev-parse", "HEAD")
         short = "0+untagged.2.g%s.dirty" % full[:7]
         self.do_checks("S2", {"TA": [short, full, True, None],
@@ -489,9 +487,8 @@ class Repo(common.Common, unittest.TestCase):
                               })
 
         # S4: now we dirty the tree
-        f = open(self.project_file("setup.py"), "a")
-        f.write("# dirty\n")
-        f.close()
+        with open(self.project_file("setup.py"), "a") as fobj:
+            fobj.write("# dirty\n")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+0.g%s.dirty" % full[:7]
         self.do_checks("S4", {"TA": [short, full, True, None],
@@ -514,9 +511,8 @@ class Repo(common.Common, unittest.TestCase):
                               })
 
         # S6: dirty the post-tag tree
-        f = open(self.project_file("setup.py"), "a")
-        f.write("# more dirty\n")
-        f.close()
+        with open(self.project_file("setup.py"), "a") as fobj:
+            fobj.write("# more dirty\n")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s.dirty" % full[:7]
         self.do_checks("S6", {"TA": [short, full, True, None],
