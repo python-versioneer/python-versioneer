@@ -74,18 +74,18 @@ class _Invocations(common.Common):
         return self.command(bins[command], *args, workdir=workdir, env=env)
 
     def check_in_venv(self, venv, env=None):
-        out = self.run_in_venv(venv, venv, "rundemo", env=env)
+        if env is None:
+            env = {}
+        out = self.run_in_venv(venv, venv, "rundemo")
         v = dict(line.split(":", 1) for line in out.splitlines())
-        self.assertEqual(v["version"], "2.0")
+        self.assertEqual(v["version"], env.get("VERSIONEER_OVERRIDE", "2.0"))
         return v
 
-    def check_in_venv_withlib(self, venv):
+    def check_in_venv_withlib(self, venv, env=None):
+        if env is None:
+            env = {}
         v = self.check_in_venv(venv)
-        self.assertEqual(v["demolib"], "1.0")
-
-    def check_in_venv_withlib_override(self, venv):
-        v = self.check_in_venv(venv, env={"VERSIONEER_OVERRIDE": "2.0"})
-        self.assertEqual(v["demolib"], "2.0")
+        self.assertEqual(v["demolib"], env.get("VERSIONEER_OVERRIDE", "1.0"))
 
     # "demolib" has a version of 1.0 and is built with distutils
     # "demoapp2-distutils" is v2.0, uses distutils, and has no deps
@@ -421,14 +421,16 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
     def test_install(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-install")
-        self.run_in_venv(venv, repodir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        for env in (None, {"VERSIONEER_OVERRIDE": "3.0"}):
+            self.run_in_venv(venv, repodir, "python", "setup.py", "install", env=env)
+            self.check_in_venv(venv, env=env)
 
     def test_install_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-install-subproject")
-        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        for env in (None, {"VERSIONEER_OVERRIDE": "3.0"}):
+            self.run_in_venv(venv, projectdir, "python", "setup.py", "install", env=env)
+            self.check_in_venv(venv, env=env)
 
     def test_pip_wheel(self):
         self.make_distutils_wheel_with_pip()
@@ -496,7 +498,6 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
-        self.check_in_venv_withlib_override(venv)
 
     def test_install_subproject(self):
         projectdir = self.make_setuptools_repo_subproject()
@@ -507,7 +508,6 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
-        self.check_in_venv_withlib_override(venv)
 
     @unittest.skip("setuptools 'easy_install .': known to be broken")
     def test_easy_install(self):
