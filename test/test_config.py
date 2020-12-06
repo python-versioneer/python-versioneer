@@ -1,5 +1,5 @@
 import unittest
-import os, tempfile, shutil
+import os, tempfile
 import configparser
 
 from versioneer import get_config_from_root
@@ -16,13 +16,10 @@ parentdir_prefix = petmail-
 
 class Parser(unittest.TestCase):
     def parse(self, contents):
-        root = tempfile.mkdtemp()
-        try:
+        with tempfile.TemporaryDirectory() as root:
             with open(os.path.join(root, "setup.cfg"), "w") as f:
                 f.write(contents)
             return get_config_from_root(root)
-        finally:
-            shutil.rmtree(root)
 
     def test_base(self):
         cfg = self.parse(base)
