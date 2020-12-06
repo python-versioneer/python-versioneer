@@ -75,6 +75,7 @@ def do_setup():
                         "TAG_PREFIX": cfg.tag_prefix,
                         "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                         "VERSIONFILE_SOURCE": cfg.versionfile_source,
+                        "FALLBACK_VERSION": cfg.fallback_version,
                         })
 
     ipy = os.path.join(os.path.dirname(cfg.versionfile_source),

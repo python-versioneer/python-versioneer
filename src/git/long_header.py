@@ -43,6 +43,7 @@ def get_config():
     cfg.tag_prefix = "%(TAG_PREFIX)s"
     cfg.parentdir_prefix = "%(PARENTDIR_PREFIX)s"
     cfg.versionfile_source = "%(VERSIONFILE_SOURCE)s"
+    cfg.fallback_version = "%(FALLBACK_VERSION)s"
     cfg.verbose = False
     return cfg
 

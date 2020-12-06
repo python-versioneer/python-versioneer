@@ -147,6 +147,7 @@ def get_cmdclass(cmdclass=None):
                              "TAG_PREFIX": cfg.tag_prefix,
                              "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                              "VERSIONFILE_SOURCE": cfg.versionfile_source,
+                             "FALLBACK_VERSION": cfg.fallback_version,
                              })
         cmds["build_exe"] = cmd_build_exe
         del cmds["build_py"]
@@ -173,6 +174,7 @@ def get_cmdclass(cmdclass=None):
                              "TAG_PREFIX": cfg.tag_prefix,
                              "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                              "VERSIONFILE_SOURCE": cfg.versionfile_source,
+                             "FALLBACK_VERSION": cfg.fallback_version,
                              })
         cmds["py2exe"] = cmd_py2exe
 
