@@ -63,24 +63,28 @@ class _Invocations(common.Common):
                              'pip', 'wheel', 'packaging')
         return venv_dir
 
-    def run_in_venv(self, venv, workdir, command, *args):
+    def run_in_venv(self, venv, workdir, command, *args, env=None):
         bins = {"python": os.path.join(venv, "bin", "python"),
                 "pip": os.path.join(venv, "bin", "pip"),
                 "rundemo": os.path.join(venv, "bin", "rundemo"),
                 }
         if command == "pip":
             args = ["--isolated", "--no-cache-dir"] + list(args)
-        return self.command(bins[command], *args, workdir=workdir)
+        return self.command(bins[command], *args, workdir=workdir, env=env)
 
-    def check_in_venv(self, venv):
+    def check_in_venv(self, venv, env=None):
+        if env is None:
+            env = {}
         out = self.run_in_venv(venv, venv, "rundemo")
         v = dict(line.split(":", 1) for line in out.splitlines())
-        self.assertEqual(v["version"], "2.0")
+        self.assertEqual(v["version"], env.get("VERSIONEER_OVERRIDE", "2.0"))
         return v
 
-    def check_in_venv_withlib(self, venv):
+    def check_in_venv_withlib(self, venv, env=None):
+        if env is None:
+            env = {}
         v = self.check_in_venv(venv)
-        self.assertEqual(v["demolib"], "1.0")
+        self.assertEqual(v["demolib"], env.get("VERSIONEER_OVERRIDE", "1.0"))
 
     # "demolib" has a version of 1.0 and is built with distutils
     # "demoapp2-distutils" is v2.0, uses distutils, and has no deps
@@ -416,14 +420,16 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
     def test_install(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-install")
-        self.run_in_venv(venv, repodir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        for env in (None, {"VERSIONEER_OVERRIDE": "3.0"}):
+            self.run_in_venv(venv, repodir, "python", "setup.py", "install", env=env)
+            self.check_in_venv(venv, env=env)
 
     def test_install_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-install-subproject")
-        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        for env in (None, {"VERSIONEER_OVERRIDE": "3.0"}):
+            self.run_in_venv(venv, projectdir, "python", "setup.py", "install", env=env)
+            self.check_in_venv(venv, env=env)
 
     def test_pip_wheel(self):
         self.make_distutils_wheel_with_pip()

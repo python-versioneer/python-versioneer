@@ -3,6 +3,7 @@ def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
 def versions_from_parentdir(): pass # --STRIP DURING BUILD
+def finalize(): pass # --STRIP DURING BUILD
 def render(): pass # --STRIP DURING BUILD
 HANDLERS = {} # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
@@ -47,7 +48,7 @@ def get_versions(verbose=False):
             ver = from_keywords_f(keywords, cfg.tag_prefix, verbose)
             if verbose:
                 print("got version from expanded keyword %s" % ver)
-            return ver
+            return finalize(ver, verbose=verbose)
         except NotThisMethod:
             pass
 
@@ -55,7 +56,7 @@ def get_versions(verbose=False):
         ver = versions_from_file(versionfile_abs)
         if verbose:
             print("got version from file %s %s" % (versionfile_abs, ver))
-        return ver
+        return finalize(ver, verbose=verbose)
     except NotThisMethod:
         pass
 
@@ -66,7 +67,7 @@ def get_versions(verbose=False):
             ver = render(pieces, cfg.style)
             if verbose:
                 print("got version from VCS %s" % ver)
-            return ver
+            return finalize(ver, verbose=verbose)
         except NotThisMethod:
             pass
 
@@ -75,16 +76,20 @@ def get_versions(verbose=False):
             ver = versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
             if verbose:
                 print("got version from parentdir %s" % ver)
-            return ver
+            return finalize(ver, verbose=verbose)
     except NotThisMethod:
         pass
 
     if verbose:
         print("unable to compute version")
 
-    return {"version": "0+unknown", "full-revisionid": None,
-            "dirty": None, "error": "unable to compute version",
-            "date": None}
+    return finalize(
+        {"version": "0+unknown",
+         "full-revisionid": None,
+         "error": "unable to compute version",
+         "dirty": None,
+         "date": None},
+        verbose=verbose)
 
 
 def get_version():
