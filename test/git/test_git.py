@@ -419,9 +419,8 @@ class Repo(common.Common, unittest.TestCase):
         if not script_only:
             with open(self.project_file("src/demo/__init__.py")) as fobj:
                 i = fobj.read().splitlines()
-            self.assertEqual(i[-3], "from ._version import get_versions")
-            self.assertEqual(i[-2], "__version__ = get_versions()['version']")
-            self.assertEqual(i[-1], "del get_versions")
+            self.assertEqual(i[-2], "from . import _version")
+            self.assertEqual(i[-1], "__version__ = _version.get_versions()['version']")
         self.git("commit", "-m", "add _version stuff")
 
         # "versioneer.py setup" should be idempotent
