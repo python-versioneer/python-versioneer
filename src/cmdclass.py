@@ -114,7 +114,7 @@ def get_cmdclass(cmdclass=None):
             # now locate _version.py in the new build/ directory and replace
             # it with an updated value
             target_versionfile = os.path.join(self.build_lib,
-                                              cfg.versionfile_source)
+                                              cfg.versionfile_build)
             print("UPDATING %s" % target_versionfile)
             write_to_version_file(target_versionfile, versions)
     cmds["build_ext"] = cmd_build_ext
