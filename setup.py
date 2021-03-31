@@ -86,6 +86,19 @@ class make_versioneer(Command):
         pass
     def run(self):
         with open("versioneer.py", "w") as f:
+            f.write("# pylint:disable=trailing-whitespace # noqa \n")
+            f.write("# pylint:disable=invalid-name # noqa \n")
+            f.write("# pylint:disable=import-outside-toplevel # noqa \n")
+            f.write("# pylint:disable=missing-function-docstring # noqa \n")
+            f.write("# pylint:disable=missing-class-docstring # noqa \n")
+            f.write("# pylint:disable=too-many-branches # noqa \n")
+            f.write("# pylint:disable=too-many-statements # noqa \n")
+            f.write("# pylint:disable=raise-missing-from # noqa \n")
+            f.write("# pylint:disable=too-many-lines # noqa \n")
+            f.write("# pylint:disable=too-many-locals # noqa \n")
+            f.write("# pylint:disable=too-few-public-methods # noqa \n")
+            f.write("# pylint:disable=import-error # noqa \n")
+            f.write("# pylint:disable=redefined-outer-name # noqa \n")
             f.write(generate_versioneer_py().decode("utf8"))
         return 0
 
