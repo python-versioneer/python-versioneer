@@ -43,6 +43,12 @@ SAMPLE_CONFIG = """
 
 """
 
+OLD_SNIPPET = """
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
+"""
+
 INIT_PY_SNIPPET = """
 from . import {0}
 __version__ = {0}.get_versions()['version']
@@ -84,7 +90,11 @@ def do_setup():
             old = ""
         module = os.path.splitext(os.path.basename(cfg.versionfile_source))[0]
         snippet = INIT_PY_SNIPPET.format(module)
-        if snippet not in old:
+        if OLD_SNIPPET in old:
+            print(" replacing boilerplate in %s" % ipy)
+            with open(ipy, "w") as f:
+                f.write(old.replace(OLD_SNIPPET, snippet))
+        elif snippet not in old:
             print(" appending to %s" % ipy)
             with open(ipy, "a") as f:
                 f.write(snippet)
