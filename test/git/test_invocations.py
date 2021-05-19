@@ -420,16 +420,28 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
     def test_install(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-install")
-        for env in (None, {"VERSIONEER_OVERRIDE": "3.0"}):
-            self.run_in_venv(venv, repodir, "python", "setup.py", "install", env=env)
-            self.check_in_venv(venv, env=env)
+        self.run_in_venv(venv, repodir, "python", "setup.py", "install")
+        self.check_in_venv(venv)
 
     def test_install_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-install-subproject")
-        for env in (None, {"VERSIONEER_OVERRIDE": "3.0"}):
-            self.run_in_venv(venv, projectdir, "python", "setup.py", "install", env=env)
-            self.check_in_venv(venv, env=env)
+        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
+        self.check_in_venv(venv)
+
+    def test_install_override(self):
+        repodir = self.make_distutils_repo()
+        venv = self.make_venv("distutils-repo-install")
+        env = {"VERSIONEER_OVERRIDE": "3.0"}
+        self.run_in_venv(venv, repodir, "python", "setup.py", "install", env=env)
+        self.check_in_venv(venv, env=env)
+
+    def test_install_subproject_override(self):
+        projectdir = self.make_distutils_repo_subproject()
+        venv = self.make_venv("distutils-repo-install-subproject")
+        env = {"VERSIONEER_OVERRIDE": "3.0"}
+        self.run_in_venv(venv, projectdir, "python", "setup.py", "install", env=env)
+        self.check_in_venv(venv, env=env)
 
     def test_pip_wheel(self):
         self.make_distutils_wheel_with_pip()
