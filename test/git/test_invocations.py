@@ -67,7 +67,6 @@ class _Invocations(common.Common):
         bins = {"python": os.path.join(venv, "bin", "python"),
                 "pip": os.path.join(venv, "bin", "pip"),
                 "rundemo": os.path.join(venv, "bin", "rundemo"),
-                "easy_install": os.path.join(venv, "bin", "easy_install"),
                 }
         if command == "pip":
             args = ["--isolated", "--no-cache-dir"] + list(args)
@@ -503,29 +502,6 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
         self.check_in_venv_withlib(venv)
 
-    @unittest.skip("setuptools 'easy_install .': known to be broken")
-    def test_easy_install(self):
-        # This case still fails: the 'easy_install' command modifies the
-        # repo's setup.cfg (copying our --index-url and --find-links
-        # arguments into [easy_install]index_url= settings, so that any
-        # dependencies setup_requires= builds will use them), which means the
-        # repo is always "dirty", which creates an .egg with the wrong
-        # version. I have not yet found a clean way to hook the easy_install
-        # command to fix this: there is very little linkage between the
-        # parent command (which could calculate the version before setup.cfg
-        # is modified) and the command which builds the .egg. Leave it broken
-        # for now.
-        linkdir = self.make_linkdir()
-        indexdir = self.make_empty_indexdir()
-        repodir = self.make_setuptools_repo()
-        venv = self.make_venv("setuptools-repo-easy-install")
-        self.run_in_venv(venv, repodir,
-                         "python", "setup.py", "easy_install",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         "."
-                         )
-        self.check_in_venv_withlib(venv)
-
     def test_develop(self):
         linkdir = self.make_linkdir()
         indexdir = self.make_empty_indexdir()
@@ -640,17 +616,6 @@ class DistutilsSdist(_Invocations, unittest.TestCase):
                          "pip", "install", sdist)
         self.check_in_venv(venv)
 
-    def test_easy_install(self):
-        linkdir = self.make_linkdir()
-        indexdir = self.make_empty_indexdir()
-        sdist = self.make_distutils_sdist()
-        venv = self.make_venv("distutils-sdist-easy-install")
-        self.run_in_venv(venv, venv,
-                         "easy_install",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         sdist)
-        self.check_in_venv(venv)
-
 class SetuptoolsSdist(_Invocations, unittest.TestCase):
     def test_pip_install(self):
         linkdir = self.make_linkdir()
@@ -672,17 +637,6 @@ class SetuptoolsSdist(_Invocations, unittest.TestCase):
                          sdist)
         self.check_in_venv_withlib(venv)
 
-    def test_easy_install(self):
-        linkdir = self.make_linkdir()
-        indexdir = self.make_empty_indexdir()
-        sdist = self.make_setuptools_sdist()
-        venv = self.make_venv("setuptools-sdist-easy-install")
-        self.run_in_venv(venv, venv,
-                         "easy_install",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         sdist)
-        self.check_in_venv_withlib(venv)
-
 class SetuptoolsWheel(_Invocations, unittest.TestCase):
     def test_pip_install(self):
         linkdir = self.make_linkdir()
@@ -692,18 +646,6 @@ class SetuptoolsWheel(_Invocations, unittest.TestCase):
                          "pip", "install",
                          "--no-index", "--find-links", linkdir,
                          wheel)
-        self.check_in_venv_withlib(venv)
-
-class Egg(_Invocations, unittest.TestCase):
-    def test_easy_install(self):
-        linkdir = self.make_linkdir()
-        indexdir = self.make_empty_indexdir()
-        egg = self.make_setuptools_egg()
-        venv = self.make_venv("setuptools-egg-easy-install")
-        self.run_in_venv(venv, venv,
-                         "easy_install",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         egg)
         self.check_in_venv_withlib(venv)
 
 class DistutilsUnpacked(_Invocations, unittest.TestCase):
@@ -779,18 +721,6 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         self.run_in_venv(venv, venv, "pip", "install", demolib)
         self.run_in_venv(venv, unpacked,
                          "python", "setup.py", "install")
-        self.check_in_venv_withlib(venv)
-
-    def test_easy_install(self):
-        linkdir = self.make_linkdir()
-        indexdir = self.make_empty_indexdir()
-        unpacked = self.make_setuptools_unpacked()
-        venv = self.make_venv("setuptools-unpacked-easy-install")
-        self.run_in_venv(venv, unpacked,
-                         "python", "setup.py", "easy_install",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         "."
-                         )
         self.check_in_venv_withlib(venv)
 
     def test_wheel(self):

@@ -22,7 +22,8 @@ class ParseGitDescribe(unittest.TestCase):
         os.mkdir(self.fakegit)
 
     def test_pieces(self):
-        def pv(git_describe, do_error=False, expect_pieces=False):
+        def pv(git_describe, do_error=False,
+               expect_pieces=False, branch_name="master"):
             def fake_run_command(exes, args, cwd=None, hide_stderr=None):
                 if args[0] == "describe":
                     if do_error == "describe":
@@ -31,13 +32,20 @@ class ParseGitDescribe(unittest.TestCase):
                 if args[0] == "rev-parse":
                     if do_error == "rev-parse":
                         return None, 0
-                    return "longlong\n", 0
+                    if args[1] == "--abbrev-ref":
+                        return "%s\n" % branch_name, 0
+                    else:
+                        return "longlong\n", 0
                 if args[0] == "rev-list":
                     return "42\n", 0
                 if args[0] == "show":
                     if do_error == "show":
                         return "gpg: signature\n12345\n", 0
                     return "12345\n", 0
+                if args[0] == "branch":
+                    return "* (no branch)\n" \
+                           "  contained-branch-1\n" \
+                           "  contained-branch-2", 0
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,
@@ -51,43 +59,64 @@ class ParseGitDescribe(unittest.TestCase):
                           "distance": 42,
                           "long": "longlong",
                           "short": "longlon",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
         self.assertEqual(pv("1f", do_error="show"),
                          {"closest-tag": None, "dirty": False, "error": None,
                           "distance": 42,
                           "long": "longlong",
                           "short": "longlon",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
         self.assertEqual(pv("1f-dirty"),
                          {"closest-tag": None, "dirty": True, "error": None,
                           "distance": 42,
                           "long": "longlong",
                           "short": "longlon",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
         self.assertEqual(pv("v1.0-0-g1f"),
                          {"closest-tag": "1.0", "dirty": False, "error": None,
                           "distance": 0,
                           "long": "longlong",
                           "short": "1f",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
         self.assertEqual(pv("v1.0-0-g1f-dirty"),
                          {"closest-tag": "1.0", "dirty": True, "error": None,
                           "distance": 0,
                           "long": "longlong",
                           "short": "1f",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
         self.assertEqual(pv("v1.0-1-g1f"),
                          {"closest-tag": "1.0", "dirty": False, "error": None,
                           "distance": 1,
                           "long": "longlong",
                           "short": "1f",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
         self.assertEqual(pv("v1.0-1-g1f-dirty"),
                          {"closest-tag": "1.0", "dirty": True, "error": None,
                           "distance": 1,
                           "long": "longlong",
                           "short": "1f",
-                          "date": "12345"})
+                          "date": "12345",
+                          "branch": "master"})
+        self.assertEqual(pv("v1.0-1-g1f-dirty", branch_name="feature-branch"),
+                         {"closest-tag": "1.0", "dirty": True, "error": None,
+                          "distance": 1,
+                          "long": "longlong",
+                          "short": "1f",
+                          "date": "12345",
+                          "branch": "feature-branch"})
+        self.assertEqual(pv("v1.0-1-g1f-dirty", branch_name="HEAD"),
+                         {"closest-tag": "1.0", "dirty": True, "error": None,
+                          "distance": 1,
+                          "long": "longlong",
+                          "short": "1f",
+                          "date": "12345",
+                          "branch": "contained-branch-1"})
 
     def tearDown(self):
         os.rmdir(self.fakegit)
@@ -164,9 +193,12 @@ expected_renders = """
 closest-tag: 1.0
 distance: 0
 dirty: False
+branch: feature
 pep440: 1.0
+pep440-branch: 1.0
 pep440-pre: 1.0
 pep440-post: 1.0
+pep440-post-branch: 1.0
 pep440-old: 1.0
 git-describe: 1.0
 git-describe-long: 1.0-0-g250b7ca
@@ -174,9 +206,12 @@ git-describe-long: 1.0-0-g250b7ca
 closest-tag: 1.0
 distance: 0
 dirty: True
+branch: master
 pep440: 1.0+0.g250b7ca.dirty
+pep440-branch: 1.0+0.g250b7ca.dirty
 pep440-pre: 1.0
 pep440-post: 1.0.post0.dev0+g250b7ca
+pep440-post-branch: 1.0.post0+g250b7ca.dirty
 pep440-old: 1.0.post0.dev0
 git-describe: 1.0-dirty
 git-describe-long: 1.0-0-g250b7ca-dirty
@@ -184,9 +219,12 @@ git-describe-long: 1.0-0-g250b7ca-dirty
 closest-tag: 1.0
 distance: 1
 dirty: False
+branch: master
 pep440: 1.0+1.g250b7ca
+pep440-branch: 1.0+1.g250b7ca
 pep440-pre: 1.0.post0.dev1
 pep440-post: 1.0.post1+g250b7ca
+pep440-post-branch: 1.0.post1+g250b7ca
 pep440-old: 1.0.post1
 git-describe: 1.0-1-g250b7ca
 git-describe-long: 1.0-1-g250b7ca
@@ -194,9 +232,12 @@ git-describe-long: 1.0-1-g250b7ca
 closest-tag: 1.0
 distance: 1
 dirty: True
+branch: feature
 pep440: 1.0+1.g250b7ca.dirty
+pep440-branch: 1.0.dev0+1.g250b7ca.dirty
 pep440-pre: 1.0.post0.dev1
 pep440-post: 1.0.post1.dev0+g250b7ca
+pep440-post-branch: 1.0.post1.dev0+g250b7ca.dirty
 pep440-old: 1.0.post1.dev0
 git-describe: 1.0-1-g250b7ca-dirty
 git-describe-long: 1.0-1-g250b7ca-dirty
@@ -205,9 +246,12 @@ git-describe-long: 1.0-1-g250b7ca-dirty
 closest-tag: 1.0+plus
 distance: 1
 dirty: False
+branch: feature
 pep440: 1.0+plus.1.g250b7ca
+pep440-branch: 1.0+plus.dev0.1.g250b7ca
 pep440-pre: 1.0+plus.post0.dev1
 pep440-post: 1.0+plus.post1.g250b7ca
+pep440-post-branch: 1.0+plus.post1.dev0.g250b7ca
 pep440-old: 1.0+plus.post1
 git-describe: 1.0+plus-1-g250b7ca
 git-describe-long: 1.0+plus-1-g250b7ca
@@ -215,9 +259,12 @@ git-describe-long: 1.0+plus-1-g250b7ca
 closest-tag: 1.0+plus
 distance: 1
 dirty: True
+branch: master
 pep440: 1.0+plus.1.g250b7ca.dirty
+pep440-branch: 1.0+plus.1.g250b7ca.dirty
 pep440-pre: 1.0+plus.post0.dev1
 pep440-post: 1.0+plus.post1.dev0.g250b7ca
+pep440-post-branch: 1.0+plus.post1.g250b7ca.dirty
 pep440-old: 1.0+plus.post1.dev0
 git-describe: 1.0+plus-1-g250b7ca-dirty
 git-describe-long: 1.0+plus-1-g250b7ca-dirty
@@ -226,9 +273,12 @@ git-describe-long: 1.0+plus-1-g250b7ca-dirty
 closest-tag: None
 distance: 1
 dirty: False
+branch: master
 pep440: 0+untagged.1.g250b7ca
+pep440-branch: 0+untagged.1.g250b7ca
 pep440-pre: 0.post0.dev1
 pep440-post: 0.post1+g250b7ca
+pep440-post-branch: 0.post1+g250b7ca
 pep440-old: 0.post1
 git-describe: 250b7ca
 git-describe-long: 250b7ca
@@ -236,9 +286,12 @@ git-describe-long: 250b7ca
 closest-tag: None
 distance: 1
 dirty: True
+branch: feature
 pep440: 0+untagged.1.g250b7ca.dirty
+pep440-branch: 0.dev0+untagged.1.g250b7ca.dirty
 pep440-pre: 0.post0.dev1
 pep440-post: 0.post1.dev0+g250b7ca
+pep440-post-branch: 0.post1.dev0+g250b7ca.dirty
 pep440-old: 0.post1.dev0
 git-describe: 250b7ca-dirty
 git-describe-long: 250b7ca-dirty
@@ -248,8 +301,9 @@ git-describe-long: 250b7ca-dirty
 class RenderPieces(unittest.TestCase):
     def do_render(self, pieces):
         out = {}
-        for style in ["pep440", "pep440-pre", "pep440-post", "pep440-old",
-                      "git-describe", "git-describe-long"]:
+        for style in ["pep440", "pep440-branch", "pep440-pre", "pep440-post",
+                      "pep440-post-branch", "pep440-old", "git-describe",
+                      "git-describe-long"]:
             out[style] = render(pieces, style)["version"]
         DEFAULT = "pep440"
         self.assertEqual(render(pieces, ""), render(pieces, DEFAULT))
@@ -283,6 +337,8 @@ class RenderPieces(unittest.TestCase):
                 more_pieces["closest-tag"] = value
                 if value == "None":
                     more_pieces["closest-tag"] = None
+            elif name == "branch":
+                more_pieces["branch"] = value
             else:
                 expected[name] = value
         if more_pieces and expected:
@@ -419,9 +475,8 @@ class Repo(common.Common, unittest.TestCase):
         if not script_only:
             with open(self.project_file("src/demo/__init__.py")) as fobj:
                 i = fobj.read().splitlines()
-            self.assertEqual(i[-3], "from ._version import get_versions")
-            self.assertEqual(i[-2], "__version__ = get_versions()['version']")
-            self.assertEqual(i[-1], "del get_versions")
+            self.assertEqual(i[-2], "from . import _version")
+            self.assertEqual(i[-1], "__version__ = _version.get_versions()['version']")
         self.git("commit", "-m", "add _version stuff")
 
         # "versioneer.py setup" should be idempotent
