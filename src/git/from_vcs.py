@@ -52,8 +52,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
 
-    branch_name, rc = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
-                                  cwd=root)
+    branch_name, rc = runner(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
+                             cwd=root)
     # --abbrev-ref was added in git-1.6.3
     if rc != 0 or branch_name is None:
         raise NotThisMethod("'git rev-parse --abbrev-ref' returned error")
@@ -63,8 +63,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
         # If we aren't exactly on a branch, pick a branch which represents
         # the current commit. If all else fails, we are on a branchless
         # commit.
-        branches, rc = run_command(GITS, ["branch", "--contains"],
-                                   cwd=root)
+        branches, rc = runner(GITS, ["branch", "--contains"], cwd=root)
         # --contains was added in git-1.5.4
         if rc != 0 or branches is None:
             raise NotThisMethod("'git branch --contains' returned error")
