@@ -14,7 +14,7 @@ def run_command(): pass  # --STRIP DURING BUILD
 class NotThisMethod(Exception):  # --STRIP DURING BUILD
     pass  # --STRIP DURING BUILD
 @register_vcs_handler("git", "pieces_from_vcs")
-def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
+def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     """Get version from 'git describe' in the root of the source tree.
 
     This only gets called if the git-archive 'subst' keywords were *not*
@@ -25,8 +25,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
 
-    out, rc = run_command(GITS, ["rev-parse", "--git-dir"], cwd=root,
-                          hide_stderr=True)
+    _, rc = runner(GITS, ["rev-parse", "--git-dir"], cwd=root,
+                   hide_stderr=True)
     if rc != 0:
         if verbose:
             print("Directory %s not under git control" % root)
@@ -34,15 +34,15 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
-    describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",
-                                          "--always", "--long",
-                                          "--match", "%s*" % tag_prefix],
-                                   cwd=root)
+    describe_out, rc = runner(GITS, ["describe", "--tags", "--dirty",
+                                     "--always", "--long",
+                                     "--match", "%s*" % tag_prefix],
+                              cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
         raise NotThisMethod("'git describe' failed")
     describe_out = describe_out.strip()
-    full_out, rc = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
+    full_out, rc = runner(GITS, ["rev-parse", "HEAD"], cwd=root)
     if full_out is None:
         raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
@@ -52,8 +52,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
 
-    branch_name, rc = run_command(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
-                                  cwd=root)
+    branch_name, rc = runner(GITS, ["rev-parse", "--abbrev-ref", "HEAD"],
+                             cwd=root)
     # --abbrev-ref was added in git-1.6.3
     if rc != 0 or branch_name is None:
         raise NotThisMethod("'git rev-parse --abbrev-ref' returned error")
@@ -63,8 +63,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         # If we aren't exactly on a branch, pick a branch which represents
         # the current commit. If all else fails, we are on a branchless
         # commit.
-        branches, rc = run_command(GITS, ["branch", "--contains"],
-                                   cwd=root)
+        branches, rc = runner(GITS, ["branch", "--contains"], cwd=root)
         # --contains was added in git-1.5.4
         if rc != 0 or branches is None:
             raise NotThisMethod("'git branch --contains' returned error")
@@ -127,13 +126,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     else:
         # HEX: no tags
         pieces["closest-tag"] = None
-        count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--count"],
-                                    cwd=root)
+        count_out, rc = runner(GITS, ["rev-list", "HEAD", "--count"], cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits
 
     # commit date: see ISO-8601 comment in git_versions_from_keywords()
-    date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"],
-                       cwd=root)[0].strip()
+    date = runner(GITS, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[0].strip()
     # Use only the last line.  Previous lines may contain GPG signature
     # information.
     date = date.splitlines()[-1]

@@ -14,10 +14,10 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
     if ipy:
         files.append(ipy)
     try:
-        me = __file__
-        if me.endswith(".pyc") or me.endswith(".pyo"):
-            me = os.path.splitext(me)[0] + ".py"
-        versioneer_file = os.path.relpath(me)
+        my_path = __file__
+        if my_path.endswith(".pyc") or my_path.endswith(".pyo"):
+            my_path = os.path.splitext(my_path)[0] + ".py"
+        versioneer_file = os.path.relpath(my_path)
     except NameError:
         versioneer_file = "versioneer.py"
     files.append(versioneer_file)

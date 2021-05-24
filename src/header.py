@@ -15,7 +15,7 @@ import subprocess
 import sys
 
 
-class VersioneerConfig:
+class VersioneerConfig:  # pylint: disable=too-few-public-methods # noqa
     """Container for Versioneer configuration parameters."""
 
 
@@ -47,12 +47,12 @@ def get_root():
         # module-import table will cache the first one. So we can't use
         # os.path.dirname(__file__), as that will find whichever
         # versioneer.py was first imported, even in later projects.
-        me = os.path.realpath(os.path.abspath(__file__))
-        me_dir = os.path.normcase(os.path.splitext(me)[0])
+        my_path = os.path.realpath(os.path.abspath(__file__))
+        me_dir = os.path.normcase(os.path.splitext(my_path)[0])
         vsr_dir = os.path.normcase(os.path.splitext(versioneer_py)[0])
         if me_dir != vsr_dir:
             print("Warning: build in %s is using versioneer.py from %s"
-                  % (os.path.dirname(me), versioneer_py))
+                  % (os.path.dirname(my_path), versioneer_py))
     except NameError:
         pass
     return root
@@ -66,13 +66,14 @@ def get_config_from_root(root):
     # the top of versioneer.py for instructions on writing your setup.cfg .
     setup_cfg = os.path.join(root, "setup.cfg")
     parser = configparser.ConfigParser()
-    with open(setup_cfg, "r") as f:
-        parser.read_file(f)
+    with open(setup_cfg, "r") as cfg_file:
+        parser.read_file(cfg_file)
     VCS = parser.get("versioneer", "VCS")  # mandatory
 
     # Dict-like interface for non-mandatory entries
     section = parser["versioneer"]
 
+    # pylint:disable=attribute-defined-outside-init # noqa
     cfg = VersioneerConfig()
     cfg.VCS = VCS
     cfg.style = section.get("style", "")
