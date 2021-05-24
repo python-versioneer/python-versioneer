@@ -41,7 +41,7 @@ class ParseGitDescribe(unittest.TestCase):
                 self.fail("git called in weird way: %s" % (args,))
             return from_vcs.git_pieces_from_vcs(
                 "v", self.fakeroot, verbose=False,
-                command=fake_run_command)
+                runner=fake_run_command)
         self.assertRaises(from_vcs.NotThisMethod,
                           pv, "ignored", do_error="describe")
         self.assertRaises(from_vcs.NotThisMethod,
