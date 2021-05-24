@@ -86,7 +86,8 @@ class make_versioneer(Command):
         pass
     def run(self):
         with open("versioneer.py", "w") as f:
-            f.write("# pylint:disable=trailing-whitespace # noqa \n")
+            f.write("# noqa: E127,E128,W291 \n")
+            f.write("# pylint:disable=trailing-whitespace \n")
             f.write("# pylint:disable=invalid-name \n")
             f.write("# pylint:disable=import-outside-toplevel \n")
             f.write("# pylint:disable=missing-function-docstring \n")
