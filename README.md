@@ -251,6 +251,7 @@ number of intermediate scripts.
   dependency
 * [minver](https://github.com/jbweston/miniver) - a lightweight reimplementation of
   versioneer
+* [versioningit](https://github.com/jwodder/versioningit) - a PEP 518-based setuptools plugin
 
 ## License
 
