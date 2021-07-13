@@ -1,3 +1,16 @@
+## Release 0.20 (13-Jul-2020)
+
+With thanks to Tanvi Moharir, Ashutosh Varma, Benjamin Rüth, Lucas Jansen,
+Timothy Lusk and Barret O'Brock for contributions.
+
+* Respect `versionfile_source` in `__init__.py` snippet (#241)
+* Add `pep440-branch` and `pep440-post-branch` styles (#164)
+* Stop testing deprecated `easy_install`, support left in for now (#237)
+* Use `versionfile_build` instead of `versionfile_source` where needed (#242)
+* Improve handling of refname edge cases (#229)
+* Clarify installation in docs (#235)
+* Play nicely with custom `build_ext`s (#232)
+
 ## Release 0.19 (10-Nov-2020)
 
 Versioneer's 0.19 release is the first under new maintainership, and most of the work
