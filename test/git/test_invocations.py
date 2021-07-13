@@ -21,6 +21,12 @@ except TypeError:  # wheel < 0.34
 
 
 class _Invocations(common.Common):
+    env = {}
+    expected_versions = {
+        "demolib": "1.0",
+        "demoapp2": "2.0",
+    }
+
     def setUp(self):
         if False:
             # when debugging, put the generated files in a predictable place
@@ -74,7 +80,7 @@ class _Invocations(common.Common):
 
     def check_in_venv(self, venv, env=None):
         if env is None:
-            env = {}
+            env = self.env
         out = self.run_in_venv(venv, venv, "rundemo")
         v = dict(line.split(":", 1) for line in out.splitlines())
         self.assertEqual(v["version"], env.get("VERSIONEER_OVERRIDE", "2.0"))
@@ -82,8 +88,8 @@ class _Invocations(common.Common):
 
     def check_in_venv_withlib(self, venv, env=None):
         if env is None:
-            env = {}
-        v = self.check_in_venv(venv)
+            env = self.env
+        v = self.check_in_venv(venv, env=env)
         self.assertEqual(v["demolib"], env.get("VERSIONEER_OVERRIDE", "1.0"))
 
     # "demolib" has a version of 1.0 and is built with distutils
@@ -165,9 +171,12 @@ class _Invocations(common.Common):
         self.git("tag", "demoapp2-2.0", workdir=repodir)
         return projectdir
 
-    def make_distutils_wheel_with_pip(self):
+    def make_distutils_wheel_with_pip(self, env=None):
+        if env is None:
+            env = self.env
+        ver = (env or {}).get("VERSIONEER_OVERRIDE", "2.0")
         # create an wheel of demoapp2-distutils at 2.0
-        wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
+        wheelname = "demoapp2-%s-%s-none-any.whl" % (ver, pyver_major)
         demoapp2_distutils_wheel = self.subpath("cache", "distutils", wheelname)
         if os.path.exists(demoapp2_distutils_wheel):
             return demoapp2_distutils_wheel
@@ -176,60 +185,64 @@ class _Invocations(common.Common):
         self.run_in_venv(venv, repodir,
                          "pip", "wheel", "--wheel-dir", "wheelhouse",
                          "--no-index",# "--find-links", linkdir,
-                         ".")
+                         ".", env=env)
         created = os.path.join(repodir, "wheelhouse", wheelname)
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_distutils_wheel)
         return demoapp2_distutils_wheel
 
-    def make_distutils_sdist(self):
+    def make_distutils_sdist(self, env=None):
+        ver = (env or {}).get("VERSIONEER_OVERRIDE", "2.0")
         # create an sdist tarball of demoapp2-distutils at 2.0
         demoapp2_distutils_sdist = self.subpath("cache", "distutils",
-                                                "demoapp2-2.0.tar")
+                                                "demoapp2-%s.tar" % ver)
         if os.path.exists(demoapp2_distutils_sdist):
             return demoapp2_distutils_sdist
         repodir = self.make_distutils_repo()
-        self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
-        created = os.path.join(repodir, "dist", "demoapp2-2.0.tar")
+        self.python("setup.py", "sdist", "--format=tar", workdir=repodir, env=env)
+        created = os.path.join(repodir, "dist", "demoapp2-%s.tar" % ver)
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_distutils_sdist)
         return demoapp2_distutils_sdist
 
-    def make_distutils_sdist_subproject(self):
+    def make_distutils_sdist_subproject(self, env=None):
+        ver = (env or {}).get("VERSIONEER_OVERRIDE", "2.0")
         demoapp2_distutils_sdist = self.subpath("cache", "distutils",
-                                                "demoapp2-subproject-2.0.tar")
+                                                "demoapp2-subproject-%s.tar" % ver)
         if os.path.exists(demoapp2_distutils_sdist):
             return demoapp2_distutils_sdist
         projectdir = self.make_distutils_repo_subproject()
-        self.python("setup.py", "sdist", "--format=tar", workdir=projectdir)
-        created = os.path.join(projectdir, "dist", "demoapp2-2.0.tar")
+        self.python("setup.py", "sdist", "--format=tar", workdir=projectdir, env=env)
+        created = os.path.join(projectdir, "dist", "demoapp2-%s.tar" % ver)
         # if that gets the version wrong, it will make the wrong tarball, and
         # this check will fail
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_distutils_sdist)
         return demoapp2_distutils_sdist
 
-    def make_distutils_unpacked(self):
-        sdist = self.make_distutils_sdist()
+    def make_distutils_unpacked(self, env=None):
+        ver = (env or {}).get("VERSIONEER_OVERRIDE", "2.0")
+        sdist = self.make_distutils_sdist(env=env)
         unpack_into = self.subpath("demoapp2-distutils-unpacked")
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
         with tarfile.TarFile(sdist) as t:
             t.extractall(path=unpack_into)
-        unpacked = os.path.join(unpack_into, "demoapp2-2.0")
+        unpacked = os.path.join(unpack_into, "demoapp2-%s" % ver)
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
 
-    def make_distutils_subproject_unpacked(self):
-        sdist = self.make_distutils_sdist_subproject()
+    def make_distutils_subproject_unpacked(self, env=None):
+        ver = (env or {}).get("VERSIONEER_OVERRIDE", "2.0")
+        sdist = self.make_distutils_sdist_subproject(env=env)
         unpack_into = self.subpath("demoapp2-distutils-unpacked-subproject")
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
         with tarfile.TarFile(sdist) as t:
             t.extractall(path=unpack_into)
-        unpacked = os.path.join(unpack_into, "demoapp2-2.0")
+        unpacked = os.path.join(unpack_into, "demoapp2-%s" % ver)
         self.assertTrue(os.path.exists(unpacked))
         return unpacked
 
@@ -401,47 +414,36 @@ class _Invocations(common.Common):
         shutil.copyfile(created, demoapp2_setuptools_wheel)
         return demoapp2_setuptools_wheel
 
-    def make_binary_wheelname(self, app):
-        return "%s-2.0-%s-%s-%s.whl" % (app,
+    def make_binary_wheelname(self, app, ver):
+        return "%s-%s-%s-%s-%s.whl" % (app, ver,
             "".join([impl, impl_ver]), abi, plat.replace("-", "_"))
 
 
 class DistutilsRepo(_Invocations, unittest.TestCase):
     def test_build(self):
-        repodir = self.make_distutils_repo()
-        self.python("setup.py", "build", workdir=repodir)
-        # test that the built _version.py is correct. Ideally we'd actually
-        # run PYTHONPATH=.../build/lib build/scripts-PYVER/rundemo and check
-        # the output, but that's more fragile than I want to deal with today
-        fn = os.path.join(repodir, "build", "lib", "demo", "_version.py")
-        data = versions_from_file(fn)
-        self.assertEqual(data["version"], "2.0")
+        for env in ({}, {"VERSIONEER_OVERRIDE": "3.0"}):
+            repodir = self.make_distutils_repo()
+            self.python("setup.py", "build", workdir=repodir, env=env or None)
+            # test that the built _version.py is correct. Ideally we'd actually
+            # run PYTHONPATH=.../build/lib build/scripts-PYVER/rundemo and check
+            # the output, but that's more fragile than I want to deal with today
+            fn = os.path.join(repodir, "build", "lib", "demo", "_version.py")
+            data = versions_from_file(fn)
+            self.assertEqual(data["version"], env.get("VERSIONEER_OVERRIDE", "2.0"))
 
     def test_install(self):
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("distutils-repo-install")
-        self.run_in_venv(venv, repodir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        for i, env in enumerate((None, {"VERSIONEER_OVERRIDE": "3.0"})):
+            repodir = self.make_distutils_repo()
+            venv = self.make_venv("distutils-repo-install-%d" % i)
+            self.run_in_venv(venv, repodir, "python", "setup.py", "install", env=env)
+            self.check_in_venv(venv, env=env)
 
     def test_install_subproject(self):
-        projectdir = self.make_distutils_repo_subproject()
-        venv = self.make_venv("distutils-repo-install-subproject")
-        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
-
-    def test_install_override(self):
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("distutils-repo-install")
-        env = {"VERSIONEER_OVERRIDE": "3.0"}
-        self.run_in_venv(venv, repodir, "python", "setup.py", "install", env=env)
-        self.check_in_venv(venv, env=env)
-
-    def test_install_subproject_override(self):
-        projectdir = self.make_distutils_repo_subproject()
-        venv = self.make_venv("distutils-repo-install-subproject")
-        env = {"VERSIONEER_OVERRIDE": "3.0"}
-        self.run_in_venv(venv, projectdir, "python", "setup.py", "install", env=env)
-        self.check_in_venv(venv, env=env)
+        for i, env in enumerate((None, {"VERSIONEER_OVERRIDE": "3.0"})):
+            projectdir = self.make_distutils_repo_subproject()
+            venv = self.make_venv("distutils-repo-install-subproject-%d" % i)
+            self.run_in_venv(venv, projectdir, "python", "setup.py", "install", env=env)
+            self.check_in_venv(venv, env=env)
 
     def test_pip_wheel(self):
         self.make_distutils_wheel_with_pip()
@@ -786,7 +788,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
 
     def test_extension_wheel_setuptools(self):
         # create an wheel of demoappext-setuptools at 2.0
-        wheelname = self.make_binary_wheelname('demoappext')
+        wheelname = self.make_binary_wheelname('demoappext', "2.0")
         demoappext_setuptools_wheel = self.subpath("cache", "setuptools",
                                                    wheelname)
         if os.path.exists(demoappext_setuptools_wheel):
@@ -811,7 +813,7 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
 
     def test_extension_wheel_pip(self):
         # create an wheel of demoappext-setuptools at 2.0 with pip
-        wheelname = self.make_binary_wheelname('demoappext')
+        wheelname = self.make_binary_wheelname('demoappext', "2.0")
         demoappext_setuptools_wheel = self.subpath("cache", "setuptools",
                                                    wheelname)
         if os.path.exists(demoappext_setuptools_wheel):

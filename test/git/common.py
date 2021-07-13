@@ -27,10 +27,10 @@ class Common:
             self.fail("problem running git (workdir: %s)" % workdir)
         return output
 
-    def python(self, *args, workdir=None, exe=sys.executable):
+    def python(self, *args, workdir=None, exe=sys.executable, env=None):
         if workdir is None:
             workdir = self.projdir
-        output, rc = run_command([exe], list(args), workdir, True)
+        output, rc = run_command([exe], list(args), workdir, True, env=env)
         if output is None:
             self.fail("problem running python (workdir: %s)" % workdir)
         return output
