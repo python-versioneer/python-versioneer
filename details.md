@@ -37,7 +37,7 @@ If the `error` key is non-None, that indicates that Versioneer was unable to obt
 
 * the closest tag found did not start with the configured `tag_prefix`
 * from-keyword mode did not find any tags (e.g. an archive created from a bare SHA1, instead of from a tag)
-* the output of `git describe` was unparseable
+* the output of `git describe` was unparsable
 * all modes failed: the source tree has no `.git` directory, expanded keywords, pre-built version data ("from-file"), or useful parent directory name.
 
 When `error` occurs, `version` will be set to "0+unknown", `full-revisionid` will be set (in from-vcs mode) or None (in other modes), and `dirty` will be None. If you want to prevent builds from happening without solid version information, use a snippet like this in your `__init__.py` or `setup.py`:
@@ -70,7 +70,7 @@ The renderer function is controlled by a configuration value called `style`. You
 | key            | description |
 | ---            | ----------- |
 | `default`      | same as `pep440` |
-| `pep440`       | `TAG[+DISTANCE.gSHORTHASH[.dirty]]`, a PEP-440 compatible version string which uses the "local version identifier" to record the complete non-tag information. This format provides compliant versions even under unusual/error circumstances. It returns `0+untagged.DISTANCE.gHASH[.dirty]` before any tags have been set, `0+unknown` if the tree does not contain enough information to report a version (e.g. the .git directory has been removed), and `0.unparseable[.dirty]` if `git describe` emits something weird. If TAG includes a plus sign, then this will use a dot as a separator instead (`TAG[.DISTANCE.gSHORTHASH[.dirty]]`).|
+| `pep440`       | `TAG[+DISTANCE.gSHORTHASH[.dirty]]`, a PEP-440 compatible version string which uses the "local version identifier" to record the complete non-tag information. This format provides compliant versions even under unusual/error circumstances. It returns `0+untagged.DISTANCE.gHASH[.dirty]` before any tags have been set, `0+unknown` if the tree does not contain enough information to report a version (e.g. the .git directory has been removed), and `0.unparsable[.dirty]` if `git describe` emits something weird. If TAG includes a plus sign, then this will use a dot as a separator instead (`TAG[.DISTANCE.gSHORTHASH[.dirty]]`).|
 | `pep440-branch`| `TAG[[.dev0]+DISTANCE.gSHORTHASH[.dirty]]`, a PEP-440 compatible version string, identical to the `pep440` style with the addition of a `.dev0` component if the tree is on a branch other than `master`. Note that PEP-0440 rules indicate that X.dev0 sorts as "older" than X, so feature branches will always appear "older" than the `master` branch in this format, even with `pip install --pre`. |
 | `pep440-pre`   | `TAG[.post0.devDISTANCE]`, a PEP-440 compatible version string which loses information but has the useful property that non-tagged versions qualify for `pip install --pre` (by virtue of the `.dev` component). This form does not record the commit hash, nor the `-dirty` flag. |
 | `pep440-post`  | `TAG[.postDISTANCE[.dev0]+gSHORTHASH]`, a PEP-440 compatible version string which allows all commits to get installable versions, and retains the commit hash.
@@ -88,7 +88,7 @@ Internally, the from-vcs function is expected to return the following values. Th
 | ---                   | ----------- |
 | `long`     | a full-length id (hex SHA1 for git) for the current revision |
 | `short`    | a truncated form of `full-revisionid`, typically 7 characters for git (but might be more in large repositories if necessary to uniquely identify the commit) |
-| `error` | a string, if something was unparseable |
+| `error` | a string, if something was unparsable |
 | `closest-tag`         | a string (or None if nothing has been tagged), with the name of the closest ancestor tag. The "tag prefix" is stripped off. |
 | `distance`            | an integer, the number of commits since the most recent tag. If the current revision is tagged, this will be 0. If nothing has been tagged, this will be the total number of commits. |
 | `dirty`            | a boolean, indicating that the working directory has modified files |
