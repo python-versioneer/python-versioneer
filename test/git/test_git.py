@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import os, sys
+import posixpath
 import shutil
 import tarfile
 import unittest
@@ -447,10 +448,11 @@ class Repo(common.Common, unittest.TestCase):
 
         out = self.python("versioneer.py", "setup").splitlines()
         self.assertEqual(out[0], "creating src/demo/_version.py")
+        init = os.path.join("src/demo", "__init__.py")
         if script_only:
-            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
-            self.assertEqual(out[1], " appending to src/demo/__init__.py")
+            self.assertEqual(out[1], f" appending to {init}")
         self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
         self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
 
@@ -464,7 +466,7 @@ class Repo(common.Common, unittest.TestCase):
                     ]
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         def pf(fn):
-            return os.path.normpath(os.path.join(self.project_sub_dir, fn))
+            return posixpath.normpath(posixpath.join(self.project_sub_dir, fn))
         expected = {"A  %s" % pf(".gitattributes"),
                     "M  %s" % pf("MANIFEST.in"),
                     "A  %s" % pf("src/demo/_version.py"),
@@ -483,9 +485,9 @@ class Repo(common.Common, unittest.TestCase):
         out = self.python("versioneer.py", "setup").splitlines()
         self.assertEqual(out[0], "creating src/demo/_version.py")
         if script_only:
-            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
-            self.assertEqual(out[1], " src/demo/__init__.py unmodified")
+            self.assertEqual(out[1], f" {init} unmodified")
         self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
         self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
