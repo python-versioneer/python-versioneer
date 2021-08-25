@@ -1,4 +1,6 @@
 import os, sys
+import stat
+import shutil
 from subprocess_helper import run_command
 
 GITS = ["git"]
@@ -41,3 +43,11 @@ class Common:
 
     def subpath(self, *path):
         return os.path.join(self.testdir, *path)
+
+    def rmtree(self, path):
+        # rm -rf <path>
+        # Found on https://stackoverflow.com/a/1889686
+        def remove_readonly(func, path, excinfo):
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        shutil.rmtree(path, onerror=remove_readonly)

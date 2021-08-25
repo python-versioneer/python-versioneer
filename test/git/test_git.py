@@ -412,7 +412,7 @@ class Repo(common.Common, unittest.TestCase):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
-            shutil.rmtree(self.testdir)
+            self.rmtree(self.testdir)
 
         # Our tests run from a git repo that lives here. All self.git()
         # operations run from this directory unless overridden.
@@ -582,7 +582,7 @@ class Repo(common.Common, unittest.TestCase):
 
     def do_checks(self, state, exps):
         if os.path.exists(self.subpath("out")):
-            shutil.rmtree(self.subpath("out"))
+            self.rmtree(self.subpath("out"))
         # TA: project tree
         self.check_version(self.projdir, state, "TA", exps["TA"])
 
@@ -590,14 +590,14 @@ class Repo(common.Common, unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
-            shutil.rmtree(os.path.join(target, ".git"))
+            self.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TB", exps["TB"])
 
         # TC: project tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
-            shutil.rmtree(os.path.join(target, ".git"))
+            self.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
 
         # TD: project subdir of an unpacked git-archive tarball
@@ -613,7 +613,7 @@ class Repo(common.Common, unittest.TestCase):
         # TE: unpacked setup.py sdist tarball
         dist_path = os.path.join(self.projdir, "dist")
         if os.path.exists(dist_path):
-            shutil.rmtree(dist_path)
+            self.rmtree(dist_path)
         self.python("setup.py", "sdist", "--formats=tar")
         files = os.listdir(dist_path)
         self.assertTrue(len(files)==1, files)
@@ -648,7 +648,7 @@ class Repo(common.Common, unittest.TestCase):
 
         # RB: setup.py build; rundemo --version
         if os.path.exists(os.path.join(workdir, "build")):
-            shutil.rmtree(os.path.join(workdir, "build"))
+            self.rmtree(os.path.join(workdir, "build"))
         self.python("setup.py", "build", "--build-lib=build/lib",
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
