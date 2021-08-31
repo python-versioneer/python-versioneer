@@ -25,7 +25,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     TAG_PREFIX_REGEX = "*"
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
-        TAG_PREFIX_REGEX = "\*"
+        TAG_PREFIX_REGEX = "\*" # noqa: W605
 
     _, rc = runner(GITS, ["rev-parse", "--git-dir"], cwd=root,
                    hide_stderr=True)
