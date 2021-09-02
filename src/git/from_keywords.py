@@ -27,7 +27,7 @@ def git_get_keywords(versionfile_abs):
                     mo = re.search(r'=\s*"(.*)"', line)
                     if mo:
                         keywords["date"] = mo.group(1)
-    except EnvironmentError:
+    except OSError:
         pass
     return keywords
 
