@@ -29,7 +29,7 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
                     if "export-subst" in line.strip().split()[1:]:
                         present = True
                         break
-    except EnvironmentError:
+    except OSError:
         pass
     if not present:
         with open(".gitattributes", "a+") as fobj:

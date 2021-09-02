@@ -14,7 +14,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
                                        stderr=(subprocess.PIPE if hide_stderr
                                                else None))
             break
-        except EnvironmentError:
+        except OSError:
             e = sys.exc_info()[1]
             if e.errno == errno.ENOENT:
                 continue
