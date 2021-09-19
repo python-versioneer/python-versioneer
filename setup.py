@@ -111,7 +111,7 @@ class make_long_version_py_git(Command):
     def finalize_options(self):
         pass
     def run(self):
-        assert os.path.exists("versioneer.py")
+        assert path.exists("versioneer.py")
         long_version = generate_long_version_py("git")
         with open("git_version.py", "w") as f:
             f.write(long_version %
@@ -135,12 +135,12 @@ class my_build_py(build_py):
         s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
 
         with tempfile.TemporaryDirectory() as tempdir:
-            installer = os.path.join(tempdir, "versioneer.py")
+            installer = path.join(tempdir, "versioneer.py")
             with open(installer, "w") as f:
                 f.write(s)
 
-            self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
-            self.package_dir.update({'': os.path.dirname(installer)})
+            self.py_modules = [path.splitext(path.basename(installer))[0]]
+            self.package_dir.update({'': path.dirname(installer)})
             rc = build_py.run(self)
         return rc
 
