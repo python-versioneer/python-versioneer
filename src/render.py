@@ -68,7 +68,7 @@ def pep440_split_post(ver):
     post-release version number (or -1 if no post-release segment is present).
     """
     vc = str.split(ver, ".post")
-    return vc[0], int(vc[1] or 0) if len(vc) == 2 else -1
+    return vc[0], int(vc[1] or 0) if len(vc) == 2 else None
 
 
 def render_pep440_pre(pieces):
@@ -78,12 +78,17 @@ def render_pep440_pre(pieces):
     1: no tags. 0.post0.devDISTANCE
     """
     if pieces["closest-tag"]:
-        tag_version, post_version = pep440_split_post(pieces["closest-tag"])
-        rendered = tag_version
-        if post_version > -1 or pieces["distance"]:
-            rendered += ".post%d" % (post_version+1)
-            if pieces["distance"]:
-                rendered += ".dev%d" % pieces["distance"]
+        if pieces["distance"]:
+            # update the post release segment
+            tag_version, post_version = pep440_split_post(pieces["closest-tag"])
+            rendered = tag_version
+            if post_version is not None:
+                rendered += ".post%d.dev%d" % (post_version+1, pieces["distance"])
+            else:
+                rendered += ".post0.dev%d" % (pieces["distance"])
+        else:
+            # no commits, use the tag as the version
+            rendered = pieces["closest-tag"]
     else:
         # exception #1
         rendered = "0.post0.dev%d" % pieces["distance"]
