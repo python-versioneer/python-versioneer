@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os, base64, tempfile, io
-from os import path
 from pathlib import Path
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
@@ -32,11 +31,11 @@ def get(fn, add_ver=False, unquote=False, do_strip=False, do_readme=False):
     return text
 
 def get_vcs_list():
-    project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
+    project_path = Path(__file__).absolute().parent / "src"
     return [filename
             for filename
-            in os.listdir(project_path)
-            if path.isdir(path.join(project_path, filename)) and filename != "__pycache__"]
+            in os.listdir(str(project_path))
+            if Path.is_dir(project_path / filename) and filename != "__pycache__"]
 
 def generate_long_version_py(VCS):
     s = io.StringIO()
@@ -111,7 +110,7 @@ class make_long_version_py_git(Command):
     def finalize_options(self):
         pass
     def run(self):
-        assert path.exists("versioneer.py")
+        assert os.path.exists("versioneer.py")
         long_version = generate_long_version_py("git")
         with open("git_version.py", "w") as f:
             f.write(long_version %
@@ -135,12 +134,12 @@ class my_build_py(build_py):
         s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
 
         with tempfile.TemporaryDirectory() as tempdir:
-            installer = path.join(tempdir, "versioneer.py")
+            installer = os.path.join(tempdir, "versioneer.py")
             with open(installer, "w") as f:
                 f.write(s)
 
-            self.py_modules = [path.splitext(path.basename(installer))[0]]
-            self.package_dir.update({'': path.dirname(installer)})
+            self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
+            self.package_dir.update({'': os.path.dirname(installer)})
             rc = build_py.run(self)
         return rc
 
