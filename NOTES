@@ -57,7 +57,7 @@
         - good to know: make_release_tree() creates hardlinks if possible. If
           'setup.py build' does this too, that would explain why it's not
           always necessary to rebuild when source files are changed.
-        - need to delink _version.py before changing it
+        - need to ensure _version.py is not a link before changing it
         - make_release_tree(base_dir, files) creates os.path.join(base_dir,f)
           for f in files
 **** let's investigate this:
