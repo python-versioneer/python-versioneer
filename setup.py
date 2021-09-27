@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os, base64, tempfile, io
-from os import path
 from pathlib import Path
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
@@ -32,11 +31,11 @@ def get(fn, add_ver=False, unquote=False, do_strip=False, do_readme=False):
     return text
 
 def get_vcs_list():
-    project_path = path.join(path.abspath(path.dirname(__file__)), 'src')
+    project_path = Path(__file__).absolute().parent / "src"
     return [filename
             for filename
-            in os.listdir(project_path)
-            if path.isdir(path.join(project_path, filename)) and filename != "__pycache__"]
+            in os.listdir(str(project_path))
+            if Path.is_dir(project_path / filename) and filename != "__pycache__"]
 
 def generate_long_version_py(VCS):
     s = io.StringIO()
