@@ -29,7 +29,7 @@ def get_keywords():
     return keywords
 
 
-class VersioneerConfig:  # pylint: disable=too-few-public-methods
+class VersioneerConfig:
     """Container for Versioneer configuration parameters."""
 
 

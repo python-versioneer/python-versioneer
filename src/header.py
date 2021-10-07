@@ -5,6 +5,11 @@
 
 @README@
 """
+# pylint:disable=invalid-name,import-outside-toplevel,missing-function-docstring
+# pylint:disable=missing-class-docstring,too-many-branches,too-many-statements
+# pylint:disable=raise-missing-from,too-many-lines,too-many-locals,import-error
+# pylint:disable=too-few-public-methods,redefined-outer-name,consider-using-with
+# pylint:disable=attribute-defined-outside-init,too-many-arguments
 
 import configparser
 import errno
@@ -15,7 +20,7 @@ import subprocess
 import sys
 
 
-class VersioneerConfig:  # pylint: disable=too-few-public-methods # noqa
+class VersioneerConfig:
     """Container for Versioneer configuration parameters."""
 
 
@@ -73,7 +78,6 @@ def get_config_from_root(root):
     # Dict-like interface for non-mandatory entries
     section = parser["versioneer"]
 
-    # pylint:disable=attribute-defined-outside-init # noqa
     cfg = VersioneerConfig()
     cfg.VCS = VCS
     cfg.style = section.get("style", "")

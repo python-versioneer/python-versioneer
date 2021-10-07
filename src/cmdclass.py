@@ -187,7 +187,6 @@ def get_cmdclass(cmdclass=None):
     class cmd_sdist(_sdist):
         def run(self):
             versions = get_versions()
-            # pylint:disable=attribute-defined-outside-init # noqa
             self._versioneer_generated_versions = versions
             # unless we update this, the command will keep using the old
             # version
