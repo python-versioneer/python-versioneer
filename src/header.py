@@ -18,6 +18,7 @@ import os
 import re
 import subprocess
 import sys
+from typing import Callable, Dict
 
 
 class VersioneerConfig:
@@ -96,8 +97,8 @@ class NotThisMethod(Exception):
 
 
 # these dictionaries contain VCS-specific tools
-LONG_VERSION_PY = {}
-HANDLERS = {}
+LONG_VERSION_PY: Dict[str, str] = {}
+HANDLERS: Dict[str, Dict[str, Callable]] = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
