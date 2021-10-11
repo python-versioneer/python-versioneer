@@ -114,6 +114,50 @@ class Testing_branch_renderer_case_mixin(Testing_renderer_case_mixin):
                              'branch_untagged_1_commits_dirty')
 
 
+class Testing_post_renderer_case_mixin(Testing_renderer_case_mixin):
+    """
+    This is a mixin object which extends the base mixin and adds tests
+    that also test version tags with a post-release segment.
+
+    """
+
+    # Naming structure:
+    # test_(un)tagged_post<n>_<n>_commits_(clean|dirty)
+    def test_tagged_post_0_commits_clean(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post'),
+                             'tagged_post_0_commits_clean')
+    
+    def test_tagged_post1_0_commits_clean(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post1'),
+                             'tagged_post1_0_commits_clean')
+    
+    def test_tagged_post_1_commits_clean(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post', distance=1),
+                             'tagged_post_1_commits_clean')
+    
+    def test_tagged_post1_1_commits_clean(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post1', distance=1),
+                             'tagged_post1_1_commits_clean')
+
+    def test_tagged_post_0_commits_dirty(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post', dirty=True),
+                             'tagged_post_0_commits_dirty')
+    
+    def test_tagged_post1_0_commits_dirty(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post1', dirty=True),
+                             'tagged_post1_0_commits_dirty')
+    
+    def test_tagged_post_1_commits_dirty(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post', distance=1,
+                                                dirty=True),
+                             'tagged_post_1_commits_dirty')
+    
+    def test_tagged_post1_1_commits_dirty(self):
+        self.assert_rendered(self.define_pieces('v1.2.3.post1', distance=1,
+                                                dirty=True),
+                             'tagged_post1_1_commits_dirty')
+
+
 class Test_pep440(unittest.TestCase, Testing_renderer_case_mixin):
     style = 'pep440'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
@@ -202,7 +246,7 @@ class Test_pep440_post_branch(unittest.TestCase,
                 }
 
 
-class Test_pep440_pre(unittest.TestCase, Testing_renderer_case_mixin):
+class Test_pep440_pre(unittest.TestCase, Testing_post_renderer_case_mixin):
     style = 'pep440-pre'
     expected = {'tagged_0_commits_clean': 'v1.2.3',
                 'tagged_0_commits_dirty': 'v1.2.3',
@@ -212,6 +256,14 @@ class Test_pep440_pre(unittest.TestCase, Testing_renderer_case_mixin):
                 'untagged_0_commits_dirty': '0.post0.dev0',
                 'untagged_1_commits_clean': '0.post0.dev1',
                 'untagged_1_commits_dirty': '0.post0.dev1',
+                'tagged_post_0_commits_clean': 'v1.2.3.post',
+                'tagged_post1_0_commits_clean': 'v1.2.3.post1',
+                'tagged_post_1_commits_clean': 'v1.2.3.post1.dev1',
+                'tagged_post1_1_commits_clean': 'v1.2.3.post2.dev1',
+                'tagged_post_0_commits_dirty': 'v1.2.3.post',
+                'tagged_post1_0_commits_dirty': 'v1.2.3.post1',
+                'tagged_post_1_commits_dirty': 'v1.2.3.post1.dev1',
+                'tagged_post1_1_commits_dirty': 'v1.2.3.post2.dev1',
                 'error_getting_parts': 'unknown'
                 }
 
