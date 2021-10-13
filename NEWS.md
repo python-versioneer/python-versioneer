@@ -1,4 +1,4 @@
-## Release 0.21 (12-Oct-2021)
+## Release 0.21 (13-Oct-2021)
 
 With thanks to Dimitri Papadopoulos Orfanos, Andrew Tolmie, Michael Niklas,
 Mike Taves, Ryan Mast, and Yaroslav Halchenko for contributions.
@@ -6,6 +6,7 @@ Mike Taves, Ryan Mast, and Yaroslav Halchenko for contributions.
 * FIX: Escape asterisk in `git describe` call on Windows (#262)
 * ENH: Add some type annotations to play nicely with mypy (#269)
 * ENH: Respect tags with `.postN` in pep440-pre style (#261)
+* TEST: Subproject installations fixed in Pip 21.3, remove expected failure marks (#271)
 * STY: Fix typos (#260 and #266)
 * STY: Centralize pylint hints in header (#270)
 * MNT: Use `os.path` and `pathlib` consistently (#267)
