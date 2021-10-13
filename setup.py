@@ -9,7 +9,7 @@ from setuptools.dist import Distribution as _Distribution
 LONG = Path.read_text(Path(__file__).parent / "README.md")
 
 # as nice as it'd be to versioneer ourselves, that sounds messy.
-VERSION = "0.21"
+VERSION = "0.22.dev0"
 
 
 def ver(s):
