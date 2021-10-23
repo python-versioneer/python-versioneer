@@ -22,12 +22,12 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     version string, meaning we're inside a checked out source tree.
     """
     GITS = ["git"]
-    match_pattern = f"{tag_prefix}*"
+    match_patterns = [f"{tag_prefix}*"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
-        # Windows can't handle a bare asterisk
-        if match_pattern == "*":
-            match_pattern = r"\*"
+        # If git is run through CMD/Powershell, do not escape the
+        # asterisk. If through MinGW/Git bash, escape.
+        match_patterns = [f"{tag_prefix}*", f"{tag_prefix}\\*"]
 
     _, rc = runner(GITS, ["rev-parse", "--git-dir"], cwd=root,
                    hide_stderr=True)
@@ -38,10 +38,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
-    describe_out, rc = runner(GITS, ["describe", "--tags", "--dirty",
-                                     "--always", "--long",
-                                     "--match", match_pattern],
-                              cwd=root)
+    describe_out, rc = runner(
+        GITS,
+        [["describe", "--tags", "--dirty", "--always", "--long", "--match", match_pattern]
+         for match_pattern in match_patterns],
+        cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
         raise NotThisMethod("'git describe' failed")
