@@ -25,24 +25,26 @@ class ParseGitDescribe(unittest.TestCase):
         def pv(git_describe, do_error=False,
                expect_pieces=False, branch_name="master"):
             def fake_run_command(exes, args, cwd=None, hide_stderr=None):
-                if args[0] == "describe":
+                if not isinstance(args[0], list):
+                    args = [args]
+                if args[0][0] == "describe":
                     if do_error == "describe":
                         return None, 0
                     return git_describe+"\n", 0
-                if args[0] == "rev-parse":
+                if args[0][0] == "rev-parse":
                     if do_error == "rev-parse":
                         return None, 0
-                    if args[1] == "--abbrev-ref":
+                    if args[0][1] == "--abbrev-ref":
                         return "%s\n" % branch_name, 0
                     else:
                         return "longlong\n", 0
-                if args[0] == "rev-list":
+                if args[0][0] == "rev-list":
                     return "42\n", 0
-                if args[0] == "show":
+                if args[0][0] == "show":
                     if do_error == "show":
                         return "gpg: signature\n12345\n", 0
                     return "12345\n", 0
-                if args[0] == "branch":
+                if args[0][0] == "branch":
                     return "* (no branch)\n" \
                            "  contained-branch-1\n" \
                            "  contained-branch-2", 0
