@@ -4,11 +4,13 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
     """Call the given command(s)."""
     assert isinstance(commands, list)
     process = None
-    for command in commands:
+    if not args or not isinstance(args[0], list):
+        args = [args]
+    for command, argv in zip(commands, args):
         try:
-            dispcmd = str([command] + args)
+            dispcmd = str([command] + argv)
             # remember shell=False, so use git.cmd on windows, not just git
-            process = subprocess.Popen([command] + args, cwd=cwd, env=env,
+            process = subprocess.Popen([command] + argv, cwd=cwd, env=env,
                                        stdout=subprocess.PIPE,
                                        stderr=(subprocess.PIPE if hide_stderr
                                                else None))
