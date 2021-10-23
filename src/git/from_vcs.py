@@ -40,7 +40,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = runner(
         GITS,
-        [["describe", "--tags", "--dirty", "--always", "--long", "--match", match_pattern]
+        [["describe", "--tags", "--dirty", "--always", "--long",
+          "--match", match_pattern]
          for match_pattern in match_patterns],
         cwd=root)
     # --long was added in git-1.5.5
