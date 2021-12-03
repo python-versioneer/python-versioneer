@@ -1,11 +1,32 @@
-import os, sys # --STRIP DURING BUILD
-def get_root(): pass # --STRIP DURING BUILD
-def get_config_from_root(): pass # --STRIP DURING BUILD
-def versions_from_file(): pass # --STRIP DURING BUILD
-def versions_from_parentdir(): pass # --STRIP DURING BUILD
-def render(): pass # --STRIP DURING BUILD
-HANDLERS = {} # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+import os, sys  # --STRIP DURING BUILD
+
+
+def get_root():
+    pass  # --STRIP DURING BUILD
+
+
+def get_config_from_root():
+    pass  # --STRIP DURING BUILD
+
+
+def versions_from_file():
+    pass  # --STRIP DURING BUILD
+
+
+def versions_from_parentdir():
+    pass  # --STRIP DURING BUILD
+
+
+def render():
+    pass  # --STRIP DURING BUILD
+
+
+HANDLERS = {}  # --STRIP DURING BUILD
+
+
+class NotThisMethod(Exception):
+    pass  # --STRIP DURING BUILD
+
 
 class VersioneerBadRootError(Exception):
     """The project root directory is unknown or missing key files."""
@@ -27,8 +48,9 @@ def get_versions(verbose=False):
     handlers = HANDLERS.get(cfg.VCS)
     assert handlers, "unrecognized VCS '%s'" % cfg.VCS
     verbose = verbose or cfg.verbose
-    assert cfg.versionfile_source is not None, \
-        "please set versioneer.versionfile_source"
+    assert (
+        cfg.versionfile_source is not None
+    ), "please set versioneer.versionfile_source"
     assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
 
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
@@ -82,9 +104,13 @@ def get_versions(verbose=False):
     if verbose:
         print("unable to compute version")
 
-    return {"version": "0+unknown", "full-revisionid": None,
-            "dirty": None, "error": "unable to compute version",
-            "date": None}
+    return {
+        "version": "0+unknown",
+        "full-revisionid": None,
+        "dirty": None,
+        "error": "unable to compute version",
+        "date": None,
+    }
 
 
 def get_version():

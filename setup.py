@@ -15,6 +15,7 @@ VERSION = "0.22.dev0"
 def ver(s):
     return s.replace("@VERSIONEER-VERSION@", VERSION)
 
+
 def get(fn, add_ver=False, unquote=False, do_strip=False, do_readme=False):
     with open(fn) as f:
         text = f.read()
@@ -24,30 +25,39 @@ def get(fn, add_ver=False, unquote=False, do_strip=False, do_readme=False):
     if unquote:
         text = text.replace("%", "%%")
     if do_strip:
-        text = "".join(line for line in text.splitlines(keepends=True)
-                         if not line.endswith("# --STRIP DURING BUILD\n"))
+        text = "".join(
+            line
+            for line in text.splitlines(keepends=True)
+            if not line.endswith("# --STRIP DURING BUILD\n")
+        )
     if do_readme:
         text = text.replace("@README@", get("README.md"))
     return text
 
+
 def get_vcs_list():
     project_path = Path(__file__).absolute().parent / "src"
-    return [filename
-            for filename
-            in os.listdir(str(project_path))
-            if Path.is_dir(project_path / filename) and filename != "__pycache__"]
+    return [
+        filename
+        for filename in os.listdir(str(project_path))
+        if Path.is_dir(project_path / filename) and filename != "__pycache__"
+    ]
+
 
 def generate_long_version_py(VCS):
     s = io.StringIO()
     s.write(get(f"src/{VCS}/long_header.py", add_ver=True, do_strip=True))
-    for piece in ["src/subprocess_helper.py",
-                  "src/from_parentdir.py",
-                  f"src/{VCS}/from_keywords.py",
-                  f"src/{VCS}/from_vcs.py",
-                  "src/render.py",
-                  f"src/{VCS}/long_get_versions.py"]:
+    for piece in [
+        "src/subprocess_helper.py",
+        "src/from_parentdir.py",
+        f"src/{VCS}/from_keywords.py",
+        f"src/{VCS}/from_vcs.py",
+        "src/render.py",
+        f"src/{VCS}/long_get_versions.py",
+    ]:
         s.write(get(piece, unquote=True, do_strip=True))
     return s.getvalue()
+
 
 def generate_versioneer_py():
     s = io.StringIO()
@@ -79,42 +89,53 @@ class make_versioneer(Command):
     description = "create standalone versioneer.py"
     user_options = []
     boolean_options = []
+
     def initialize_options(self):
         pass
+
     def finalize_options(self):
         pass
+
     def run(self):
         with open("versioneer.py", "w") as f:
             f.write(generate_versioneer_py().decode("utf8"))
         return 0
 
+
 class make_long_version_py_git(Command):
     description = "create standalone _version.py (for git)"
     user_options = []
     boolean_options = []
+
     def initialize_options(self):
         pass
+
     def finalize_options(self):
         pass
+
     def run(self):
         assert os.path.exists("versioneer.py")
         long_version = generate_long_version_py("git")
         with open("git_version.py", "w") as f:
-            f.write(long_version %
-                    {"DOLLAR": "$",
-                     "STYLE": "pep440",
-                     "TAG_PREFIX": "tag-",
-                     "PARENTDIR_PREFIX": "parentdir_prefix",
-                     "VERSIONFILE_SOURCE": "versionfile_source",
-                     })
+            f.write(
+                long_version
+                % {
+                    "DOLLAR": "$",
+                    "STYLE": "pep440",
+                    "TAG_PREFIX": "tag-",
+                    "PARENTDIR_PREFIX": "parentdir_prefix",
+                    "VERSIONFILE_SOURCE": "versionfile_source",
+                }
+            )
         return 0
+
 
 class my_build_py(build_py):
     def run(self):
         v = generate_versioneer_py()
         v_b64 = base64.b64encode(v).decode("ascii")
-        lines = [v_b64[i:i+60] for i in range(0, len(v_b64), 60)]
-        v_b64 = "\n".join(lines)+"\n"
+        lines = [v_b64[i : i + 60] for i in range(0, len(v_b64), 60)]
+        v_b64 = "\n".join(lines) + "\n"
 
         with open("src/installer.py") as f:
             s = f.read()
@@ -126,7 +147,7 @@ class my_build_py(build_py):
                 f.write(s)
 
             self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
-            self.package_dir.update({'': os.path.dirname(installer)})
+            self.package_dir.update({"": os.path.dirname(installer)})
             rc = build_py.run(self)
         return rc
 
@@ -136,32 +157,35 @@ class my_build_py(build_py):
 # this so we get cross-platform wheels instead. More info at:
 # https://bitbucket.org/pypa/wheel/issue/116/packages-with-only-filesdata_files-get
 class Distribution(_Distribution):
-    def is_pure(self): return True
+    def is_pure(self):
+        return True
+
 
 setup(
-    name = "versioneer",
-    license = "public domain",
-    version = VERSION,
-    description = "Easy VCS-based management of project version strings",
-    author = "Brian Warner",
-    author_email = "warner-versioneer@lothar.com",
-    url = "https://github.com/python-versioneer/python-versioneer",
+    name="versioneer",
+    license="public domain",
+    version=VERSION,
+    description="Easy VCS-based management of project version strings",
+    author="Brian Warner",
+    author_email="warner-versioneer@lothar.com",
+    url="https://github.com/python-versioneer/python-versioneer",
     # "fake" is replaced with versioneer-installer in build_scripts. We need
     # a non-empty list to provoke "setup.py build" into making scripts,
     # otherwise it skips that step.
-    py_modules = ["fake"],
+    py_modules=["fake"],
     entry_points={
-        'console_scripts': [
-            'versioneer = versioneer:main',
+        "console_scripts": [
+            "versioneer = versioneer:main",
         ],
     },
     long_description=LONG,
     long_description_content_type="text/markdown",
     distclass=Distribution,
-    cmdclass = { "build_py": my_build_py,
-                 "make_versioneer": make_versioneer,
-                 "make_long_version_py_git": make_long_version_py_git,
-                 },
+    cmdclass={
+        "build_py": my_build_py,
+        "make_versioneer": make_versioneer,
+        "make_long_version_py_git": make_long_version_py_git,
+    },
     python_requires=">=3.6",
     classifiers=[
         "Programming Language :: Python",
@@ -170,5 +194,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        ],
-    )
+    ],
+)

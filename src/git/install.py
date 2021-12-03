@@ -1,5 +1,9 @@
-import sys # --STRIP DURING BUILD
-def run_command(): pass # --STRIP DURING BUILD
+import sys  # --STRIP DURING BUILD
+
+
+def run_command():
+    pass  # --STRIP DURING BUILD
+
 
 def do_vcs_install(manifest_in, versionfile_source, ipy):
     """Git-specific installation logic for Versioneer.
@@ -36,5 +40,3 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
             fobj.write(f"{versionfile_source} export-subst\n")
         files.append(".gitattributes")
     run_command(GITS, ["add", "--"] + files)
-
-

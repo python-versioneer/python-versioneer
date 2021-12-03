@@ -14,6 +14,7 @@ tag_prefix = v
 parentdir_prefix = petmail-
 """
 
+
 class Parser(unittest.TestCase):
     def parse(self, contents):
         with tempfile.TemporaryDirectory() as root:
@@ -32,12 +33,10 @@ class Parser(unittest.TestCase):
         self.assertEqual(cfg.verbose, None)
 
     def test_empty(self):
-        self.assertRaises(configparser.NoSectionError,
-                          self.parse, "")
+        self.assertRaises(configparser.NoSectionError, self.parse, "")
 
     def test_mostly_empty(self):
-        self.assertRaises(configparser.NoOptionError,
-                          self.parse, "[versioneer]\n")
+        self.assertRaises(configparser.NoOptionError, self.parse, "[versioneer]\n")
 
     def test_minimal(self):
         cfg = self.parse("[versioneer]\nvcs = git\n")
@@ -58,5 +57,5 @@ class Parser(unittest.TestCase):
         self.assertEqual(cfg.tag_prefix, "")
         cfg = self.parse("[versioneer]\nVCS=git\ntag_prefix=''")
         self.assertEqual(cfg.tag_prefix, "")
-        cfg = self.parse("[versioneer]\nVCS=git\ntag_prefix=\"\"")
+        cfg = self.parse('[versioneer]\nVCS=git\ntag_prefix=""')
         self.assertEqual(cfg.tag_prefix, "")

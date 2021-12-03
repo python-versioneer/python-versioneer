@@ -15,6 +15,7 @@ from render import render
 from git import from_vcs, from_keywords
 from subprocess_helper import run_command
 
+
 class ParseGitDescribe(unittest.TestCase):
     def setUp(self):
         self.fakeroot = tempfile.mkdtemp()
@@ -22,13 +23,12 @@ class ParseGitDescribe(unittest.TestCase):
         os.mkdir(self.fakegit)
 
     def test_pieces(self):
-        def pv(git_describe, do_error=False,
-               expect_pieces=False, branch_name="master"):
+        def pv(git_describe, do_error=False, expect_pieces=False, branch_name="master"):
             def fake_run_command(exes, args, cwd=None, hide_stderr=None):
                 if args[0] == "describe":
                     if do_error == "describe":
                         return None, 0
-                    return git_describe+"\n", 0
+                    return git_describe + "\n", 0
                 if args[0] == "rev-parse":
                     if do_error == "rev-parse":
                         return None, 0
@@ -43,80 +43,137 @@ class ParseGitDescribe(unittest.TestCase):
                         return "gpg: signature\n12345\n", 0
                     return "12345\n", 0
                 if args[0] == "branch":
-                    return "* (no branch)\n" \
-                           "  contained-branch-1\n" \
-                           "  contained-branch-2", 0
+                    return (
+                        "* (no branch)\n"
+                        "  contained-branch-1\n"
+                        "  contained-branch-2",
+                        0,
+                    )
                 self.fail("git called in weird way: %s" % (args,))
+
             return from_vcs.git_pieces_from_vcs(
-                "v", self.fakeroot, verbose=False,
-                runner=fake_run_command)
-        self.assertRaises(from_vcs.NotThisMethod,
-                          pv, "ignored", do_error="describe")
-        self.assertRaises(from_vcs.NotThisMethod,
-                          pv, "ignored", do_error="rev-parse")
-        self.assertEqual(pv("1f"),
-                         {"closest-tag": None, "dirty": False, "error": None,
-                          "distance": 42,
-                          "long": "longlong",
-                          "short": "longlon",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("1f", do_error="show"),
-                         {"closest-tag": None, "dirty": False, "error": None,
-                          "distance": 42,
-                          "long": "longlong",
-                          "short": "longlon",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("1f-dirty"),
-                         {"closest-tag": None, "dirty": True, "error": None,
-                          "distance": 42,
-                          "long": "longlong",
-                          "short": "longlon",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("v1.0-0-g1f"),
-                         {"closest-tag": "1.0", "dirty": False, "error": None,
-                          "distance": 0,
-                          "long": "longlong",
-                          "short": "1f",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("v1.0-0-g1f-dirty"),
-                         {"closest-tag": "1.0", "dirty": True, "error": None,
-                          "distance": 0,
-                          "long": "longlong",
-                          "short": "1f",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("v1.0-1-g1f"),
-                         {"closest-tag": "1.0", "dirty": False, "error": None,
-                          "distance": 1,
-                          "long": "longlong",
-                          "short": "1f",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("v1.0-1-g1f-dirty"),
-                         {"closest-tag": "1.0", "dirty": True, "error": None,
-                          "distance": 1,
-                          "long": "longlong",
-                          "short": "1f",
-                          "date": "12345",
-                          "branch": "master"})
-        self.assertEqual(pv("v1.0-1-g1f-dirty", branch_name="feature-branch"),
-                         {"closest-tag": "1.0", "dirty": True, "error": None,
-                          "distance": 1,
-                          "long": "longlong",
-                          "short": "1f",
-                          "date": "12345",
-                          "branch": "feature-branch"})
-        self.assertEqual(pv("v1.0-1-g1f-dirty", branch_name="HEAD"),
-                         {"closest-tag": "1.0", "dirty": True, "error": None,
-                          "distance": 1,
-                          "long": "longlong",
-                          "short": "1f",
-                          "date": "12345",
-                          "branch": "contained-branch-1"})
+                "v", self.fakeroot, verbose=False, runner=fake_run_command
+            )
+
+        self.assertRaises(from_vcs.NotThisMethod, pv, "ignored", do_error="describe")
+        self.assertRaises(from_vcs.NotThisMethod, pv, "ignored", do_error="rev-parse")
+        self.assertEqual(
+            pv("1f"),
+            {
+                "closest-tag": None,
+                "dirty": False,
+                "error": None,
+                "distance": 42,
+                "long": "longlong",
+                "short": "longlon",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("1f", do_error="show"),
+            {
+                "closest-tag": None,
+                "dirty": False,
+                "error": None,
+                "distance": 42,
+                "long": "longlong",
+                "short": "longlon",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("1f-dirty"),
+            {
+                "closest-tag": None,
+                "dirty": True,
+                "error": None,
+                "distance": 42,
+                "long": "longlong",
+                "short": "longlon",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("v1.0-0-g1f"),
+            {
+                "closest-tag": "1.0",
+                "dirty": False,
+                "error": None,
+                "distance": 0,
+                "long": "longlong",
+                "short": "1f",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("v1.0-0-g1f-dirty"),
+            {
+                "closest-tag": "1.0",
+                "dirty": True,
+                "error": None,
+                "distance": 0,
+                "long": "longlong",
+                "short": "1f",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("v1.0-1-g1f"),
+            {
+                "closest-tag": "1.0",
+                "dirty": False,
+                "error": None,
+                "distance": 1,
+                "long": "longlong",
+                "short": "1f",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("v1.0-1-g1f-dirty"),
+            {
+                "closest-tag": "1.0",
+                "dirty": True,
+                "error": None,
+                "distance": 1,
+                "long": "longlong",
+                "short": "1f",
+                "date": "12345",
+                "branch": "master",
+            },
+        )
+        self.assertEqual(
+            pv("v1.0-1-g1f-dirty", branch_name="feature-branch"),
+            {
+                "closest-tag": "1.0",
+                "dirty": True,
+                "error": None,
+                "distance": 1,
+                "long": "longlong",
+                "short": "1f",
+                "date": "12345",
+                "branch": "feature-branch",
+            },
+        )
+        self.assertEqual(
+            pv("v1.0-1-g1f-dirty", branch_name="HEAD"),
+            {
+                "closest-tag": "1.0",
+                "dirty": True,
+                "error": None,
+                "distance": 1,
+                "long": "longlong",
+                "short": "1f",
+                "date": "12345",
+                "branch": "contained-branch-1",
+            },
+        )
 
     def tearDown(self):
         os.rmdir(self.fakegit)
@@ -126,7 +183,8 @@ class ParseGitDescribe(unittest.TestCase):
 class Keywords(unittest.TestCase):
     def parse(self, refnames, full, prefix="", date=None):
         return from_keywords.git_versions_from_keywords(
-            {"refnames": refnames, "full": full, "date": date}, prefix, False)
+            {"refnames": refnames, "full": full, "date": date}, prefix, False
+        )
 
     def test_parse(self):
         v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ")
@@ -153,8 +211,13 @@ class Keywords(unittest.TestCase):
         self.assertEqual(v["date"], None)
 
     def test_unexpanded(self):
-        self.assertRaises(from_keywords.NotThisMethod,
-                          self.parse, " $Format$ ", " full ", "projectname-")
+        self.assertRaises(
+            from_keywords.NotThisMethod,
+            self.parse,
+            " $Format$ ",
+            " full ",
+            "projectname-",
+        )
 
     def test_no_tags(self):
         v = self.parse("(HEAD, master)", "full")
@@ -175,8 +238,7 @@ class Keywords(unittest.TestCase):
     def test_date(self):
         date = "2017-07-24 16:03:40 +0200"
         result = "2017-07-24T16:03:40+0200"
-        v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ",
-                       date=date)
+        v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ", date=date)
         self.assertEqual(v["date"], result)
 
     def test_date_gpg(self):
@@ -185,9 +247,9 @@ class Keywords(unittest.TestCase):
         gpg: ...
         2017-07-24 16:03:40 +0200"""
         result = "2017-07-24T16:03:40+0200"
-        v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ",
-                       date=date)
+        v = self.parse(" (HEAD, 2.0,master  , otherbranch ) ", " full ", date=date)
         self.assertEqual(v["date"], result)
+
 
 expected_renders = """
 closest-tag: 1.0
@@ -298,12 +360,20 @@ git-describe-long: 250b7ca-dirty
 
 """
 
+
 class RenderPieces(unittest.TestCase):
     def do_render(self, pieces):
         out = {}
-        for style in ["pep440", "pep440-branch", "pep440-pre", "pep440-post",
-                      "pep440-post-branch", "pep440-old", "git-describe",
-                      "git-describe-long"]:
+        for style in [
+            "pep440",
+            "pep440-branch",
+            "pep440-pre",
+            "pep440-post",
+            "pep440-post-branch",
+            "pep440-old",
+            "git-describe",
+            "git-describe-long",
+        ]:
             out[style] = render(pieces, style)["version"]
         DEFAULT = "pep440"
         self.assertEqual(render(pieces, ""), render(pieces, DEFAULT))
@@ -311,9 +381,11 @@ class RenderPieces(unittest.TestCase):
         return out
 
     def parse_expected(self):
-        base_pieces = {"long": "250b7ca731388d8f016db2e06ab1d6289486424b",
-                       "short": "250b7ca",
-                       "error": None}
+        base_pieces = {
+            "long": "250b7ca731388d8f016db2e06ab1d6289486424b",
+            "short": "250b7ca",
+            "error": None,
+        }
         more_pieces = {}
         expected = {}
         for line in expected_renders.splitlines():
@@ -350,11 +422,13 @@ class RenderPieces(unittest.TestCase):
         for (pieces, expected) in self.parse_expected():
             got = self.do_render(pieces)
             for key in expected:
-                self.assertEqual(got[key], expected[key],
-                                 (pieces, key, got[key], expected[key]))
+                self.assertEqual(
+                    got[key], expected[key], (pieces, key, got[key], expected[key])
+                )
 
 
 VERBOSE = False
+
 
 class Repo(common.Common, unittest.TestCase):
 
@@ -409,7 +483,8 @@ class Repo(common.Common, unittest.TestCase):
         # .git parent. So if you change this to use a fixed directory (say,
         # when debugging problems), use /tmp/_test rather than ./_test .
         self.testdir = tempfile.mkdtemp()
-        if VERBOSE: print("testdir: %s" % (self.testdir,))
+        if VERBOSE:
+            print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
             shutil.rmtree(self.testdir)
 
@@ -421,8 +496,7 @@ class Repo(common.Common, unittest.TestCase):
         # self.command() operations run from this directory unless
         # overridden.
         self.project_sub_dir = project_sub_dir
-        self.projdir = os.path.join(self.testdir, self.gitdir,
-                                    self.project_sub_dir)
+        self.projdir = os.path.join(self.testdir, self.gitdir, self.project_sub_dir)
 
         os.mkdir(self.testdir)
 
@@ -441,8 +515,9 @@ class Repo(common.Common, unittest.TestCase):
         full = self.git("rev-parse", "HEAD")
         v = self.python("setup.py", "--version")
         self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
-        v = self.python(self.project_file("setup.py"), "--version",
-                        workdir=self.testdir)
+        v = self.python(
+            self.project_file("setup.py"), "--version", workdir=self.testdir
+        )
         self.assertEqual(v, "0+untagged.1.g%s" % full[:7])
 
         out = self.python("versioneer.py", "setup").splitlines()
@@ -452,23 +527,33 @@ class Repo(common.Common, unittest.TestCase):
         else:
             self.assertEqual(out[1], " appending to src/demo/__init__.py")
         self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
-        self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
+        self.assertEqual(
+            out[3],
+            " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in",
+        )
 
         # Many folks have a ~/.gitignore with ignores .pyc files, but if they
         # don't, it will show up in the status here. Ignore it.
         def remove_pyc(s):
-            return [f for f in s
-                    if not (f.startswith("?? ")
-                            and (f.endswith(".pyc") or
-                                 f.endswith("__pycache__/")))
-                    ]
+            return [
+                f
+                for f in s
+                if not (
+                    f.startswith("?? ")
+                    and (f.endswith(".pyc") or f.endswith("__pycache__/"))
+                )
+            ]
+
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
+
         def pf(fn):
             return os.path.normpath(os.path.join(self.project_sub_dir, fn))
-        expected = {"A  %s" % pf(".gitattributes"),
-                    "M  %s" % pf("MANIFEST.in"),
-                    "A  %s" % pf("src/demo/_version.py"),
-                    }
+
+        expected = {
+            "A  %s" % pf(".gitattributes"),
+            "M  %s" % pf("MANIFEST.in"),
+            "A  %s" % pf("src/demo/_version.py"),
+        }
         if not script_only:
             expected.add("M  %s" % pf("src/demo/__init__.py"))
         self.assertEqual(out, expected)
@@ -497,12 +582,16 @@ class Repo(common.Common, unittest.TestCase):
         # S1: the tree is sitting on a pre-tagged commit
         full = self.git("rev-parse", "HEAD")
         short = "0+untagged.2.g%s" % full[:7]
-        self.do_checks("S1", {"TA": [short, full, False, None],
-                              "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full, False, None],
-                              "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, False, None],
-                              })
+        self.do_checks(
+            "S1",
+            {
+                "TA": [short, full, False, None],
+                "TB": ["0+unknown", None, None, UNABLE],
+                "TC": [short, full, False, None],
+                "TD": ["0+unknown", full, False, NOTAG],
+                "TE": [short, full, False, None],
+            },
+        )
 
         # TD: expanded keywords only tell us about tags and full revisionids,
         # not how many patches we are beyond a tag. So any TD git-archive
@@ -515,12 +604,16 @@ class Repo(common.Common, unittest.TestCase):
             fobj.write("# dirty\n")
         full = self.git("rev-parse", "HEAD")
         short = "0+untagged.2.g%s.dirty" % full[:7]
-        self.do_checks("S2", {"TA": [short, full, True, None],
-                              "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full, True, None],
-                              "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, True, None],
-                              })
+        self.do_checks(
+            "S2",
+            {
+                "TA": [short, full, True, None],
+                "TB": ["0+unknown", None, None, UNABLE],
+                "TC": [short, full, True, None],
+                "TD": ["0+unknown", full, False, NOTAG],
+                "TE": [short, full, True, None],
+            },
+        )
 
         # S3: we commit that change, then make the first tag (1.0)
         self.git("add", self.project_file("setup.py"))
@@ -532,51 +625,67 @@ class Repo(common.Common, unittest.TestCase):
         self.git("tag", "aaa-999")
         full = self.git("rev-parse", "HEAD")
         short = "1.0"
-        if VERBOSE: print("FULL %s" % full)
+        if VERBOSE:
+            print("FULL %s" % full)
         # the tree is now sitting on the 1.0 tag
-        self.do_checks("S3", {"TA": [short, full, False, None],
-                              "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full, False, None],
-                              "TD": [short, full, False, None],
-                              "TE": [short, full, False, None],
-                              })
+        self.do_checks(
+            "S3",
+            {
+                "TA": [short, full, False, None],
+                "TB": ["0+unknown", None, None, UNABLE],
+                "TC": [short, full, False, None],
+                "TD": [short, full, False, None],
+                "TE": [short, full, False, None],
+            },
+        )
 
         # S4: now we dirty the tree
         with open(self.project_file("setup.py"), "a") as fobj:
             fobj.write("# dirty\n")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+0.g%s.dirty" % full[:7]
-        self.do_checks("S4", {"TA": [short, full, True, None],
-                              "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full, True, None],
-                              "TD": ["1.0", full, False, None],
-                              "TE": [short, full, True, None],
-                              })
+        self.do_checks(
+            "S4",
+            {
+                "TA": [short, full, True, None],
+                "TB": ["0+unknown", None, None, UNABLE],
+                "TC": [short, full, True, None],
+                "TD": ["1.0", full, False, None],
+                "TE": [short, full, True, None],
+            },
+        )
 
         # S5: now we make one commit past the tag
         self.git("add", self.project_file("setup.py"))
         self.git("commit", "-m", "dirty")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s" % full[:7]
-        self.do_checks("S5", {"TA": [short, full, False, None],
-                              "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full, False, None],
-                              "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, False, None],
-                              })
+        self.do_checks(
+            "S5",
+            {
+                "TA": [short, full, False, None],
+                "TB": ["0+unknown", None, None, UNABLE],
+                "TC": [short, full, False, None],
+                "TD": ["0+unknown", full, False, NOTAG],
+                "TE": [short, full, False, None],
+            },
+        )
 
         # S6: dirty the post-tag tree
         with open(self.project_file("setup.py"), "a") as fobj:
             fobj.write("# more dirty\n")
         full = self.git("rev-parse", "HEAD")
         short = "1.0+1.g%s.dirty" % full[:7]
-        self.do_checks("S6", {"TA": [short, full, True, None],
-                              "TB": ["0+unknown", None, None, UNABLE],
-                              "TC": [short, full, True, None],
-                              "TD": ["0+unknown", full, False, NOTAG],
-                              "TE": [short, full, True, None],
-                              })
-
+        self.do_checks(
+            "S6",
+            {
+                "TA": [short, full, True, None],
+                "TB": ["0+unknown", None, None, UNABLE],
+                "TC": [short, full, True, None],
+                "TD": ["0+unknown", full, False, NOTAG],
+                "TE": [short, full, True, None],
+            },
+        )
 
     def do_checks(self, state, exps):
         if os.path.exists(self.subpath("out")):
@@ -596,17 +705,23 @@ class Repo(common.Common, unittest.TestCase):
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
             shutil.rmtree(os.path.join(target, ".git"))
-        self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
+        self.check_version(target, state, "TC", ["1.1", None, False, None])  # XXX
 
         # TD: project subdir of an unpacked git-archive tarball
         target = self.subpath("out/TD/demoapp-TD")
-        self.git("archive", "--format=tar", "--prefix=demoapp-TD/",
-                 "--output=../demo.tar", "HEAD")
+        self.git(
+            "archive",
+            "--format=tar",
+            "--prefix=demoapp-TD/",
+            "--output=../demo.tar",
+            "HEAD",
+        )
         os.mkdir(self.subpath("out/TD"))
         with tarfile.TarFile(self.subpath("demo.tar")) as t:
             t.extractall(path=self.subpath("out/TD"))
-        self.check_version(os.path.join(target, self.project_sub_dir),
-                           state, "TD", exps["TD"])
+        self.check_version(
+            os.path.join(target, self.project_sub_dir), state, "TD", exps["TD"]
+        )
 
         # TE: unpacked setup.py sdist tarball
         dist_path = os.path.join(self.projdir, "dist")
@@ -614,7 +729,7 @@ class Repo(common.Common, unittest.TestCase):
             shutil.rmtree(dist_path)
         self.python("setup.py", "sdist", "--formats=tar")
         files = os.listdir(dist_path)
-        self.assertTrue(len(files)==1, files)
+        self.assertTrue(len(files) == 1, files)
         distfile = files[0]
         self.assertEqual(distfile, "demo-%s.tar" % exps["TE"][0])
         fn = os.path.join(dist_path, distfile)
@@ -627,7 +742,8 @@ class Repo(common.Common, unittest.TestCase):
 
     def check_version(self, workdir, state, tree, exps):
         exp_version, exp_full, exp_dirty, exp_error = exps
-        if VERBOSE: print("== starting %s %s" % (state, tree))
+        if VERBOSE:
+            print("== starting %s %s" % (state, tree))
         # RA: setup.py --version
         if VERBOSE:
             # setup.py version invokes cmd_version, which uses verbose=True
@@ -639,19 +755,25 @@ class Repo(common.Common, unittest.TestCase):
         self.assertPEP440(v, state, tree, "RA1")
 
         # and test again from outside the tree
-        v = self.python(os.path.join(workdir, "setup.py"), "--version",
-                        workdir=self.testdir)
+        v = self.python(
+            os.path.join(workdir, "setup.py"), "--version", workdir=self.testdir
+        )
         self.compare(v, exp_version, state, tree, "RA2")
         self.assertPEP440(v, state, tree, "RA2")
 
         # RB: setup.py build; rundemo --version
         if os.path.exists(os.path.join(workdir, "build")):
             shutil.rmtree(os.path.join(workdir, "build"))
-        self.python("setup.py", "build", "--build-lib=build/lib",
-                    "--build-scripts=build/lib", workdir=workdir)
+        self.python(
+            "setup.py",
+            "build",
+            "--build-lib=build/lib",
+            "--build-scripts=build/lib",
+            workdir=workdir,
+        )
         build_lib = os.path.join(workdir, "build", "lib")
         out = self.python("rundemo", "--version", workdir=build_lib)
-        data = dict(line.split(":",1) for line in out.splitlines())
+        data = dict(line.split(":", 1) for line in out.splitlines())
         self.compare(data["__version__"], exp_version, state, tree, "RB")
         self.assertPEP440(data["__version__"], state, tree, "RB")
         self.compare(data["version"], exp_version, state, tree, "RB")
@@ -661,22 +783,26 @@ class Repo(common.Common, unittest.TestCase):
 
     def compare(self, got, expected, state, tree, runtime):
         where = "/".join([state, tree, runtime])
-        self.assertEqual(got, expected, "%s: got '%s' != expected '%s'"
-                         % (where, got, expected))
-        if VERBOSE: print(" good %s" % where)
+        self.assertEqual(
+            got, expected, "%s: got '%s' != expected '%s'" % (where, got, expected)
+        )
+        if VERBOSE:
+            print(" good %s" % where)
 
     def assertPEP440(self, got, state, tree, runtime):
         where = "/".join([state, tree, runtime])
         pv = parse_version(got)
         # rather than using an undocumented API, setuptools dev recommends this
-        self.assertFalse("Legacy" in pv.__class__.__name__,
-                         "%s: '%s' was not pep440-compatible"
-                         % (where, got))
-        self.assertEqual(str(pv), got,
-                         "%s: '%s' pep440-normalized to '%s'"
-                         % (where, got, str(pv)))
+        self.assertFalse(
+            "Legacy" in pv.__class__.__name__,
+            "%s: '%s' was not pep440-compatible" % (where, got),
+        )
+        self.assertEqual(
+            str(pv), got, "%s: '%s' pep440-normalized to '%s'" % (where, got, str(pv))
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     ver, rc = run_command(common.GITS, ["--version"], ".", True)
     print("git --version: %s" % ver.strip())
     unittest.main()

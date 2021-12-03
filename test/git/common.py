@@ -5,6 +5,7 @@ GITS = ["git"]
 if sys.platform == "win32":
     GITS = ["git.cmd", "git.exe"]
 
+
 class Common:
     def command(self, cmd, *args, **kwargs):
         workdir = kwargs.pop("workdir", self.projdir)
@@ -21,8 +22,9 @@ class Common:
         env["EMAIL"] = "foo@example.com"
         env["GIT_AUTHOR_NAME"] = "foo"
         env["GIT_COMMITTER_NAME"] = "foo"
-        output, rc = run_command(GITS, args=list(args), cwd=workdir,
-                                 verbose=True, env=env)
+        output, rc = run_command(
+            GITS, args=list(args), cwd=workdir, verbose=True, env=env
+        )
         if output is None:
             self.fail("problem running git (workdir: %s)" % workdir)
         return output

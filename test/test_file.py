@@ -1,6 +1,7 @@
 import os, tempfile, unittest
 from versioneer import versions_from_file
 
+
 class Parser(unittest.TestCase):
     def test_lf(self):
         with tempfile.TemporaryDirectory() as root:
