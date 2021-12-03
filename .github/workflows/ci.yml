@@ -1,4 +1,4 @@
-name: Tox
+name: CI
 
 on:
   push:
@@ -15,7 +15,15 @@ defaults:
     shell: bash
 
 jobs:
-  stable:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+
+  tox:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
