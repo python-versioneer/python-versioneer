@@ -1,5 +1,5 @@
 
-from setuptools import setup
+from distutils.core import setup
 import versioneer
 commands = versioneer.get_cmdclass().copy()
 
