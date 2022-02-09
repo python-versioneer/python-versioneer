@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import os, sys
+import posixpath
 import shutil
 import tarfile
 import unittest
@@ -411,7 +412,7 @@ class Repo(common.Common, unittest.TestCase):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
-            shutil.rmtree(self.testdir)
+            self.rmtree(self.testdir)
 
         # Our tests run from a git repo that lives here. All self.git()
         # operations run from this directory unless overridden.
@@ -447,10 +448,11 @@ class Repo(common.Common, unittest.TestCase):
 
         out = self.python("versioneer.py", "setup").splitlines()
         self.assertEqual(out[0], "creating src/demo/_version.py")
+        init = os.path.join("src/demo", "__init__.py")
         if script_only:
-            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
-            self.assertEqual(out[1], " appending to src/demo/__init__.py")
+            self.assertEqual(out[1], f" appending to {init}")
         self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
         self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
 
@@ -464,7 +466,7 @@ class Repo(common.Common, unittest.TestCase):
                     ]
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         def pf(fn):
-            return os.path.normpath(os.path.join(self.project_sub_dir, fn))
+            return posixpath.normpath(posixpath.join(self.project_sub_dir, fn))
         expected = {"A  %s" % pf(".gitattributes"),
                     "M  %s" % pf("MANIFEST.in"),
                     "A  %s" % pf("src/demo/_version.py"),
@@ -483,9 +485,9 @@ class Repo(common.Common, unittest.TestCase):
         out = self.python("versioneer.py", "setup").splitlines()
         self.assertEqual(out[0], "creating src/demo/_version.py")
         if script_only:
-            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
-            self.assertEqual(out[1], " src/demo/__init__.py unmodified")
+            self.assertEqual(out[1], f" {init} unmodified")
         self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
         self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
@@ -580,7 +582,7 @@ class Repo(common.Common, unittest.TestCase):
 
     def do_checks(self, state, exps):
         if os.path.exists(self.subpath("out")):
-            shutil.rmtree(self.subpath("out"))
+            self.rmtree(self.subpath("out"))
         # TA: project tree
         self.check_version(self.projdir, state, "TA", exps["TA"])
 
@@ -588,14 +590,14 @@ class Repo(common.Common, unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
-            shutil.rmtree(os.path.join(target, ".git"))
+            self.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TB", exps["TB"])
 
         # TC: project tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
-            shutil.rmtree(os.path.join(target, ".git"))
+            self.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
 
         # TD: project subdir of an unpacked git-archive tarball
@@ -611,7 +613,7 @@ class Repo(common.Common, unittest.TestCase):
         # TE: unpacked setup.py sdist tarball
         dist_path = os.path.join(self.projdir, "dist")
         if os.path.exists(dist_path):
-            shutil.rmtree(dist_path)
+            self.rmtree(dist_path)
         self.python("setup.py", "sdist", "--formats=tar")
         files = os.listdir(dist_path)
         self.assertTrue(len(files)==1, files)
@@ -646,7 +648,7 @@ class Repo(common.Common, unittest.TestCase):
 
         # RB: setup.py build; rundemo --version
         if os.path.exists(os.path.join(workdir, "build")):
-            shutil.rmtree(os.path.join(workdir, "build"))
+            self.rmtree(os.path.join(workdir, "build"))
         self.python("setup.py", "build", "--build-lib=build/lib",
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
