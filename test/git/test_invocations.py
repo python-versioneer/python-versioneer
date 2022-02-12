@@ -39,7 +39,7 @@ class _Invocations(common.Common):
     def make_venv(self, mode):
         if not os.path.exists(self.subpath("venvs")):
             os.mkdir(self.subpath("venvs"))
-        venv_dir = self.subpath("venvs/%s" % mode)
+        venv_dir = self.subpath(os.path.join("venvs", mode))
         # python3 on OS-X uses a funky two-part executable and an environment
         # variable to communicate between them. If this variable is still set
         # by the time a virtualenv's 'pip' or 'python' is run, and if that
