@@ -6,6 +6,7 @@ import shutil
 import tarfile
 import unittest
 import tempfile
+import re
 
 
 from pkg_resources import parse_version
@@ -403,12 +404,15 @@ class Repo(common.Common, unittest.TestCase):
         # i.e. setup.py -- is not located in the root directory
         self.run_test("test/demoapp", False, "project")
 
-    def run_test(self, demoapp_dir, script_only, project_sub_dir):
+    def test_no_tag_prefix(self):
+        self.run_test("test/demoapp", False, ".", tag_prefix="")
+
+    def run_test(self, demoapp_dir, script_only, project_sub_dir, tag_prefix=None):
         # The test dir should live under /tmp/ or /var/ or somewhere that
         # isn't the child of the versioneer repo's .git directory, since that
         # will confuse the tests that check what happens when there is no
         # .git parent. So if you change this to use a fixed directory (say,
-        # when debugging problems), use /tmp/_test rather than ./_test .
+        # when debugging problems), use /tmp/_test rather than ./_test .        
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
@@ -432,6 +436,13 @@ class Repo(common.Common, unittest.TestCase):
         with open(setup_cfg_fn, "r") as f:
             setup_cfg = f.read()
         setup_cfg = setup_cfg.replace("@VCS@", "git")
+        
+        tag_prefix_regex = "tag_prefix = (.*)"
+        if tag_prefix is None:
+            tag_prefix = re.search(tag_prefix_regex, setup_cfg).group(1)
+        else:
+            setup_cfg = re.sub(tag_prefix_regex, f"tag_prefix = {tag_prefix}", setup_cfg)
+        
         with open(setup_cfg_fn, "w") as f:
             f.write(setup_cfg)
         shutil.copyfile("versioneer.py", self.project_file("versioneer.py"))
@@ -527,7 +538,7 @@ class Repo(common.Common, unittest.TestCase):
         # S3: we commit that change, then make the first tag (1.0)
         self.git("add", self.project_file("setup.py"))
         self.git("commit", "-m", "dirty")
-        self.git("tag", "demo-1.0")
+        self.git("tag", f"{tag_prefix}1.0")
         # also add an unrelated tag, to test exclusion. git-describe appears
         # to return the highest lexicographically-sorted tag, so make sure
         # the unrelated one sorts earlier
