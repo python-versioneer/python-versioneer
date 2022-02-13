@@ -676,19 +676,19 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         repodir = self.make_distutils_unpacked()
         venv = self.make_venv("distutils-unpacked-pip-install")
         self.run_in_venv(venv, repodir, "pip", "install", ".")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_subproject(self):
         unpacked = self.make_distutils_subproject_unpacked()
         venv = self.make_venv("distutils-subproject-unpacked-pip-install")
         self.run_in_venv(venv, unpacked, "pip", "install", ".")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_from_afar(self):
         repodir = self.make_distutils_unpacked()
         venv = self.make_venv("distutils-unpacked-pip-install-from-afar")
         self.run_in_venv(venv, venv, "pip", "install", repodir)
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
 class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
     def test_install(self):
