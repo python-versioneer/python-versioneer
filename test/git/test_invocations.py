@@ -63,17 +63,26 @@ class _Invocations(common.Common):
                              'pip', 'wheel', 'packaging')
         return venv_dir
 
-    def run_in_venv(self, venv, workdir, command, *args):
-        bins = {"python": os.path.join(venv, "bin", "python"),
-                "pip": os.path.join(venv, "bin", "pip"),
-                "rundemo": os.path.join(venv, "bin", "rundemo"),
-                }
-        if command == "pip":
-            args = ["--isolated", "--no-cache-dir"] + list(args)
-        return self.command(bins[command], *args, workdir=workdir)
+    def get_venv_bin(self, venv, command):
+        if sys.platform == "win32":
+            return os.path.join(venv, "Scripts", command)
 
-    def check_in_venv(self, venv):
-        out = self.run_in_venv(venv, venv, "rundemo")
+        return os.path.join(venv, "bin", command)
+
+    def run_in_venv(self, venv, workdir, command, *args, use_python=False):
+        bin_args = [self.get_venv_bin(venv, command)]
+        pybin = self.get_venv_bin(venv, "python")
+        
+        if command == "pip":
+            bin_args = [pybin, "-m", "pip"]
+            args = ["--isolated", "--no-cache-dir"] + list(args)
+        elif command == "rundemo" and use_python:
+            bin_args = [pybin] + bin_args
+        
+        return self.command(*bin_args, *args, workdir=workdir)
+
+    def check_in_venv(self, venv, use_python=False):
+        out = self.run_in_venv(venv, venv, "rundemo", use_python=use_python)
         v = dict(line.split(":", 1) for line in out.splitlines())
         self.assertEqual(v["version"], "2.0")
         return v
@@ -417,13 +426,13 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-install")
         self.run_in_venv(venv, repodir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_install_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-install-subproject")
         self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_wheel(self):
         self.make_distutils_wheel_with_pip()
@@ -447,37 +456,37 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install")
         self.run_in_venv(venv, repodir, "pip", "install", ".")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-pip-install-subproject")
         self.run_in_venv(venv, projectdir, "pip", "install", ".")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_from_afar(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install-from-afar")
         self.run_in_venv(venv, venv, "pip", "install", repodir)
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_from_afar_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-pip-install-from-afar-subproject")
         self.run_in_venv(venv, venv, "pip", "install", projectdir)
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_editable(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install-editable")
         self.run_in_venv(venv, repodir, "pip", "install", "--editable", ".")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_editable_subproject(self):
         projectdir = self.make_distutils_repo_subproject()
         venv = self.make_venv("distutils-repo-pip-install-editable-subproject")
         self.run_in_venv(venv, projectdir, "pip", "install", "--editable", ".")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
 class SetuptoolsRepo(_Invocations, unittest.TestCase):
     def test_install(self):
@@ -603,14 +612,14 @@ class DistutilsSdist(_Invocations, unittest.TestCase):
         venv = self.make_venv("distutils-sdist-pip-install")
         self.run_in_venv(venv, venv,
                          "pip", "install", sdist)
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_install_subproject(self):
         sdist = self.make_distutils_sdist_subproject()
         venv = self.make_venv("distutils-sdist-pip-install-subproject")
         self.run_in_venv(venv, venv,
                          "pip", "install", sdist)
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
 class SetuptoolsSdist(_Invocations, unittest.TestCase):
     def test_pip_install(self):
@@ -659,13 +668,13 @@ class DistutilsUnpacked(_Invocations, unittest.TestCase):
         unpacked = self.make_distutils_unpacked()
         venv = self.make_venv("distutils-unpacked-install")
         self.run_in_venv(venv, unpacked, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_install_subproject(self):
         unpacked = self.make_distutils_subproject_unpacked()
         venv = self.make_venv("distutils-subproject-unpacked-install")
         self.run_in_venv(venv, unpacked, "python", "setup.py", "install")
-        self.check_in_venv(venv)
+        self.check_in_venv(venv, use_python=True)
 
     def test_pip_wheel(self):
         unpacked = self.make_distutils_unpacked()
