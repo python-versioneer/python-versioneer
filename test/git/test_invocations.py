@@ -53,11 +53,10 @@ class _Invocations(common.Common):
         # switching to 'venv' on py3, but only py3.4 includes pip, and even
         # then it's an ancient version.
         os.environ.pop("__PYVENV_LAUNCHER__", None)
-        virtualenv.logger = virtualenv.Logger([]) # hush
         # virtualenv causes DeprecationWarning/ResourceWarning on py3
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            virtualenv.create_environment(venv_dir)
+            self.python('-m', 'virtualenv', venv_dir, workdir=self.testdir)
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
                              'pip', 'wheel', 'packaging')
