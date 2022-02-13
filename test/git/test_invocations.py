@@ -429,20 +429,6 @@ class DistutilsRepo(_Invocations, unittest.TestCase):
         self.make_distutils_wheel_with_pip()
         # asserts version as a side-effect
 
-    def test_sdist(self):
-        sdist = self.make_distutils_sdist() # asserts version as a side-effect
-        # make sure we used distutils/sdist, not setuptools/sdist
-        with tarfile.TarFile(sdist) as t:
-            self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
-                             t.getnames())
-
-    def test_sdist_subproject(self):
-        sdist = self.make_distutils_sdist_subproject()
-        # make sure we used distutils/sdist, not setuptools/sdist
-        with tarfile.TarFile(sdist) as t:
-            self.assertFalse("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO" in
-                             t.getnames())
-
     def test_pip_install(self):
         repodir = self.make_distutils_repo()
         venv = self.make_venv("distutils-repo-pip-install")
