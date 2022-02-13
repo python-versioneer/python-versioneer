@@ -1,4 +1,4 @@
-import os, sys, shutil, unittest, tempfile, tarfile, virtualenv, warnings
+import os, sys, shutil, unittest, tempfile, tarfile, warnings
 from wheel.bdist_wheel import get_abi_tag, get_platform
 from packaging.tags import interpreter_name, interpreter_version
 
