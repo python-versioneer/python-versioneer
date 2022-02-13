@@ -25,7 +25,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     TAG_PREFIX_REGEX = "*"
     MATCH_ARGS = ["--match", "%s%s" % (tag_prefix, TAG_PREFIX_REGEX)] \
         if tag_prefix else []
-    
+
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
 
