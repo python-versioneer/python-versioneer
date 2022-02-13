@@ -38,3 +38,11 @@ jobs:
         run: tox
         env:
           PLATFORM: ${{ matrix.os }}
+      - name: Test Git (cmd)
+        run: python test/git/test_git.py -v
+        shell: cmd
+        if: ${{ matrix.os == 'windows-latest' }}
+      - name: Test Git (Powershell)
+        run: python test/git/test_git.py -v
+        shell: pwsh
+        if: ${{ matrix.os == 'windows-latest' }}
