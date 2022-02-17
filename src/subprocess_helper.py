@@ -4,6 +4,14 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
     """Call the given command(s)."""
     assert isinstance(commands, list)
     process = None
+
+    popen_kwargs = {}
+    if sys.platform == "win32":
+        # This hides the console window if pythonw.exe is used
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        popen_kwargs["startupinfo"] = startupinfo
+
     for command in commands:
         try:
             dispcmd = str([command] + args)
@@ -11,7 +19,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
             process = subprocess.Popen([command] + args, cwd=cwd, env=env,
                                        stdout=subprocess.PIPE,
                                        stderr=(subprocess.PIPE if hide_stderr
-                                               else None))
+                                               else None), **popen_kwargs)
             break
         except OSError:
             e = sys.exc_info()[1]
