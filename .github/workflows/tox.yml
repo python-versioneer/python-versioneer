@@ -9,6 +9,8 @@ on:
     branches:
       - master
       - maint/*
+  schedule:
+    - cron: '0 0 * * MON'
 
 defaults:
   run:
