@@ -7,7 +7,7 @@ import tarfile
 import unittest
 import tempfile
 import re
-
+from unittest import mock
 
 from pkg_resources import parse_version
 
@@ -429,7 +429,12 @@ class Repo(common.Common, unittest.TestCase):
         self.projdir = os.path.join(self.testdir, self.gitdir,
                                     self.project_sub_dir)
 
+        # Extra repository to try to mess with GIT_DIR and check resilience
+        self.extra_git_dir = os.path.join(self.testdir, "extra_git")
+
         os.mkdir(self.testdir)
+        os.mkdir(self.extra_git_dir)
+        self.git("init", workdir=self.extra_git_dir)
 
         shutil.copytree(demoapp_dir, self.projdir)
         setup_cfg_fn = self.project_file("setup.cfg")
@@ -596,6 +601,10 @@ class Repo(common.Common, unittest.TestCase):
             self.rmtree(self.subpath("out"))
         # TA: project tree
         self.check_version(self.projdir, state, "TA", exps["TA"])
+        # TA2: GIT_DIR has no effect when in git repository
+        GIT_DIR = os.path.join(self.extra_git_dir, ".git")
+        with mock.patch.dict(os.environ, {"GIT_DIR": GIT_DIR}):
+            self.check_version(self.projdir, state, "TA", exps["TA"])
 
         # TB: .git-less copy of project tree
         target = self.subpath("out/demoapp-TB")
