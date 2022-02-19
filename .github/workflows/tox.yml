@@ -12,10 +12,6 @@ on:
   schedule:
     - cron: '0 0 * * MON'
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   stable:
     runs-on: ${{ matrix.os }}
@@ -23,7 +19,21 @@ jobs:
       matrix:
         os: ['ubuntu-latest']
         python-version: [3.6, 3.7, 3.8, 3.9, '3.10', 'pypy-3.7']
+        shell: ['bash']
+        include:
+          - os: 'windows-2019'
+            python-version: '3.10'
+            shell: 'bash'
+          - os: 'windows-2019'
+            python-version: '3.10'
+            shell: 'pwsh'
+          - os: 'windows-2019'
+            python-version: '3.10'
+            shell: 'cmd'
 
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}

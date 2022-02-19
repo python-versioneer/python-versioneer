@@ -1,10 +1,12 @@
 #! /usr/bin/python
 
 import os, sys
+import posixpath
 import shutil
 import tarfile
 import unittest
 import tempfile
+import re
 
 
 from pkg_resources import parse_version
@@ -402,7 +404,10 @@ class Repo(common.Common, unittest.TestCase):
         # i.e. setup.py -- is not located in the root directory
         self.run_test("test/demoapp", False, "project")
 
-    def run_test(self, demoapp_dir, script_only, project_sub_dir):
+    def test_no_tag_prefix(self):
+        self.run_test("test/demoapp", False, ".", tag_prefix="")
+
+    def run_test(self, demoapp_dir, script_only, project_sub_dir, tag_prefix=None):
         # The test dir should live under /tmp/ or /var/ or somewhere that
         # isn't the child of the versioneer repo's .git directory, since that
         # will confuse the tests that check what happens when there is no
@@ -411,7 +416,7 @@ class Repo(common.Common, unittest.TestCase):
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
-            shutil.rmtree(self.testdir)
+            self.rmtree(self.testdir)
 
         # Our tests run from a git repo that lives here. All self.git()
         # operations run from this directory unless overridden.
@@ -431,6 +436,13 @@ class Repo(common.Common, unittest.TestCase):
         with open(setup_cfg_fn, "r") as f:
             setup_cfg = f.read()
         setup_cfg = setup_cfg.replace("@VCS@", "git")
+
+        tag_prefix_regex = "tag_prefix = (.*)"
+        if tag_prefix is None:
+            tag_prefix = re.search(tag_prefix_regex, setup_cfg).group(1)
+        else:
+            setup_cfg = re.sub(tag_prefix_regex, f"tag_prefix = {tag_prefix}", setup_cfg)
+
         with open(setup_cfg_fn, "w") as f:
             f.write(setup_cfg)
         shutil.copyfile("versioneer.py", self.project_file("versioneer.py"))
@@ -447,10 +459,11 @@ class Repo(common.Common, unittest.TestCase):
 
         out = self.python("versioneer.py", "setup").splitlines()
         self.assertEqual(out[0], "creating src/demo/_version.py")
+        init = os.path.join("src/demo", "__init__.py")
         if script_only:
-            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
-            self.assertEqual(out[1], " appending to src/demo/__init__.py")
+            self.assertEqual(out[1], f" appending to {init}")
         self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
         self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
 
@@ -464,7 +477,7 @@ class Repo(common.Common, unittest.TestCase):
                     ]
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         def pf(fn):
-            return os.path.normpath(os.path.join(self.project_sub_dir, fn))
+            return posixpath.normpath(posixpath.join(self.project_sub_dir, fn))
         expected = {"A  %s" % pf(".gitattributes"),
                     "M  %s" % pf("MANIFEST.in"),
                     "A  %s" % pf("src/demo/_version.py"),
@@ -483,9 +496,9 @@ class Repo(common.Common, unittest.TestCase):
         out = self.python("versioneer.py", "setup").splitlines()
         self.assertEqual(out[0], "creating src/demo/_version.py")
         if script_only:
-            self.assertEqual(out[1], " src/demo/__init__.py doesn't exist, ok")
+            self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
-            self.assertEqual(out[1], " src/demo/__init__.py unmodified")
+            self.assertEqual(out[1], f" {init} unmodified")
         self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
         self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
@@ -525,7 +538,7 @@ class Repo(common.Common, unittest.TestCase):
         # S3: we commit that change, then make the first tag (1.0)
         self.git("add", self.project_file("setup.py"))
         self.git("commit", "-m", "dirty")
-        self.git("tag", "demo-1.0")
+        self.git("tag", f"{tag_prefix}1.0")
         # also add an unrelated tag, to test exclusion. git-describe appears
         # to return the highest lexicographically-sorted tag, so make sure
         # the unrelated one sorts earlier
@@ -580,7 +593,7 @@ class Repo(common.Common, unittest.TestCase):
 
     def do_checks(self, state, exps):
         if os.path.exists(self.subpath("out")):
-            shutil.rmtree(self.subpath("out"))
+            self.rmtree(self.subpath("out"))
         # TA: project tree
         self.check_version(self.projdir, state, "TA", exps["TA"])
 
@@ -588,14 +601,14 @@ class Repo(common.Common, unittest.TestCase):
         target = self.subpath("out/demoapp-TB")
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
-            shutil.rmtree(os.path.join(target, ".git"))
+            self.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TB", exps["TB"])
 
         # TC: project tree in versionprefix-named parentdir
         target = self.subpath("out/demo-1.1")
         shutil.copytree(self.projdir, target)
         if os.path.exists(os.path.join(target, ".git")):
-            shutil.rmtree(os.path.join(target, ".git"))
+            self.rmtree(os.path.join(target, ".git"))
         self.check_version(target, state, "TC", ["1.1", None, False, None]) # XXX
 
         # TD: project subdir of an unpacked git-archive tarball
@@ -611,7 +624,7 @@ class Repo(common.Common, unittest.TestCase):
         # TE: unpacked setup.py sdist tarball
         dist_path = os.path.join(self.projdir, "dist")
         if os.path.exists(dist_path):
-            shutil.rmtree(dist_path)
+            self.rmtree(dist_path)
         self.python("setup.py", "sdist", "--formats=tar")
         files = os.listdir(dist_path)
         self.assertTrue(len(files)==1, files)
@@ -646,7 +659,7 @@ class Repo(common.Common, unittest.TestCase):
 
         # RB: setup.py build; rundemo --version
         if os.path.exists(os.path.join(workdir, "build")):
-            shutil.rmtree(os.path.join(workdir, "build"))
+            self.rmtree(os.path.join(workdir, "build"))
         self.python("setup.py", "build", "--build-lib=build/lib",
                     "--build-scripts=build/lib", workdir=workdir)
         build_lib = os.path.join(workdir, "build", "lib")
