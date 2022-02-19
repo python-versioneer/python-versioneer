@@ -71,13 +71,13 @@ class _Invocations(common.Common):
     def run_in_venv(self, venv, workdir, command, *args, use_python=False):
         bin_args = [self.get_venv_bin(venv, command)]
         pybin = self.get_venv_bin(venv, "python")
-        
+
         if command == "pip":
             bin_args = [pybin, "-m", "pip"]
             args = ["--isolated", "--no-cache-dir"] + list(args)
         elif command == "rundemo" and use_python:
             bin_args = [pybin] + bin_args
-        
+
         return self.command(*bin_args, *args, workdir=workdir)
 
     def check_in_venv(self, venv, use_python=False):

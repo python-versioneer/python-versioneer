@@ -22,10 +22,6 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     version string, meaning we're inside a checked out source tree.
     """
     GITS = ["git"]
-    TAG_PREFIX_REGEX = "*"
-    MATCH_ARGS = ["--match", "%s%s" % (tag_prefix, TAG_PREFIX_REGEX)] \
-        if tag_prefix else []
-
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
 
@@ -36,10 +32,12 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
             print("Directory %s not under git control" % root)
         raise NotThisMethod("'git rev-parse --git-dir' returned error")
 
+    MATCH_ARGS = ["--match", "%s*" % tag_prefix] if tag_prefix else []
+
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = runner(GITS, ["describe", "--tags", "--dirty",
-                                     "--always", "--long"] + MATCH_ARGS,
+                                     "--always", "--long", *MATCH_ARGS],
                               cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:

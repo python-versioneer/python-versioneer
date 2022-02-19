@@ -412,7 +412,7 @@ class Repo(common.Common, unittest.TestCase):
         # isn't the child of the versioneer repo's .git directory, since that
         # will confuse the tests that check what happens when there is no
         # .git parent. So if you change this to use a fixed directory (say,
-        # when debugging problems), use /tmp/_test rather than ./_test .        
+        # when debugging problems), use /tmp/_test rather than ./_test .
         self.testdir = tempfile.mkdtemp()
         if VERBOSE: print("testdir: %s" % (self.testdir,))
         if os.path.exists(self.testdir):
@@ -436,13 +436,13 @@ class Repo(common.Common, unittest.TestCase):
         with open(setup_cfg_fn, "r") as f:
             setup_cfg = f.read()
         setup_cfg = setup_cfg.replace("@VCS@", "git")
-        
+
         tag_prefix_regex = "tag_prefix = (.*)"
         if tag_prefix is None:
             tag_prefix = re.search(tag_prefix_regex, setup_cfg).group(1)
         else:
             setup_cfg = re.sub(tag_prefix_regex, f"tag_prefix = {tag_prefix}", setup_cfg)
-        
+
         with open(setup_cfg_fn, "w") as f:
             f.write(setup_cfg)
         shutil.copyfile("versioneer.py", self.project_file("versioneer.py"))
