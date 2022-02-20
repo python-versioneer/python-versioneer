@@ -1,4 +1,5 @@
 import os, sys # --STRIP DURING BUILD
+from unittest import mock # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
@@ -61,14 +62,17 @@ def get_versions(verbose=False):
 
     from_vcs_f = handlers.get("pieces_from_vcs")
     if from_vcs_f:
-        try:
-            pieces = from_vcs_f(cfg.tag_prefix, root, verbose)
-            ver = render(pieces, cfg.style)
-            if verbose:
-                print("got version from VCS %s" % ver)
-            return ver
-        except NotThisMethod:
-            pass
+        # Patch os.environ to allow handlers to modify their
+        # environment without affecting later subprocesses
+        with mock.patch.dict(os.environ):
+            try:
+                pieces = from_vcs_f(cfg.tag_prefix, root, verbose)
+                ver = render(pieces, cfg.style)
+                if verbose:
+                    print("got version from VCS %s" % ver)
+                return ver
+            except NotThisMethod:
+                pass
 
     try:
         if cfg.parentdir_prefix:

@@ -1,5 +1,6 @@
 import sys  # --STRIP DURING BUILD
 import re  # --STRIP DURING BUILD
+import os  # --STRIP DURING BUILD
   # --STRIP DURING BUILD
   # --STRIP DURING BUILD
 def register_vcs_handler(*args):  # --STRIP DURING BUILD
@@ -20,10 +21,18 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     This only gets called if the git-archive 'subst' keywords were *not*
     expanded, and _version.py hasn't already been rewritten with a short
     version string, meaning we're inside a checked out source tree.
+
+    This function modifies the environment, so a caller that needs to
+    preserve the environment should save/restore around the call.
     """
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
+
+    # GIT_DIR can interfere with correct operation of Versioneer.
+    # It may be intended to be passed to the Versioneer-versioned project,
+    # but that should not change where we get our version from.
+    os.environ.pop("GIT_DIR", None)
 
     _, rc = runner(GITS, ["rev-parse", "--git-dir"], cwd=root,
                    hide_stderr=True)
