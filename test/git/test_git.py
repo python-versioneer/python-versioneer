@@ -26,7 +26,8 @@ class ParseGitDescribe(unittest.TestCase):
     def test_pieces(self):
         def pv(git_describe, do_error=False,
                expect_pieces=False, branch_name="master"):
-            def fake_run_command(exes, args, cwd=None, hide_stderr=None, env=None):
+            def fake_run_command(commands, args, cwd=None, verbose=False,
+                                 hide_stderr=False, env=None):
                 if args[0] == "describe":
                     if do_error == "describe":
                         return None, 0
