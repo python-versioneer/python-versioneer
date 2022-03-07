@@ -4,7 +4,6 @@ import os, base64, tempfile, io
 from pathlib import Path
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
-from setuptools.dist import Distribution as _Distribution
 
 LONG = Path.read_text(Path(__file__).parent / "README.md")
 
@@ -131,13 +130,6 @@ class my_build_py(build_py):
         return rc
 
 
-# python's distutils treats module-less packages as binary-specific (not
-# "pure"), so "setup.py bdist_wheel" creates binary-specific wheels. Override
-# this so we get cross-platform wheels instead. More info at:
-# https://bitbucket.org/pypa/wheel/issue/116/packages-with-only-filesdata_files-get
-class Distribution(_Distribution):
-    def is_pure(self): return True
-
 setup(
     name = "versioneer",
     license = "public domain",
@@ -146,10 +138,6 @@ setup(
     author = "Brian Warner",
     author_email = "warner-versioneer@lothar.com",
     url = "https://github.com/python-versioneer/python-versioneer",
-    # "fake" is replaced with versioneer-installer in build_scripts. We need
-    # a non-empty list to provoke "setup.py build" into making scripts,
-    # otherwise it skips that step.
-    py_modules = ["fake"],
     entry_points={
         'console_scripts': [
             'versioneer = versioneer:main',
@@ -157,7 +145,6 @@ setup(
     },
     long_description=LONG,
     long_description_content_type="text/markdown",
-    distclass=Distribution,
     cmdclass = { "build_py": my_build_py,
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
