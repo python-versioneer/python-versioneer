@@ -1,3 +1,21 @@
+## Release 0.22 (07-Mar-2022)
+
+This release fixes failures in Windows related to different handling of
+asterisk characters depending on the shell and the presence of a prefix.
+
+This release explicitly has been tested on Python 3.10 and is the final
+release that will support Python 3.6 or distutils.
+
+With thanks to John Wodder, Mathijs van der Vlies and Christian Schulze for
+their contributions.
+
+* FIX: Unset `GIT_DIR` environment variable while retrieving version information from git (#280)
+* FIX: Hide console window if pythonw.exe is used (#285)
+* FIX: Broken tag prefix on Windows and add CI (#283)
+* FIX: Default to setuptools, only falling back to distutils (#276)
+* TEST: Verify and note Python 3.10 support (#272)
+* MNT: Run CI weekly to catch upstream deprecations quickly (#281)
+
 ## Release 0.21 (13-Oct-2021)
 
 With thanks to Dimitri Papadopoulos Orfanos, Andrew Tolmie, Michael Niklas,
