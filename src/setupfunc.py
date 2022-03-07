@@ -119,8 +119,8 @@ def do_setup():
     except OSError:
         pass
     # That doesn't cover everything MANIFEST.in can do
-    # (http://docs.python.org/2/distutils/sourcedist.html#commands), so
-    # it might give some false negatives. Appending redundant 'include'
+    # (https://packaging.python.org/en/latest/guides/using-manifest-in/#manifest-in-commands),
+    # so it might give some false negatives. Appending redundant 'include'
     # lines is safe, though.
     if "versioneer.py" not in simple_includes:
         print(" appending 'versioneer.py' to MANIFEST.in")
