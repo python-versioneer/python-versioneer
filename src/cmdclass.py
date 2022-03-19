@@ -8,7 +8,7 @@ def write_to_version_file(): pass # --STRIP DURING BUILD
 
 
 def get_cmdclass(cmdclass=None):
-    """Get the custom setuptools/distutils subclasses used by Versioneer.
+    """Get the custom setuptools subclasses used by Versioneer.
 
     If the package uses a different cmdclass (e.g. one from numpy), it
     should be provide as an argument.
@@ -30,11 +30,8 @@ def get_cmdclass(cmdclass=None):
 
     cmds = {} if cmdclass is None else cmdclass.copy()
 
-    # we add "version" to both distutils and setuptools
-    try:
-        from setuptools import Command
-    except ImportError:
-        from distutils.core import Command
+    # we add "version" to setuptools
+    from setuptools import Command
 
     class cmd_version(Command):
         description = "report generated version string"
@@ -57,7 +54,7 @@ def get_cmdclass(cmdclass=None):
                 print(" error: %s" % vers["error"])
     cmds["version"] = cmd_version
 
-    # we override "build_py" in both distutils and setuptools
+    # we override "build_py" in setuptools
     #
     # most invocation pathways end up running build_py:
     #  distutils/build -> build_py
@@ -75,10 +72,8 @@ def get_cmdclass(cmdclass=None):
     # we override different "build_py" commands for both environments
     if 'build_py' in cmds:
         _build_py = cmds['build_py']
-    elif "setuptools" in sys.modules:
-        from setuptools.command.build_py import build_py as _build_py
     else:
-        from distutils.command.build_py import build_py as _build_py
+        from setuptools.command.build_py import build_py as _build_py
 
     class cmd_build_py(_build_py):
         def run(self):
@@ -97,10 +92,8 @@ def get_cmdclass(cmdclass=None):
 
     if 'build_ext' in cmds:
         _build_ext = cmds['build_ext']
-    elif "setuptools" in sys.modules:
-        from setuptools.command.build_ext import build_ext as _build_ext
     else:
-        from distutils.command.build_ext import build_ext as _build_ext
+        from setuptools.command.build_ext import build_ext as _build_ext
 
     class cmd_build_ext(_build_ext):
         def run(self):
@@ -182,10 +175,8 @@ def get_cmdclass(cmdclass=None):
     # we override different "sdist" commands for both environments
     if 'sdist' in cmds:
         _sdist = cmds['sdist']
-    elif "setuptools" in sys.modules:
-        from setuptools.command.sdist import sdist as _sdist
     else:
-        from distutils.command.sdist import sdist as _sdist
+        from setuptools.command.sdist import sdist as _sdist
 
     class cmd_sdist(_sdist):
         def run(self):

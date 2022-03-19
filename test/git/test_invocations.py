@@ -3,7 +3,6 @@ from wheel.bdist_wheel import get_abi_tag, get_platform
 from packaging.tags import interpreter_name, interpreter_version
 
 sys.path.insert(0, "src")
-from from_file import versions_from_file
 import common
 
 
@@ -31,7 +30,6 @@ class _Invocations(common.Common):
         else:
             self.testdir = tempfile.mkdtemp()
         os.mkdir(self.subpath("cache"))
-        os.mkdir(self.subpath("cache", "distutils"))
         os.mkdir(self.subpath("cache", "setuptools"))
         self.gitdir = None
         self.projdir = None
@@ -90,8 +88,7 @@ class _Invocations(common.Common):
         v = self.check_in_venv(venv)
         self.assertEqual(v["demolib"], "1.0")
 
-    # "demolib" has a version of 1.0 and is built with distutils
-    # "demoapp2-distutils" is v2.0, uses distutils, and has no deps
+    # "demolib" has a version of 1.0 and is built with setuptools
     # "demoapp2-setuptools" is v2.0, uses setuptools, and depends on demolib
 
     # repos and unpacked git-archive tarballs come in two flavors: normal (in
@@ -139,103 +136,6 @@ class _Invocations(common.Common):
             return indexdir
         os.mkdir(indexdir)
         return indexdir
-
-    def make_distutils_repo(self):
-        # create a clean repo of demoapp2-distutils at 2.0
-        repodir = self.subpath("demoapp2-distutils-repo")
-        if os.path.exists(repodir):
-            shutil.rmtree(repodir)
-        shutil.copytree("test/demoapp2-distutils", repodir)
-        shutil.copy("versioneer.py", repodir)
-        self.git("init", workdir=repodir)
-        self.python("versioneer.py", "setup", workdir=repodir)
-        self.git("add", "--all", workdir=repodir)
-        self.git("commit", "-m", "comment", workdir=repodir)
-        self.git("tag", "demoapp2-2.0", workdir=repodir)
-        return repodir
-
-    def make_distutils_repo_subproject(self):
-        # create a clean repo of demoapp2-distutils at 2.0
-        repodir = self.subpath("demoapp2-distutils-repo-subproject")
-        if os.path.exists(repodir):
-            shutil.rmtree(repodir)
-        shutil.copytree("test/demoapp2-distutils-subproject", repodir)
-        projectdir = os.path.join(repodir, "subproject")
-        shutil.copy("versioneer.py", projectdir)
-        self.git("init", workdir=repodir)
-        self.python("versioneer.py", "setup", workdir=projectdir)
-        self.git("add", "--all", workdir=repodir)
-        self.git("commit", "-m", "comment", workdir=repodir)
-        self.git("tag", "demoapp2-2.0", workdir=repodir)
-        return projectdir
-
-    def make_distutils_wheel_with_pip(self):
-        # create an wheel of demoapp2-distutils at 2.0
-        wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
-        demoapp2_distutils_wheel = self.subpath("cache", "distutils", wheelname)
-        if os.path.exists(demoapp2_distutils_wheel):
-            return demoapp2_distutils_wheel
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("make-distutils-wheel-with-pip")
-        self.run_in_venv(venv, repodir,
-                         "pip", "wheel", "--wheel-dir", "wheelhouse",
-                         "--no-index",# "--find-links", linkdir,
-                         ".")
-        created = os.path.join(repodir, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created), created)
-        shutil.copyfile(created, demoapp2_distutils_wheel)
-        return demoapp2_distutils_wheel
-
-    def make_distutils_sdist(self):
-        # create an sdist tarball of demoapp2-distutils at 2.0
-        demoapp2_distutils_sdist = self.subpath("cache", "distutils",
-                                                "demoapp2-2.0.tar")
-        if os.path.exists(demoapp2_distutils_sdist):
-            return demoapp2_distutils_sdist
-        repodir = self.make_distutils_repo()
-        self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
-        created = os.path.join(repodir, "dist", "demoapp2-2.0.tar")
-        self.assertTrue(os.path.exists(created), created)
-        shutil.copyfile(created, demoapp2_distutils_sdist)
-        return demoapp2_distutils_sdist
-
-    def make_distutils_sdist_subproject(self):
-        demoapp2_distutils_sdist = self.subpath("cache", "distutils",
-                                                "demoapp2-subproject-2.0.tar")
-        if os.path.exists(demoapp2_distutils_sdist):
-            return demoapp2_distutils_sdist
-        projectdir = self.make_distutils_repo_subproject()
-        self.python("setup.py", "sdist", "--format=tar", workdir=projectdir)
-        created = os.path.join(projectdir, "dist", "demoapp2-2.0.tar")
-        # if that gets the version wrong, it will make the wrong tarball, and
-        # this check will fail
-        self.assertTrue(os.path.exists(created), created)
-        shutil.copyfile(created, demoapp2_distutils_sdist)
-        return demoapp2_distutils_sdist
-
-    def make_distutils_unpacked(self):
-        sdist = self.make_distutils_sdist()
-        unpack_into = self.subpath("demoapp2-distutils-unpacked")
-        if os.path.exists(unpack_into):
-            shutil.rmtree(unpack_into)
-        os.mkdir(unpack_into)
-        with tarfile.TarFile(sdist) as t:
-            t.extractall(path=unpack_into)
-        unpacked = os.path.join(unpack_into, "demoapp2-2.0")
-        self.assertTrue(os.path.exists(unpacked))
-        return unpacked
-
-    def make_distutils_subproject_unpacked(self):
-        sdist = self.make_distutils_sdist_subproject()
-        unpack_into = self.subpath("demoapp2-distutils-unpacked-subproject")
-        if os.path.exists(unpack_into):
-            shutil.rmtree(unpack_into)
-        os.mkdir(unpack_into)
-        with tarfile.TarFile(sdist) as t:
-            t.extractall(path=unpack_into)
-        unpacked = os.path.join(unpack_into, "demoapp2-2.0")
-        self.assertTrue(os.path.exists(unpacked))
-        return unpacked
 
     def make_setuptools_repo(self):
         # create a clean repo of demoapp2-setuptools at 2.0
@@ -410,69 +310,6 @@ class _Invocations(common.Common):
             "".join([impl, impl_ver]), abi, plat.replace("-", "_"))
 
 
-class DistutilsRepo(_Invocations, unittest.TestCase):
-    def test_build(self):
-        repodir = self.make_distutils_repo()
-        self.python("setup.py", "build", workdir=repodir)
-        # test that the built _version.py is correct. Ideally we'd actually
-        # run PYTHONPATH=.../build/lib build/scripts-PYVER/rundemo and check
-        # the output, but that's more fragile than I want to deal with today
-        fn = os.path.join(repodir, "build", "lib", "demo", "_version.py")
-        data = versions_from_file(fn)
-        self.assertEqual(data["version"], "2.0")
-
-    def test_install(self):
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("distutils-repo-install")
-        self.run_in_venv(venv, repodir, "python", "setup.py", "install")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_install_subproject(self):
-        projectdir = self.make_distutils_repo_subproject()
-        venv = self.make_venv("distutils-repo-install-subproject")
-        self.run_in_venv(venv, projectdir, "python", "setup.py", "install")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_wheel(self):
-        self.make_distutils_wheel_with_pip()
-        # asserts version as a side-effect
-
-    def test_pip_install(self):
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("distutils-repo-pip-install")
-        self.run_in_venv(venv, repodir, "pip", "install", ".")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_subproject(self):
-        projectdir = self.make_distutils_repo_subproject()
-        venv = self.make_venv("distutils-repo-pip-install-subproject")
-        self.run_in_venv(venv, projectdir, "pip", "install", ".")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_from_afar(self):
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("distutils-repo-pip-install-from-afar")
-        self.run_in_venv(venv, venv, "pip", "install", repodir)
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_from_afar_subproject(self):
-        projectdir = self.make_distutils_repo_subproject()
-        venv = self.make_venv("distutils-repo-pip-install-from-afar-subproject")
-        self.run_in_venv(venv, venv, "pip", "install", projectdir)
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_editable(self):
-        repodir = self.make_distutils_repo()
-        venv = self.make_venv("distutils-repo-pip-install-editable")
-        self.run_in_venv(venv, repodir, "pip", "install", "--editable", ".")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_editable_subproject(self):
-        projectdir = self.make_distutils_repo_subproject()
-        venv = self.make_venv("distutils-repo-pip-install-editable-subproject")
-        self.run_in_venv(venv, projectdir, "pip", "install", "--editable", ".")
-        self.check_in_venv(venv, use_python=True)
-
 class SetuptoolsRepo(_Invocations, unittest.TestCase):
     def test_install(self):
         repodir = self.make_setuptools_repo()
@@ -591,21 +428,6 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
-class DistutilsSdist(_Invocations, unittest.TestCase):
-    def test_pip_install(self):
-        sdist = self.make_distutils_sdist()
-        venv = self.make_venv("distutils-sdist-pip-install")
-        self.run_in_venv(venv, venv,
-                         "pip", "install", sdist)
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_subproject(self):
-        sdist = self.make_distutils_sdist_subproject()
-        venv = self.make_venv("distutils-sdist-pip-install-subproject")
-        self.run_in_venv(venv, venv,
-                         "pip", "install", sdist)
-        self.check_in_venv(venv, use_python=True)
-
 class SetuptoolsSdist(_Invocations, unittest.TestCase):
     def test_pip_install(self):
         linkdir = self.make_linkdir()
@@ -637,58 +459,6 @@ class SetuptoolsWheel(_Invocations, unittest.TestCase):
                          "--no-index", "--find-links", linkdir,
                          wheel)
         self.check_in_venv_withlib(venv)
-
-class DistutilsUnpacked(_Invocations, unittest.TestCase):
-    def test_build(self):
-        unpacked = self.make_distutils_unpacked()
-        self.python("setup.py", "build", workdir=unpacked)
-        # test that the built _version.py is correct. Ideally we'd actually
-        # run PYTHONPATH=.../build/lib build/scripts-PYVER/rundemo and check
-        # the output, but that's more fragile than I want to deal with today
-        fn = os.path.join(unpacked, "build", "lib", "demo", "_version.py")
-        data = versions_from_file(fn)
-        self.assertEqual(data["version"], "2.0")
-
-    def test_install(self):
-        unpacked = self.make_distutils_unpacked()
-        venv = self.make_venv("distutils-unpacked-install")
-        self.run_in_venv(venv, unpacked, "python", "setup.py", "install")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_install_subproject(self):
-        unpacked = self.make_distutils_subproject_unpacked()
-        venv = self.make_venv("distutils-subproject-unpacked-install")
-        self.run_in_venv(venv, unpacked, "python", "setup.py", "install")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_wheel(self):
-        unpacked = self.make_distutils_unpacked()
-        wheelname = "demoapp2-2.0-%s-none-any.whl" % pyver_major
-        venv = self.make_venv("distutils-unpacked-pip-wheel")
-        self.run_in_venv(venv, unpacked,
-                         "pip", "wheel", "--wheel-dir", "wheelhouse",
-                         "--no-index",# "--find-links", linkdir,
-                         ".")
-        created = os.path.join(unpacked, "wheelhouse", wheelname)
-        self.assertTrue(os.path.exists(created), created)
-
-    def test_pip_install(self):
-        repodir = self.make_distutils_unpacked()
-        venv = self.make_venv("distutils-unpacked-pip-install")
-        self.run_in_venv(venv, repodir, "pip", "install", ".")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_subproject(self):
-        unpacked = self.make_distutils_subproject_unpacked()
-        venv = self.make_venv("distutils-subproject-unpacked-pip-install")
-        self.run_in_venv(venv, unpacked, "pip", "install", ".")
-        self.check_in_venv(venv, use_python=True)
-
-    def test_pip_install_from_afar(self):
-        repodir = self.make_distutils_unpacked()
-        venv = self.make_venv("distutils-unpacked-pip-install-from-afar")
-        self.run_in_venv(venv, venv, "pip", "install", repodir)
-        self.check_in_venv(venv, use_python=True)
 
 class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
     def test_install(self):
