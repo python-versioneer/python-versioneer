@@ -7,6 +7,11 @@ VERSIONEER_b64 = """
 """
 newver = "@VERSIONEER-VERSION@"
 
+VERSIONEER_PEP518 = True
+
+# Make versioneer usable via import
+exec(base64.b64decode(VERSIONEER_b64.encode('ASCII')).decode(),
+     globals())
 
 def main():
     if len(sys.argv) < 2:
