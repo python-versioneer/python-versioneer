@@ -111,6 +111,11 @@ def get_cmdclass(cmdclass=None):
             # it with an updated value
             target_versionfile = os.path.join(self.build_lib,
                                               cfg.versionfile_build)
+            if not os.path.exists(target_versionfile):
+                print(f"Warning: {target_versionfile} does not exist, skipping "
+                      "version update. This can happen if you are running build_ext "
+                      "without first running build_py.")
+                return
             print("UPDATING %s" % target_versionfile)
             write_to_version_file(target_versionfile, versions)
     cmds["build_ext"] = cmd_build_ext
