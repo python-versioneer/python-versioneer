@@ -2,7 +2,6 @@ import sys  # --STRIP DURING BUILD
 import re  # --STRIP DURING BUILD
 import os  # --STRIP DURING BUILD
 import functools  # --STRIP DURING BUILD
-from packaging import version  # --STRIP DURING BUILD
   # --STRIP DURING BUILD
   # --STRIP DURING BUILD
 def register_vcs_handler(*args):  # --STRIP DURING BUILD
@@ -137,15 +136,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     else:
         # HEX: no tags
         pieces["closest-tag"] = None
-        GITS_version, rc = run_command(GITS, ["--version"], cwd=root)
-        GITS_version = GITS_version.split()[2]
-        if version.parse(GITS_version) >= version.parse("1.7.2"):
-            count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--count"],
-                                        cwd=root)
-        else:
-            count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--left-right"],
-                                        cwd=root)
-            count_out = len(count_out.split())
+        count_out, rc = runner(GITS, ["rev-list", "HEAD", "--left-right"], cwd=root)
+        count_out = len(count_out.split())
         pieces["distance"] = int(count_out)  # total number of commits
 
     # commit date: see ISO-8601 comment in git_versions_from_keywords()
