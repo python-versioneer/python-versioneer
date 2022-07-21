@@ -40,7 +40,7 @@ class ParseGitDescribe(unittest.TestCase):
                     else:
                         return "longlong\n", 0
                 if args[0] == "rev-list":
-                    return "42\n", 0
+                    return ">hashhashhashhashhashhashhashhash\n" * 42, 0
                 if args[0] == "show":
                     if do_error == "show":
                         return "gpg: signature\n12345\n", 0
