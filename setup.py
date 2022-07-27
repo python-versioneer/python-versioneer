@@ -4,6 +4,7 @@ import os, base64, tempfile, io
 from pathlib import Path
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
+from setuptools.command.develop import develop
 
 LONG = Path.read_text(Path(__file__).parent / "README.md")
 
@@ -129,6 +130,12 @@ class my_build_py(build_py):
             rc = build_py.run(self)
         return rc
 
+# The structure of versioneer, with its components that are compiled into a single file,
+# makes it unsuitable for development mode.
+class develop(develop):
+    def run(self):
+        raise RuntimeError("Versioneer cannot be installed in developer/editable mode.")
+
 
 setup(
     name = "versioneer",
@@ -152,6 +159,7 @@ setup(
     cmdclass = { "build_py": my_build_py,
                  "make_versioneer": make_versioneer,
                  "make_long_version_py_git": make_long_version_py_git,
+                 "develop": develop,
                  },
     python_requires=">=3.7",
     classifiers=[
