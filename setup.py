@@ -50,7 +50,7 @@ def generate_long_version_py(VCS):
 
 def generate_versioneer_py():
     s = io.StringIO()
-    s.write(get("src/header.py", add_ver=True, do_readme=True))
+    s.write(get("src/header.py", add_ver=True, do_readme=True, do_strip=True))
     s.write(get("src/subprocess_helper.py", do_strip=True))
 
     for VCS in get_vcs_list():

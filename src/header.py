@@ -21,6 +21,7 @@ import sys
 from typing import Callable, Dict
 import functools
 
+class VersioneerBadRootError(Exception): ... # --STRIP DURING BUILD
 
 class VersioneerConfig:
     """Container for Versioneer configuration parameters."""
