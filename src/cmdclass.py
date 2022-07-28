@@ -177,39 +177,40 @@ def get_cmdclass(cmdclass=None):
                              })
         cmds["py2exe"] = cmd_py2exe
 
-    # sdist farms its file list building out to egg_info, which in turn
-    # farms it out to a subclass of sdist called manifest_maker
-    # To insert versioneer.py into the file listing, we need to create our
-    # own manifest_maker and then patch egg_info to use that
+    # sdist farms its file list building out to egg_info
     if 'egg_info' in cmds:
         _sdist = cmds['egg_info']
     else:
         from setuptools.command.egg_info import egg_info as _egg_info
-        from setuptools.command.egg_info import manifest_maker as _manifest_maker
 
-    class manifest_maker(_manifest_maker):
-        def add_versioneer(self):
-            print("appending versioneer to file list")
-            self.filelist.append('versioneer.py')
-            root = get_root()
-            cfg = get_config_from_root(root)
-            print(f"appending {cfg.versionfile_source} to file list")
-            self.filelist.append(cfg.versionfile_source)
-
-        def add_defaults(self):
-            super().add_defaults()
-            self.add_versioneer()
-
-    # This is an exact copy of setuptools' find_sources, it just has our
-    # manifest_maker class in scope
     class cmd_egg_info(_egg_info):
         def find_sources(self):
-            """Generate SOURCES.txt manifest file."""
-            manifest_filename = os.path.join(self.egg_info, "SOURCES.txt")
-            mm = manifest_maker(self.distribution)
-            mm.manifest = manifest_filename
-            mm.run()
-            self.filelist = mm.filelist
+            # egg_info.find_sources builds the manifest list and writes it
+            # in one shot
+            super().find_sources()
+
+            # Modify the filelist and normalize it
+            root = get_root()
+            cfg = get_config_from_root(root)
+            self.filelist.append('versioneer.py')
+            if cfg.versionfile_source:
+                # There are rare cases where versionfile_source might not be
+                # included by default, so we must be explicit
+                self.filelist.append(cfg.versionfile_source)
+            self.filelist.sort()
+            self.filelist.remove_duplicates()
+
+            # The write method is hidden in the manifest_maker instance that
+            # generated the filelist and was thrown away
+            # We will instead replicate their final normalization (to unicode,
+            # and POSIX-style paths)
+            from setuptools import unicode_utils
+            normalized = [unicode_utils.filesys_decode(f).replace(os.sep, '/')
+                          for f in self.filelist.files]
+
+            manifest_filename = os.path.join(self.egg_info, 'SOURCES.txt')
+            with open(manifest_filename, 'w') as fobj:
+                fobj.write('\n'.join(normalized))
 
     cmds['egg_info'] = cmd_egg_info
 
