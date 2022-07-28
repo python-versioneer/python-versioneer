@@ -45,7 +45,7 @@ class Parser(unittest.TestCase):
         self.assertEqual(cfg.style, "")
         self.assertEqual(cfg.versionfile_source, None)
         self.assertEqual(cfg.versionfile_build, None)
-        self.assertEqual(cfg.tag_prefix, None)
+        self.assertEqual(cfg.tag_prefix, "")
         self.assertEqual(cfg.parentdir_prefix, None)
         self.assertEqual(cfg.verbose, None)
 
