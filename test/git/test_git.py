@@ -470,8 +470,6 @@ class Repo(common.Common, unittest.TestCase):
             self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
             self.assertEqual(out[1], f" appending to {init}")
-        self.assertEqual(out[2], " appending 'versioneer.py' to MANIFEST.in")
-        self.assertEqual(out[3], " appending versionfile_source ('src/demo/_version.py') to MANIFEST.in")
 
         # Many folks have a ~/.gitignore with ignores .pyc files, but if they
         # don't, it will show up in the status here. Ignore it.
@@ -485,7 +483,6 @@ class Repo(common.Common, unittest.TestCase):
         def pf(fn):
             return posixpath.normpath(posixpath.join(self.project_sub_dir, fn))
         expected = {"A  %s" % pf(".gitattributes"),
-                    "M  %s" % pf("MANIFEST.in"),
                     "A  %s" % pf("src/demo/_version.py"),
                     }
         if not script_only:
@@ -505,8 +502,6 @@ class Repo(common.Common, unittest.TestCase):
             self.assertEqual(out[1], f" {init} doesn't exist, ok")
         else:
             self.assertEqual(out[1], f" {init} unmodified")
-        self.assertEqual(out[2], " 'versioneer.py' already in MANIFEST.in")
-        self.assertEqual(out[3], " versionfile_source already in MANIFEST.in")
         out = set(remove_pyc(self.git("status", "--porcelain").splitlines()))
         self.assertEqual(out, set())
 
