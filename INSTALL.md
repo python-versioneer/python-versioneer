@@ -58,9 +58,17 @@ First, decide on values for the following configuration variables:
   'myproject-1.2.0', this should be 'myproject-'. To disable this feature,
   just omit the field from your `setup.cfg`.
 
-This tool provides one script, named `versioneer`. That script has one mode,
-"install", which writes a copy of `versioneer.py` into the current directory
-and runs `versioneer.py setup` to finish the installation.
+This tool provides one script, named `versioneer`. That script has two modes:
+
+1) "install --vendor", which writes a copy of `versioneer.py` into the current
+   directory and runs `versioneer.py setup` to finish the installation.
+2) "install --no-vendor", which attempts to run versioneer without installing a
+   copy into the current directory. This is an experimental mode intended to
+   work with `pyproject.toml`.
+
+## Installation instructions
+
+### Common steps
 
 To versioneer-enable your project:
 
@@ -70,7 +78,7 @@ To versioneer-enable your project:
   populating it with the configuration values you decided earlier (note that
   the option names are not case-sensitive):
 
-  ````
+  ```ini
   [versioneer]
   VCS = git
   style = pep440
@@ -78,22 +86,32 @@ To versioneer-enable your project:
   versionfile_build = myproject/_version.py
   tag_prefix =
   parentdir_prefix = myproject-
-  ````
+  ```
 
-* 3: Run `versioneer install`. This will do the following:
+* 3: If using the EXPERIMENTAL non-vendored mode, add `versioneer` to your
+  `pyproject.toml`:
 
-  * copy `versioneer.py` into the top of your source tree
+  ```toml
+  [build-system]
+  requires = ["setuptools", "versioneer==0.24"]
+  build-backend = "setuptools.build_meta"
+  ```
+
+  It is recommended to pin the version of Versioneer you installed with.
+
+* 4: Run `versioneer install --vendor` OR `versioneer install --no-vendor`.
+  This will do the following:
+
+  * copy `versioneer.py` into the top of your source tree (vendored mode)
   * create `_version.py` in the right place (`versionfile_source`)
   * modify your `__init__.py` (if one exists next to `_version.py`) to define
     `__version__` (by calling a function from `_version.py`)
-  * modify your `MANIFEST.in` to include both `versioneer.py` and the
-    generated `_version.py` in sdist tarballs
 
   `versioneer install` will complain about any problems it finds with your
   `setup.py` or `setup.cfg`. Run it multiple times until you have fixed all
   the problems.
 
-* 4: add a `import versioneer` to your setup.py, and add the following
+* 5: add a `import versioneer` to your setup.py, and add the following
   arguments to the setup() call:
 
         version=versioneer.get_version(),
@@ -105,7 +123,7 @@ To versioneer-enable your project:
         from numpy.distutils.core import numpy_cmdclass
         cmdclass=versioneer.get_cmdclass(numpy_cmdclass),
 
-* 5: commit these changes to your VCS. To make sure you won't forget,
+* 6: commit these changes to your VCS. To make sure you won't forget,
   `versioneer install` will mark everything it touched for addition using
   `git add`. Don't forget to add `setup.py` and `setup.cfg` too.
 
