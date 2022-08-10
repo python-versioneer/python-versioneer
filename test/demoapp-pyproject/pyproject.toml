@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0", "versioneer @ @REPOROOT@"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "demo"
+authors = [
+  { name="Example Author", email="author@example.com" },
+]
+description = "Demo"
+requires-python = ">=3.7"
+dynamic = ["version"]
