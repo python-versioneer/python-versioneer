@@ -1,3 +1,26 @@
+## Release 0.23 (12-Aug-2022)
+
+This release adds support for Setuptools' PEP-660 editable installations,
+drops support for Python 3.6, and supports startlingly old git versions.
+
+With thanks to Biastian Zim, Michał Górny, Igor S. Gerasimov, Christian Clauss,
+Anderson Bravalheri and Simão Afonso for contributions.
+
+* FIX: Adequate custom `build_py` command to changes in setuptools v64 by @abravalheri in (313)
+* FIX: skip version update on `build_ext` if .py does not exist by @mgorny in (297)
+* FIX: old GIT (<1.7.2) does not know about `--count` flag by @foxtran in (306)
+* FIX: Use only numeric versions in Git, ignore other tags with the same prefix by @effigies in (256)
+* FIX: Handle missing `tag_prefix` gracefully by @effigies in (308)
+* FIX: Restore `py_modules` field to setup.py by @effigies in (293)
+* ENH: Patch versioneer files into manifest at runtime by @effigies in (309)
+* STY: Undefined name: VersioneerBadRootError on line 51 by @cclauss in (305)
+* STY: Appease flake8 by @simaoafonso-pwt in (312)
+* MNT: Drop 3.6 support, remove old hacks by @effigies in (288)
+* MNT: Clarify license as CC0-1.0 by @BastianZim in (292)
+* MNT: Drop distutils by @effigies in (289)
+* MNT: Disable editable installs of versioneer (they will not work) by @effigies in (307)
+* CI: Update gh-actions PLATFORM variable to avoid double-testing by @effigies in (311)
+
 ## Release 0.22 (07-Mar-2022)
 
 This release fixes failures in Windows related to different handling of
