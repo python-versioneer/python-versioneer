@@ -84,8 +84,13 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
 
         # Strip off the leading "* " from the list of branches.
         branches = [branch[2:] for branch in branches]
-        if "master" in branches:
-            branch_name = "master"
+        default_branch, rc = runner(GITS,
+                                ["rev-parse","--abbrev-ref","origin/HEAD"],
+                                cwd=root)
+        # default_branch will be origin/<dafault_branch_name>
+        default_branch = default_branch.split('/')[-1]
+        if default_branch in branches:
+            branch_name = default_branch
         elif not branches:
             branch_name = None
         else:
