@@ -466,6 +466,8 @@ class Repo(common.Common, unittest.TestCase):
             f.write(setup_cfg)
 
         if pep518:
+            # Set test versioneer build-system.requires entry to @ file:///<this-repo>
+            # so that `python -m build` picks it up.
             pyproject_path = Path(self.project_file("pyproject.toml"))
             versioneer_source_root = Path(__file__).absolute().parent.parent.parent
             vsr = str(versioneer_source_root).replace("\\", "/")  # For testing on Windows...
