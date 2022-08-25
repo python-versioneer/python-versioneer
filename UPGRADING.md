@@ -5,7 +5,7 @@ must be configured. This document contains a list of releases where,
 when upgrading from an older release, you must make changes in your
 project.
 
-## Upgrading to 0.16 through 0.22
+## Upgrading to 0.16 through 0.23
 
 Nothing special.
 
