@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "versioneer >=0.24"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "versioneer"
+description = "Easy VCS-based management of project version strings"
+authors = [
+  { name = "Brian Warner" },
+]
+maintainers = [
+  { name = "Christopher Markiewicz", email = "effigies@gmail.com" },
+]
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "License :: OSI Approved :: The Unlicense (Unlicense)",
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/python-versioneer/python-versioneer"
+
+[project.scripts]
+"versioneer" = "versioneer:main"
