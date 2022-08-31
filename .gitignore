@@ -9,3 +9,4 @@
 /.idea
 *.iml
 /.tox/
+.*.swp
