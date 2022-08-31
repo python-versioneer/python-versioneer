@@ -9,7 +9,7 @@ from setuptools.command.develop import develop
 LONG = Path.read_text(Path(__file__).parent / "README.md")
 
 # as nice as it'd be to versioneer ourselves, that sounds messy.
-VERSION = "0.24"
+VERSION = "0.25.dev0"
 
 
 def ver(s):
