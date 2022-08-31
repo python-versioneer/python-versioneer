@@ -3,7 +3,7 @@
 
 include MANIFEST.in README.md .travis.yml NOTES developers.md details.md LICENSE
 recursive-include src *.py
-recursive-include test *.py *.cfg README MANIFEST.in
+recursive-include test *.py *.cfg README MANIFEST.in pyproject.toml
 include test/demoapp/bin/rundemo
 include test/demoapp/MANIFEST.in
 include test/demoapp/README
