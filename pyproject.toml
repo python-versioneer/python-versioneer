@@ -10,6 +10,7 @@ authors = [
 ]
 maintainers = [
   { name = "Christopher Markiewicz", email = "effigies@gmail.com" },
+  { name = "Nathan Buckner",  email = "bucknerns@users.noreply.github.com" },
 ]
 readme = "README.md"
 license = { file="LICENSE" }
