@@ -5,6 +5,16 @@ must be configured. This document contains a list of releases where,
 when upgrading from an older release, you must make changes in your
 project.
 
+## Upgrading to 0.24
+
+If you are transitioning to a non-vendored mode for versioneer, add
+`"versioneer"` to your `pyproject.toml`. You now update the version file
+by using `versioneer install --no-vendor` instead of
+`python versioneer.py setup`. Consider using `"versioneer @ 0.24"` to
+ensure future breaking changes don't affect your build.
+
+For vendored installations, nothing changes.
+
 ## Upgrading to 0.16 through 0.23
 
 Nothing special.

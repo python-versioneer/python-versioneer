@@ -1,3 +1,15 @@
+## Release 0.24 (30-Aug-2022)
+
+This release adds support for a non-vendored use of Versioneer.
+
+With thanks to Stefan Appelhoff and Yaroslav Halchenko for contributions.
+
+* MNT: Relicense to Unlicense by @effigies (#317)
+* ENH: in verbose mode do not hide stderr of git rev-parse by @yarikoptic (#318)
+* DOC: clarify upgrading to 0.23 doesn't require special actions by @sappelhoff (#321)
+* ENH: Prepare for py2exe dropping distutils support by @effigies (#319)
+* ENH: Allow versioneer to be used as a module in PEP-518 mode by @effigies (#294)
+
 ## Release 0.23 (12-Aug-2022)
 
 This release adds support for Setuptools' PEP-660 editable installations,
@@ -6,20 +18,20 @@ drops support for Python 3.6, and supports startlingly old git versions.
 With thanks to Biastian Zim, Michał Górny, Igor S. Gerasimov, Christian Clauss,
 Anderson Bravalheri and Simão Afonso for contributions.
 
-* FIX: Adequate custom `build_py` command to changes in setuptools v64 by @abravalheri in (313)
-* FIX: skip version update on `build_ext` if .py does not exist by @mgorny in (297)
-* FIX: old GIT (<1.7.2) does not know about `--count` flag by @foxtran in (306)
-* FIX: Use only numeric versions in Git, ignore other tags with the same prefix by @effigies in (256)
-* FIX: Handle missing `tag_prefix` gracefully by @effigies in (308)
-* FIX: Restore `py_modules` field to setup.py by @effigies in (293)
-* ENH: Patch versioneer files into manifest at runtime by @effigies in (309)
-* STY: Undefined name: VersioneerBadRootError on line 51 by @cclauss in (305)
-* STY: Appease flake8 by @simaoafonso-pwt in (312)
-* MNT: Drop 3.6 support, remove old hacks by @effigies in (288)
-* MNT: Clarify license as CC0-1.0 by @BastianZim in (292)
-* MNT: Drop distutils by @effigies in (289)
-* MNT: Disable editable installs of versioneer (they will not work) by @effigies in (307)
-* CI: Update gh-actions PLATFORM variable to avoid double-testing by @effigies in (311)
+* FIX: Adequate custom `build_py` command to changes in setuptools v64 by @abravalheri (#313)
+* FIX: skip version update on `build_ext` if .py does not exist by @mgorny (#297)
+* FIX: old GIT (<1.7.2) does not know about `--count` flag by @foxtran (#306)
+* FIX: Use only numeric versions in Git, ignore other tags with the same prefix by @effigies (#256)
+* FIX: Handle missing `tag_prefix` gracefully by @effigies (#308)
+* FIX: Restore `py_modules` field to setup.py by @effigies (#293)
+* ENH: Patch versioneer files into manifest at runtime by @effigies (#309)
+* STY: Undefined name: VersioneerBadRootError on line 51 by @cclauss (#305)
+* STY: Appease flake8 by @simaoafonso-pwt (#312)
+* MNT: Drop 3.6 support, remove old hacks by @effigies (#288)
+* MNT: Clarify license as CC0-1.0 by @BastianZim (#292)
+* MNT: Drop distutils by @effigies (#289)
+* MNT: Disable editable installs of versioneer (they will not work) by @effigies (#307)
+* CI: Update gh-actions PLATFORM variable to avoid double-testing by @effigies (#311)
 
 ## Release 0.22 (07-Mar-2022)
 
