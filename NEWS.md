@@ -1,3 +1,16 @@
+## Release 0.25 (2-Sep-2022)
+
+This release makes minor changes to the metadata, ensures tests run correctly from sdist
+packages, and uses non-vendored versioneer to version itself.
+
+With thanks to Simão Afonso for contributions.
+
+* FIX: Include pyproject.toml in MANIFEST.in by @effigies (#326)
+* STY: Appease flake8 by @simaoafonso-pwt (#327)
+* MNT: Version versioneer with versioneer by @effigies (#323)
+* CI: Build package and push to PyPI on tag by @effigies (#328)
+* CI: Explicitly test sdist by @effigies (#329)
+
 ## Release 0.24 (30-Aug-2022)
 
 This release adds support for a non-vendored use of Versioneer.
