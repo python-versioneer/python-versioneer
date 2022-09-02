@@ -6,10 +6,10 @@ from setuptools import setup, Command
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 
-LONG = Path.read_text(Path(__file__).parent / "README.md")
-
-# as nice as it'd be to versioneer ourselves, that sounds messy.
-VERSION = "0.25.dev0"
+# If versioneer is not installed in the environment, then we will need to
+# need to build and exec it. The build requires a VERSION, so we might need
+# this before we know its value.
+VERSION = "0+bootstrap"
 
 
 def ver(s):
@@ -116,17 +116,13 @@ class my_build_py(build_py):
         lines = [v_b64[i:i+60] for i in range(0, len(v_b64), 60)]
         v_b64 = "\n".join(lines)+"\n"
 
-        with open("src/installer.py") as f:
-            s = f.read()
+        s = Path("src/installer.py").read_text()
         s = ver(s.replace("@VERSIONEER-INSTALLER@", v_b64))
-
         with tempfile.TemporaryDirectory() as tempdir:
-            installer = os.path.join(tempdir, "versioneer.py")
-            with open(installer, "w") as f:
-                f.write(s)
+            installer = Path(tempdir) / "versioneer.py"
+            installer.write_text(s)
 
-            self.py_modules = [os.path.splitext(os.path.basename(installer))[0]]
-            self.package_dir.update({'': os.path.dirname(installer)})
+            self.package_dir.update({'': os.path.relpath(installer.parent)})
             rc = build_py.run(self)
         return rc
 
@@ -136,39 +132,24 @@ class develop(develop):
     def run(self):
         raise RuntimeError("Versioneer cannot be installed in developer/editable mode.")
 
+try:
+    import versioneer
+except ImportError:
+    # Bootstrap a versioneer module until it's built
+    from importlib import util as ilu
+    versioneer = ilu.module_from_spec(ilu.spec_from_loader('versioneer', loader=None))
+    exec(generate_versioneer_py(), versioneer.__dict__)
+
+VERSION = versioneer.get_version()
+
 
 setup(
-    name = "versioneer",
-    license = "Unlicense",
-    version = VERSION,
-    description = "Easy VCS-based management of project version strings",
-    author = "Brian Warner",
-    author_email = "warner-versioneer@lothar.com",
-    url = "https://github.com/python-versioneer/python-versioneer",
-    # "fake" is replaced with versioneer-installer in build_scripts. We need
-    # a non-empty list to provoke "setup.py build" into making scripts,
-    # otherwise it skips that step.
-    py_modules = ["fake"],
-    entry_points={
-        'console_scripts': [
-            'versioneer = versioneer:main',
-        ],
-    },
-    long_description=LONG,
-    long_description_content_type="text/markdown",
-    cmdclass = { "build_py": my_build_py,
-                 "make_versioneer": make_versioneer,
-                 "make_long_version_py_git": make_long_version_py_git,
-                 "develop": develop,
-                 },
-    python_requires=">=3.7",
-    classifiers=[
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "License :: OSI Approved :: The Unlicense (Unlicense)",
-        ],
-    )
+    version=VERSION,
+    py_modules=["versioneer"],
+    cmdclass=versioneer.get_cmdclass({
+        "build_py": my_build_py,
+        "make_versioneer": make_versioneer,
+        "make_long_version_py_git": make_long_version_py_git,
+        "develop": develop,
+    })
+)
