@@ -74,9 +74,20 @@ To versioneer-enable your project:
 
 * 1: Install versioneer with `pip install versioneer`
 
-* 2: Modify your `setup.cfg`, adding a section named `[versioneer]` and
+* 2: Modify your `pyproject.toml` or your `setup.cfg`,
+  adding a section named `[tool.versioneer]` or `[versioneer]` (respectively) and
   populating it with the configuration values you decided earlier (note that
   the option names are not case-sensitive):
+
+  ```toml
+  [tool.versioneer]
+  VCS = "git"
+  style = "pep440"
+  versionfile_source = "src/myproject/_version.py"
+  versionfile_build = "myproject/_version.py"
+  tag_prefix = ""
+  parentdir_prefix = "myproject-"
+  ```
 
   ```ini
   [versioneer]
