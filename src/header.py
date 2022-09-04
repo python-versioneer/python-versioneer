@@ -18,8 +18,14 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 from typing import Callable, Dict
 import functools
+try:
+    import tomli
+    have_tomli = True
+except ImportError:
+    have_tomli = False
 
 class VersioneerBadRootError(Exception): ... # --STRIP DURING BUILD
 
@@ -72,17 +78,27 @@ def get_config_from_root(root):
     # configparser.NoSectionError (if it lacks a [versioneer] section), or
     # configparser.NoOptionError (if it lacks "VCS="). See the docstring at
     # the top of versioneer.py for instructions on writing your setup.cfg .
-    setup_cfg = os.path.join(root, "setup.cfg")
-    parser = configparser.ConfigParser()
-    with open(setup_cfg, "r") as cfg_file:
-        parser.read_file(cfg_file)
-    VCS = parser.get("versioneer", "VCS")  # mandatory
+    root = Path(root)
+    pyproject_toml = root / "pyproject.toml"
+    setup_cfg = root / "setup.cfg"
+    section = None
+    if pyproject_toml.exists() and have_tomli:
+        try:
+            with open(pyproject_toml, 'rb') as fobj:
+                pp = tomli.load(fobj)
+            section = pp['tool']['versioneer']
+        except (tomli.TOMLDecodeError, KeyError):
+            pass
+    if not section:
+        parser = configparser.ConfigParser()
+        with open(setup_cfg) as cfg_file:
+            parser.read_file(cfg_file)
+        parser.get("versioneer", "VCS")  # raise error if missing
 
-    # Dict-like interface for non-mandatory entries
-    section = parser["versioneer"]
+        section = parser["versioneer"]
 
     cfg = VersioneerConfig()
-    cfg.VCS = VCS
+    cfg.VCS = section['VCS']
     cfg.style = section.get("style", "")
     cfg.versionfile_source = section.get("versionfile_source")
     cfg.versionfile_build = section.get("versionfile_build")
