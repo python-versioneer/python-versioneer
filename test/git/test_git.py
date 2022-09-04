@@ -452,18 +452,19 @@ class Repo(common.Common, unittest.TestCase):
 
         shutil.copytree(demoapp_dir, self.projdir)
         setup_cfg_fn = self.project_file("setup.cfg")
-        with open(setup_cfg_fn, "r") as f:
-            setup_cfg = f.read()
-        setup_cfg = setup_cfg.replace("@VCS@", "git")
+        if os.path.exists(setup_cfg_fn):
+            with open(setup_cfg_fn, "r") as f:
+                setup_cfg = f.read()
+            setup_cfg = setup_cfg.replace("@VCS@", "git")
 
-        tag_prefix_regex = "tag_prefix = (.*)"
-        if tag_prefix is None:
-            tag_prefix = re.search(tag_prefix_regex, setup_cfg).group(1)
-        else:
-            setup_cfg = re.sub(tag_prefix_regex, f"tag_prefix = {tag_prefix}", setup_cfg)
+            tag_prefix_regex = "tag_prefix = (.*)"
+            if tag_prefix is None:
+                tag_prefix = re.search(tag_prefix_regex, setup_cfg).group(1)
+            else:
+                setup_cfg = re.sub(tag_prefix_regex, f"tag_prefix = {tag_prefix}", setup_cfg)
 
-        with open(setup_cfg_fn, "w") as f:
-            f.write(setup_cfg)
+            with open(setup_cfg_fn, "w") as f:
+                f.write(setup_cfg)
 
         if pep518:
             # Set test versioneer build-system.requires entry to @ file:///<this-repo>
@@ -473,6 +474,15 @@ class Repo(common.Common, unittest.TestCase):
             vsr = str(versioneer_source_root).replace("\\", "/")  # For testing on Windows...
             pyproject_toml = pyproject_path.read_text()
             pyproject_toml = pyproject_toml.replace("@REPOROOT@", f"file://{vsr}")
+
+            # Update versioneer config
+            pyproject_toml = pyproject_toml.replace("@VCS@", "git")
+            tag_prefix_regex = 'tag_prefix = "(.*)"'
+            if tag_prefix is None:
+                tag_prefix = re.search(tag_prefix_regex, pyproject_toml).group(1)
+            else:
+                pyproject_toml = re.sub(tag_prefix_regex, f'tag_prefix = "{tag_prefix}"', pyproject_toml)
+
             pyproject_path.write_text(pyproject_toml)
         else:
             shutil.copyfile("versioneer.py", self.project_file("versioneer.py"))
