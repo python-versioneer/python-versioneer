@@ -31,3 +31,6 @@ dynamic = ["version"]
 
 [project.scripts]
 "versioneer" = "versioneer:main"
+
+[project.optional-dependencies]
+toml = ["tomli"]

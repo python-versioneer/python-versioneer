@@ -25,14 +25,16 @@ is intended to allow you to skip this step and simplify the process of upgrading
 ### Vendored mode
 
 * `pip install versioneer` to somewhere in your $PATH
-* add a `[versioneer]` section to your setup.cfg (see [Install](INSTALL.md))
+* add a `[tool.versioneer]` section to your `pyproject.toml or a
+  `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
 * run `versioneer install --vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
 
 ### Build-time dependency mode
 
 * `pip install versioneer` to somewhere in your $PATH
-* add a `[versioneer]` section to your setup.cfg (see [Install](INSTALL.md))
+* add a `[tool.versioneer]` section to your `pyproject.toml or a
+  `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
 * add `versioneer` to the `requires` key of the `build-system` table in
   `pyproject.toml`:
   ```toml
@@ -246,8 +248,9 @@ resolve it.
 To upgrade your project to a new release of Versioneer, do the following:
 
 * install the new Versioneer (`pip install -U versioneer` or equivalent)
-* edit `setup.cfg`, if necessary, to include any new configuration settings
-  indicated by the release notes. See [UPGRADING](./UPGRADING.md) for details.
+* edit `setup.cfg` and `pyproject.toml`, if necessary,
+  to include any new configuration settings indicated by the release notes.
+  See [UPGRADING](./UPGRADING.md) for details.
 * re-run `versioneer install --[no-]vendor` in your source tree, to replace
   `SRC/_version.py`
 * commit any changed files
