@@ -1,3 +1,12 @@
+## Release 0.26 (6-Sep-2022)
+
+This release adds support for configuring versioneer through pyproject.toml and
+removes itself from the list of explicit build requirements, which caused problems
+with `--no-binary` installations.
+
+* FIX: Remove versioneer from build-system.requires by @effigies (#334)
+* ENH: Support configuration in pyproject.toml by @effigies (#330)
+
 ## Release 0.25 (2-Sep-2022)
 
 This release makes minor changes to the metadata, ensures tests run correctly from sdist
