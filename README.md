@@ -25,7 +25,7 @@ is intended to allow you to skip this step and simplify the process of upgrading
 ### Vendored mode
 
 * `pip install versioneer` to somewhere in your $PATH
-* add a `[tool.versioneer]` section to your `pyproject.toml or a
+* add a `[tool.versioneer]` section to your `pyproject.toml` or a
   `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
 * run `versioneer install --vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
@@ -33,7 +33,7 @@ is intended to allow you to skip this step and simplify the process of upgrading
 ### Build-time dependency mode
 
 * `pip install versioneer` to somewhere in your $PATH
-* add a `[tool.versioneer]` section to your `pyproject.toml or a
+* add a `[tool.versioneer]` section to your `pyproject.toml` or a
   `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
 * add `versioneer` to the `requires` key of the `build-system` table in
   `pyproject.toml`:
