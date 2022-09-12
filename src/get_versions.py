@@ -1,4 +1,5 @@
 import os, sys # --STRIP DURING BUILD
+import runpy # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
 def versions_from_file(): pass # --STRIP DURING BUILD
@@ -38,6 +39,13 @@ def get_versions(verbose=False):
     # source checkout, for users of a tarball created by 'setup.py sdist',
     # and for users of a tarball/zipball created by 'git archive' or github's
     # download-from-tag feature or the equivalent in other VCSes.
+
+    # First, can we just load the module?
+    try:
+        version_module = runpy.run_module(versionfile_abs)
+        return version_module['get_versions'](verbose=verbose)
+    except Exception:
+        pass
 
     get_keywords_f = handlers.get("get_keywords")
     from_keywords_f = handlers.get("keywords")
