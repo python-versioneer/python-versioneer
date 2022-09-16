@@ -3,7 +3,7 @@ import unittest
 from versioneer import render
 
 
-class Testing_renderer_case_mixin(object):
+class Testing_renderer_case_mixin:
     """
     This is a mixin object which can be combined with a unittest.TestCase
     which defines a style and an expected dictionary. See Test_pep440 for
