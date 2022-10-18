@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, base64, tempfile, io
+from importlib import util as ilu
 from pathlib import Path
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
@@ -132,13 +133,9 @@ class develop(develop):
     def run(self):
         raise RuntimeError("Versioneer cannot be installed in developer/editable mode.")
 
-try:
-    import versioneer
-except ImportError:
-    # Bootstrap a versioneer module until it's built
-    from importlib import util as ilu
-    versioneer = ilu.module_from_spec(ilu.spec_from_loader('versioneer', loader=None))
-    exec(generate_versioneer_py(), versioneer.__dict__)
+# Bootstrap a versioneer module to guarantee that we get a compatible version
+versioneer = ilu.module_from_spec(ilu.spec_from_loader('versioneer', loader=None))
+exec(generate_versioneer_py(), versioneer.__dict__)
 
 VERSION = versioneer.get_version()
 
