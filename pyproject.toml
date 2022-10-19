@@ -39,3 +39,4 @@ toml = ["tomli"]
 VCS = "git"
 style = "pep440"
 versionfile_source = "_version.py"
+parentdir_prefix = ""
