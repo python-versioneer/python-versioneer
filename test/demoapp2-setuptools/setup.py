@@ -2,6 +2,8 @@
 from setuptools import setup
 import versioneer
 commands = versioneer.get_cmdclass().copy()
+# Updating our updated commands should be safe
+commands = versioneer.get_cmdclass(commands).copy()
 
 setup(name="demoapp2",
       version=versioneer.get_version(),
