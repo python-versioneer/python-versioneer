@@ -25,21 +25,27 @@ is intended to allow you to skip this step and simplify the process of upgrading
 ### Vendored mode
 
 * `pip install versioneer` to somewhere in your $PATH
+   * A [conda-forge recipe](https://github.com/conda-forge/versioneer-feedstock) is
+     available, so you can also use `conda install -c conda-forge versioneer`
 * add a `[tool.versioneer]` section to your `pyproject.toml` or a
   `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
+   * Note that you will need to add `tomli` to your build-time dependencies if you
+     use `pyproject.toml`
 * run `versioneer install --vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
 
 ### Build-time dependency mode
 
 * `pip install versioneer` to somewhere in your $PATH
+   * A [conda-forge recipe](https://github.com/conda-forge/versioneer-feedstock) is
+     available, so you can also use `conda install -c conda-forge versioneer`
 * add a `[tool.versioneer]` section to your `pyproject.toml` or a
   `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
-* add `versioneer` to the `requires` key of the `build-system` table in
-  `pyproject.toml`:
+* add `versioneer` (with `[toml]` extra, if configuring in `pyproject.toml`)
+  to the `requires` key of the `build-system` table in `pyproject.toml`:
   ```toml
   [build-system]
-  requires = ["setuptools", "versioneer"]
+  requires = ["setuptools", "versioneer[toml]"]
   build-backend = "setuptools.build_meta"
   ```
 * run `versioneer install --no-vendor` in your source tree, commit the results
@@ -281,9 +287,8 @@ number of intermediate scripts.
 
 To make Versioneer easier to embed, all its code is dedicated to the public
 domain. The `_version.py` that it creates is also in the public domain.
-Specifically, both are released under the Creative Commons "Public Domain
-Dedication" license (CC0-1.0), as described in
-https://creativecommons.org/publicdomain/zero/1.0/ .
+Specifically, both are released under the "Unlicense", as described in
+https://unlicense.org/.
 
 [pypi-image]: https://img.shields.io/pypi/v/versioneer.svg
 [pypi-url]: https://pypi.python.org/pypi/versioneer/

@@ -5,6 +5,17 @@ must be configured. This document contains a list of releases where,
 when upgrading from an older release, you must make changes in your
 project.
 
+## Upgrading to 0.26
+
+Versioneer now supports configuration through `pyproject.toml` using a
+`[tool.versioneer]` table. To use this feature, you will need to add the
+`[toml]` extra to `build-system.requires`, e.g.,
+
+```toml
+[build-system]
+requires = ["setuptools", "versioneer[toml]==0.26"]
+```
+
 ## Upgrading to 0.24
 
 If you are transitioning to a non-vendored mode for versioneer, add

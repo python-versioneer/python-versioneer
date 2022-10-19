@@ -1,3 +1,17 @@
+## Release 0.27 (19-Oct-2022)
+
+This release fixes a bug with non-isolated builds of Versioneer and for packages that
+provide their own `sdist` command.
+
+With thanks to Dimitri Papadopoulos and Michal Gorny for contributions.
+
+* FIX: Always bootstrap in setup.py to avoid incompatibility with old versioneer by @mgorny (#344)
+* FIX: Mixup between `_egg_info` and `_sdist` by @DimitriPapadopoulos (#342)
+* STY: Merge `endswith` checks by @DimitriPapadopoulos (#337)
+* STY: Useless inheritance from object by @DimitriPapadopoulos (#336)
+* CI: python-version should be a string, not a float by @DimitriPapadopoulos (#340)
+* CI: Automatically update GitHub Actions in the future by @DimitriPapadopoulos (#341)
+
 ## Release 0.26 (6-Sep-2022)
 
 This release adds support for configuring versioneer through pyproject.toml and
