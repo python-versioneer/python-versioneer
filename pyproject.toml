@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "tomli"]
+requires = ["setuptools", "tomli; python_version < '3.11'"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -33,7 +33,7 @@ dynamic = ["version"]
 "versioneer" = "versioneer:main"
 
 [project.optional-dependencies]
-toml = ["tomli"]
+toml = ["tomli; python_version < '3.11'"]
 
 [tool.versioneer]
 VCS = "git"

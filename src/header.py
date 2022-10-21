@@ -21,11 +21,15 @@ import sys
 from pathlib import Path
 from typing import Callable, Dict
 import functools
-try:
-    import tomli
-    have_tomli = True
-except ImportError:
-    have_tomli = False
+
+have_tomllib = True
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    try:
+        import tomli as tomllib
+    except ImportError:
+        have_tomllib = False
 
 class VersioneerBadRootError(Exception): ... # --STRIP DURING BUILD
 
@@ -82,12 +86,12 @@ def get_config_from_root(root):
     pyproject_toml = root / "pyproject.toml"
     setup_cfg = root / "setup.cfg"
     section = None
-    if pyproject_toml.exists() and have_tomli:
+    if pyproject_toml.exists() and have_tomllib:
         try:
             with open(pyproject_toml, 'rb') as fobj:
-                pp = tomli.load(fobj)
+                pp = tomllib.load(fobj)
             section = pp['tool']['versioneer']
-        except (tomli.TOMLDecodeError, KeyError):
+        except (tomllib.TOMLDecodeError, KeyError):
             pass
     if not section:
         parser = configparser.ConfigParser()

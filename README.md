@@ -29,8 +29,8 @@ is intended to allow you to skip this step and simplify the process of upgrading
      available, so you can also use `conda install -c conda-forge versioneer`
 * add a `[tool.versioneer]` section to your `pyproject.toml` or a
   `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
-   * Note that you will need to add `tomli` to your build-time dependencies if you
-     use `pyproject.toml`
+   * Note that you will need to add `tomli; python_version < "3.11"` to your
+     build-time dependencies if you use `pyproject.toml`
 * run `versioneer install --vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
 
