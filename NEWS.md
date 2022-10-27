@@ -1,9 +1,19 @@
+## Release 0.28 (27-Oct-2022)
+
+This release adds official support for Python 3.11, including using the built-in tomllib
+instead of the third-party tomli, when available.
+
+With thanks to Michał Górny for contributions.
+
+* FIX: Handle unset `versionfile_build` in `build_ext` by @mgorny (#347)
+* ENH: Support built-in tomllib for Python 3.11+ by @mgorny (#348)
+
 ## Release 0.27 (19-Oct-2022)
 
 This release fixes a bug with non-isolated builds of Versioneer and for packages that
 provide their own `sdist` command.
 
-With thanks to Dimitri Papadopoulos and Michal Gorny for contributions.
+With thanks to Dimitri Papadopoulos and Michał Górny for contributions.
 
 * FIX: Always bootstrap in setup.py to avoid incompatibility with old versioneer by @mgorny (#344)
 * FIX: Mixup between `_egg_info` and `_sdist` by @DimitriPapadopoulos (#342)
