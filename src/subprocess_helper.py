@@ -26,18 +26,18 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
             if e.errno == errno.ENOENT:
                 continue
             if verbose:
-                print("unable to run %s" % dispcmd)
+                print(f"unable to run {dispcmd}")
                 print(e)
             return None, None
     else:
         if verbose:
-            print("unable to find command, tried %s" % (commands,))
+            print(f"unable to find command, tried {commands}")
         return None, None
     stdout = process.communicate()[0].strip().decode()
     if process.returncode != 0:
         if verbose:
-            print("unable to run %s (error)" % dispcmd)
-            print("stdout was %s" % stdout)
+            print(f"unable to run {dispcmd} (error)")
+            print(f"stdout was {stdout}")
         return None, process.returncode
     return stdout, process.returncode
 

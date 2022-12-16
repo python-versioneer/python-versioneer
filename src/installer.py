@@ -57,7 +57,7 @@ def main():
     mode = "--vendor" if len(sys.argv) == 2 else sys.argv[2]
 
     if command in ("version", "--version"):
-        print("versioneer (installer) %s" % newver)
+        print(f"versioneer (installer) {newver}")
         sys.exit(0)
     elif command in ("help", "-help", "--help"):
         print(usage)

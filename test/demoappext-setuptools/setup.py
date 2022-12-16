@@ -1,4 +1,3 @@
-
 from setuptools import setup, Extension
 import versioneer
 commands = versioneer.get_cmdclass().copy()

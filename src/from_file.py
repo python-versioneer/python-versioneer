@@ -7,7 +7,7 @@ SHORT_VERSION_PY = """
 import json
 
 version_json = '''
-%s
+{}
 '''  # END VERSION_JSON
 
 
@@ -41,7 +41,7 @@ def write_to_version_file(filename, versions):
     contents = json.dumps(versions, sort_keys=True,
                           indent=1, separators=(",", ": "))
     with open(filename, "w") as f:
-        f.write(SHORT_VERSION_PY % contents)
+        f.write(SHORT_VERSION_PY.format(contents))
 
-    print("set %s to '%s'" % (filename, versions["version"]))
+    print("set {} to '{}'".format(filename, versions["version"]))
 
