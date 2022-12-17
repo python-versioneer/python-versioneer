@@ -15,7 +15,6 @@ def get_versions():
     return json.loads(version_json)
 """
 
-import os # --STRIP DURING BUILD
 import json # --STRIP DURING BUILD
 import re # --STRIP DURING BUILD
 class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
@@ -39,7 +38,6 @@ def versions_from_file(filename):
 
 def write_to_version_file(filename, versions):
     """Write the given version number to the given _version.py file."""
-    os.unlink(filename)
     contents = json.dumps(versions, sort_keys=True,
                           indent=1, separators=(",", ": "))
     with open(filename, "w") as f:
