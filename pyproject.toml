@@ -9,7 +9,6 @@ authors = [
   { name = "Brian Warner" },
 ]
 maintainers = [
-  { name = "Christopher Markiewicz", email = "effigies@gmail.com" },
   { name = "Nathan Buckner",  email = "bucknerns@users.noreply.github.com" },
 ]
 readme = "README.md"
