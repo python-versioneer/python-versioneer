@@ -141,6 +141,7 @@ VERSION = versioneer.get_version()
 
 
 setup(
+    name="versioneer",  # need by GitHub dependency graph
     version=VERSION,
     py_modules=["versioneer"],
     cmdclass=versioneer.get_cmdclass({
