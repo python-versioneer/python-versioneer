@@ -91,8 +91,9 @@ def get_config_from_root(root):
             with open(pyproject_toml, 'rb') as fobj:
                 pp = tomllib.load(fobj)
             section = pp['tool']['versioneer']
-        except (tomllib.TOMLDecodeError, KeyError):
-            pass
+        except (tomllib.TOMLDecodeError, KeyError) as e:
+            print(f"Failed to load config from {pyproject_toml}: {e}")
+            print("Try to load it from setup.cfg")
     if not section:
         parser = configparser.ConfigParser()
         with open(setup_cfg) as cfg_file:
