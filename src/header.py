@@ -31,7 +31,7 @@ else:
     except ImportError:
         have_tomllib = False
 
-class VersioneerBadRootError(Exception): ... # --STRIP DURING BUILD
+from .get_versions import VersioneerBadRootError # --STRIP DURING BUILD
 
 class VersioneerConfig:
     """Container for Versioneer configuration parameters."""

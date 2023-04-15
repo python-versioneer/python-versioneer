@@ -17,7 +17,7 @@ def get_versions():
 
 import json # --STRIP DURING BUILD
 import re # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+from .header import NotThisMethod # --STRIP DURING BUILD
 
 def versions_from_file(filename):
     """Try to determine the version from _version.py if present."""

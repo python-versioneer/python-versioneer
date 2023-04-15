@@ -1,5 +1,5 @@
 import os # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+from .header import NotThisMethod # --STRIP DURING BUILD
 def versions_from_parentdir(parentdir_prefix, root, verbose):
     """Try to determine the version from the parent directory name.
 

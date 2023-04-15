@@ -2,19 +2,10 @@ import sys  # --STRIP DURING BUILD
 import re  # --STRIP DURING BUILD
 import os  # --STRIP DURING BUILD
 import functools  # --STRIP DURING BUILD
+from .long_header import NotThisMethod, register_vcs_handler  # --STRIP DURING BUILD
+from subprocess_helper import run_command  # --STRIP DURING BUILD
   # --STRIP DURING BUILD
   # --STRIP DURING BUILD
-def register_vcs_handler(*args):  # --STRIP DURING BUILD
-    def nil(f):  # --STRIP DURING BUILD
-        return f  # --STRIP DURING BUILD
-    return nil  # --STRIP DURING BUILD
-  # --STRIP DURING BUILD
-  # --STRIP DURING BUILD
-def run_command(): pass  # --STRIP DURING BUILD
-  # --STRIP DURING BUILD
-  # --STRIP DURING BUILD
-class NotThisMethod(Exception):  # --STRIP DURING BUILD
-    pass  # --STRIP DURING BUILD
 @register_vcs_handler("git", "pieces_from_vcs")
 def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     """Get version from 'git describe' in the root of the source tree.

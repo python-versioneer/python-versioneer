@@ -1,9 +1,5 @@
 import re # --STRIP DURING BUILD
-def register_vcs_handler(*args): # --STRIP DURING BUILD
-    def nil(f): # --STRIP DURING BUILD
-        return f # --STRIP DURING BUILD
-    return nil # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+from .long_header import NotThisMethod, register_vcs_handler # --STRIP DURING BUILD
 @register_vcs_handler("git", "get_keywords")
 def git_get_keywords(versionfile_abs):
     """Extract version information from the given file."""

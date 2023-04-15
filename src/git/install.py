@@ -1,5 +1,5 @@
 import sys # --STRIP DURING BUILD
-def run_command(): pass # --STRIP DURING BUILD
+from subprocess_helper import run_command # --STRIP DURING BUILD
 
 def do_vcs_install(versionfile_source, ipy):
     """Git-specific installation logic for Versioneer.

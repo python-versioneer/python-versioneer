@@ -1,11 +1,9 @@
 import os, sys # --STRIP DURING BUILD
-def get_root(): pass # --STRIP DURING BUILD
-def get_config_from_root(): pass # --STRIP DURING BUILD
-def versions_from_file(): pass # --STRIP DURING BUILD
-def versions_from_parentdir(): pass # --STRIP DURING BUILD
-def render(): pass # --STRIP DURING BUILD
-HANDLERS = {} # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+from .header import HANDLERS, get_root, get_config_from_root # --STRIP DURING BUILD
+from .header import NotThisMethod # --STRIP DURING BUILD
+from .from_file import versions_from_file # --STRIP DURING BUILD
+from .from_parentdir import versions_from_parentdir # --STRIP DURING BUILD
+from .render import render # --STRIP DURING BUILD
 
 class VersioneerBadRootError(Exception):
     """The project root directory is unknown or missing key files."""
