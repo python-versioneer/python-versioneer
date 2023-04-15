@@ -19,7 +19,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import functools
 
 have_tomllib = True
