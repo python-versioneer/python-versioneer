@@ -307,7 +307,9 @@ class _Invocations(common.Common):
 
     def make_binary_wheelname(self, app):
         return "%s-2.0-%s-%s-%s.whl" % (app,
-            "".join([impl, impl_ver]), abi, plat.replace("-", "_"))
+            "".join([impl, impl_ver]), abi,
+            plat.replace("-", "_").replace(".", "_")
+            )
 
 
 class SetuptoolsRepo(_Invocations, unittest.TestCase):
