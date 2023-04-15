@@ -1,6 +1,5 @@
 import os, sys # --STRIP DURING BUILD
 LONG_VERSION_PY = {} # --STRIP DURING BUILD
-def get_version(): pass # --STRIP DURING BUILD
 def get_versions(): pass # --STRIP DURING BUILD
 def get_root(): pass # --STRIP DURING BUILD
 def get_config_from_root(): pass # --STRIP DURING BUILD
