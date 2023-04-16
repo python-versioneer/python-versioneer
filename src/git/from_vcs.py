@@ -2,12 +2,18 @@ import sys  # --STRIP DURING BUILD
 import re  # --STRIP DURING BUILD
 import os  # --STRIP DURING BUILD
 import functools  # --STRIP DURING BUILD
+from typing import Any, Callable, Dict  # --STRIP DURING BUILD
 from .long_header import NotThisMethod, register_vcs_handler  # --STRIP DURING BUILD
 from subprocess_helper import run_command  # --STRIP DURING BUILD
   # --STRIP DURING BUILD
   # --STRIP DURING BUILD
 @register_vcs_handler("git", "pieces_from_vcs")
-def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
+def git_pieces_from_vcs(
+    tag_prefix: str,
+    root: str,
+    verbose: bool,
+    runner: Callable = run_command
+) -> Dict[str, Any]:
     """Get version from 'git describe' in the root of the source tree.
 
     This only gets called if the git-archive 'subst' keywords were *not*
@@ -47,7 +53,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
         raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
 
-    pieces = {}
+    pieces: Dict[str, Any] = {}
     pieces["long"] = full_out
     pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
