@@ -35,13 +35,12 @@ def get_keywords() -> Dict[str, str]:
 class VersioneerConfig:
     """Container for Versioneer configuration parameters."""
 
-    VCS: Optional[str]
-    style: Optional[str]
-    versionfile_source: Optional[str]
-    versionfile_build: Optional[str]
-    tag_prefix: Optional[str]
-    parentdir_prefix: Optional[str]
-    verbose: Optional[bool]
+    VCS: str
+    style: str
+    tag_prefix: str
+    parentdir_prefix: str
+    versionfile_source: str
+    verbose: bool
 
 
 def get_config() -> VersioneerConfig:
