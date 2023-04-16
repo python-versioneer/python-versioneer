@@ -1,6 +1,11 @@
 import os # --STRIP DURING BUILD
 from .header import NotThisMethod # --STRIP DURING BUILD
-def versions_from_parentdir(parentdir_prefix, root, verbose):
+from typing import Any, Dict # --STRIP DURING BUILD
+def versions_from_parentdir(
+    parentdir_prefix: str,
+    root: str,
+    verbose: bool,
+) -> Dict[str, Any]:
     """Try to determine the version from the parent directory name.
 
     Source tarballs conventionally unpack into a directory that includes both
