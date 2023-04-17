@@ -19,7 +19,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import functools
 
 have_tomllib = True
@@ -31,7 +31,7 @@ else:
     except ImportError:
         have_tomllib = False
 
-class VersioneerBadRootError(Exception): ... # --STRIP DURING BUILD
+from .get_versions import VersioneerBadRootError # --STRIP DURING BUILD
 
 class VersioneerConfig:
     """Container for Versioneer configuration parameters."""

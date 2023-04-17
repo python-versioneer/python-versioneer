@@ -1,17 +1,14 @@
 import re # --STRIP DURING BUILD
-def register_vcs_handler(*args): # --STRIP DURING BUILD
-    def nil(f): # --STRIP DURING BUILD
-        return f # --STRIP DURING BUILD
-    return nil # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
+from typing import Any, Dict # --STRIP DURING BUILD
+from .long_header import NotThisMethod, register_vcs_handler # --STRIP DURING BUILD
 @register_vcs_handler("git", "get_keywords")
-def git_get_keywords(versionfile_abs):
+def git_get_keywords(versionfile_abs: str) -> Dict[str, str]:
     """Extract version information from the given file."""
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
     # so we do it with a regexp instead. This function is not used from
     # _version.py.
-    keywords = {}
+    keywords: Dict[str, str] = {}
     try:
         with open(versionfile_abs, "r") as fobj:
             for line in fobj:
@@ -33,7 +30,11 @@ def git_get_keywords(versionfile_abs):
 
 
 @register_vcs_handler("git", "keywords")
-def git_versions_from_keywords(keywords, tag_prefix, verbose):
+def git_versions_from_keywords(
+    keywords: Dict[str, str],
+    tag_prefix: str,
+    verbose: bool,
+) -> Dict[str, Any]:
     """Get version information from git keywords."""
     if "refnames" not in keywords:
         raise NotThisMethod("Short version file found")

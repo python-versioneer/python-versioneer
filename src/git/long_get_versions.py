@@ -1,13 +1,12 @@
 import os # --STRIP DURING BUILD
-def get_config(): pass # --STRIP DURING BUILD
-def get_keywords(): pass # --STRIP DURING BUILD
-def git_versions_from_keywords(): pass # --STRIP DURING BUILD
-def git_pieces_from_vcs(): pass # --STRIP DURING BUILD
-def versions_from_parentdir(): pass # --STRIP DURING BUILD
-class NotThisMethod(Exception): pass  # --STRIP DURING BUILD
-def render(): pass # --STRIP DURING BUILD
+from typing import Any, Dict # --STRIP DURING BUILD
+from .long_header import get_config, get_keywords, NotThisMethod # --STRIP DURING BUILD
+from .from_keywords import git_versions_from_keywords # --STRIP DURING BUILD
+from .from_vcs import git_pieces_from_vcs # --STRIP DURING BUILD
+from from_parentdir import versions_from_parentdir # --STRIP DURING BUILD
+from render import render # --STRIP DURING BUILD
 
-def get_versions():
+def get_versions() -> Dict[str, Any]:
     """Get version information or return default if unable to do so."""
     # I am in _version.py, which lives at ROOT/VERSIONFILE_SOURCE. If we have
     # __file__, we can work backwards from there to the root. Some

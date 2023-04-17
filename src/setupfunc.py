@@ -1,10 +1,9 @@
 
+import configparser # --STRIP DURING BUILD
 import os, sys  # --STRIP DURING BUILD
-def get_root(): pass # --STRIP DURING BUILD
-def get_config_from_root(): pass # --STRIP DURING BUILD
-LONG_VERSION_PY = {} # --STRIP DURING BUILD
-def do_vcs_install(): pass # --STRIP DURING BUILD
-configparser = None # --STRIP DURING BUILD
+from .header import get_config_from_root, get_root # --STRIP DURING BUILD
+from .header import LONG_VERSION_PY # --STRIP DURING BUILD
+from .git.install import do_vcs_install # --STRIP DURING BUILD
 
 CONFIG_ERROR = """
 setup.cfg is missing the necessary Versioneer configuration. You need
