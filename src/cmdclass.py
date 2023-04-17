@@ -43,12 +43,12 @@ def get_cmdclass(cmdclass=None):
 
         def run(self):
             vers = get_versions(verbose=True)
-            print("Version: %s" % vers["version"])
-            print(" full-revisionid: %s" % vers.get("full-revisionid"))
-            print(" dirty: %s" % vers.get("dirty"))
-            print(" date: %s" % vers.get("date"))
+            print("Version: {}".format(vers["version"]))
+            print(" full-revisionid: {}".format(vers.get("full-revisionid")))
+            print(" dirty: {}".format(vers.get("dirty")))
+            print(" date: {}".format(vers.get("date")))
             if vers["error"]:
-                print(" error: %s" % vers["error"])
+                print(" error: {}".format(vers["error"]))
     cmds["version"] = cmd_version
 
     # we override "build_py" in setuptools
@@ -90,7 +90,7 @@ def get_cmdclass(cmdclass=None):
             if cfg.versionfile_build:
                 target_versionfile = os.path.join(self.build_lib,
                                                   cfg.versionfile_build)
-                print("UPDATING %s" % target_versionfile)
+                print(f"UPDATING {target_versionfile}")
                 write_to_version_file(target_versionfile, versions)
     cmds["build_py"] = cmd_build_py
 
@@ -122,7 +122,7 @@ def get_cmdclass(cmdclass=None):
                       "version update. This can happen if you are running build_ext "
                       "without first running build_py.")
                 return
-            print("UPDATING %s" % target_versionfile)
+            print(f"UPDATING {target_versionfile}")
             write_to_version_file(target_versionfile, versions)
     cmds["build_ext"] = cmd_build_ext
 
@@ -141,7 +141,7 @@ def get_cmdclass(cmdclass=None):
                 cfg = get_config_from_root(root)
                 versions = get_versions()
                 target_versionfile = cfg.versionfile_source
-                print("UPDATING %s" % target_versionfile)
+                print(f"UPDATING {target_versionfile}")
                 write_to_version_file(target_versionfile, versions)
 
                 _build_exe.run(self)
@@ -170,7 +170,7 @@ def get_cmdclass(cmdclass=None):
                 cfg = get_config_from_root(root)
                 versions = get_versions()
                 target_versionfile = cfg.versionfile_source
-                print("UPDATING %s" % target_versionfile)
+                print(f"UPDATING {target_versionfile}")
                 write_to_version_file(target_versionfile, versions)
 
                 _py2exe.run(self)
@@ -246,7 +246,7 @@ def get_cmdclass(cmdclass=None):
             # (remembering that it may be a hardlink) and replace it with an
             # updated value
             target_versionfile = os.path.join(base_dir, cfg.versionfile_source)
-            print("UPDATING %s" % target_versionfile)
+            print(f"UPDATING {target_versionfile}")
             write_to_version_file(target_versionfile,
                                   self._versioneer_generated_versions)
     cmds["sdist"] = cmd_sdist

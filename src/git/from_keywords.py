@@ -71,9 +71,11 @@ def git_versions_from_keywords(
         # "stabilization", as well as "HEAD" and "master".
         tags = {r for r in refs if re.search(r'\d', r)}
         if verbose:
-            print("discarding '%s', no digits" % ",".join(refs - tags))
+            discarded_tags = ",".join(sorted(refs - tags))
+            print(f"discarding '{discarded_tags}', no digits")
     if verbose:
-        print("likely tags: %s" % ",".join(sorted(tags)))
+        likely_tags = ",".join(sorted(tags))
+        print(f"likely tags: {likely_tags}")
     for ref in sorted(tags):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
@@ -84,7 +86,7 @@ def git_versions_from_keywords(
             if not re.match(r'\d', r):
                 continue
             if verbose:
-                print("picking %s" % r)
+                print(f"picking {r}")
             return {"version": r,
                     "full-revisionid": keywords["full"].strip(),
                     "dirty": False, "error": None,

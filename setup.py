@@ -41,12 +41,12 @@ def get_vcs_list():
 def generate_long_version_py(VCS):
     s = io.StringIO()
     s.write(get(f"src/{VCS}/long_header.py", add_ver=True, do_strip=True))
-    for piece in ["src/subprocess_helper.py",
+    for piece in ("src/subprocess_helper.py",
                   "src/from_parentdir.py",
                   f"src/{VCS}/from_keywords.py",
                   f"src/{VCS}/from_vcs.py",
                   "src/render.py",
-                  f"src/{VCS}/long_get_versions.py"]:
+                  f"src/{VCS}/long_get_versions.py"):
         s.write(get(piece, unquote=True, do_strip=True))
     return s.getvalue()
 

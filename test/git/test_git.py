@@ -313,9 +313,9 @@ git-describe-long: 250b7ca-dirty
 class RenderPieces(unittest.TestCase):
     def do_render(self, pieces):
         out = {}
-        for style in ["pep440", "pep440-branch", "pep440-pre", "pep440-post",
+        for style in ("pep440", "pep440-branch", "pep440-pre", "pep440-post",
                       "pep440-post-branch", "pep440-old", "git-describe",
-                      "git-describe-long"]:
+                      "git-describe-long"):
             out[style] = render(pieces, style)["version"]
         DEFAULT = "pep440"
         self.assertEqual(render(pieces, ""), render(pieces, DEFAULT))
