@@ -1,7 +1,9 @@
+import os # --STRIP DURING BUILD
 import sys # --STRIP DURING BUILD
+from typing import Optional # --STRIP DURING BUILD
 from subprocess_helper import run_command # --STRIP DURING BUILD
 
-def do_vcs_install(versionfile_source, ipy):
+def do_vcs_install(versionfile_source: str, ipy: Optional[str]) -> None:
     """Git-specific installation logic for Versioneer.
 
     For Git, this means creating/changing .gitattributes to mark _version.py
