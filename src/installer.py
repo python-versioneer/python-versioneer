@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, base64
+from typing import NoReturn
 
 VERSIONEER_b64 = """
 @VERSIONEER-INSTALLER@
@@ -13,7 +14,7 @@ VERSIONEER = base64.b64decode(VERSIONEER_b64.encode('ASCII'))
 
 
 # Stub overwritten by exec()
-def setup_command(): ...
+def setup_command() -> NoReturn: ...  # type: ignore
 
 # Make versioneer usable via import
 exec(VERSIONEER.decode(), globals())
@@ -33,7 +34,7 @@ def detect_installed_version() -> str:
     return "unknown version"
 
 
-def vendor():
+def vendor() -> None:
     """Install versioneer into current directory"""
     try:
         oldver = detect_installed_version()
@@ -47,7 +48,7 @@ def vendor():
     print(f"versioneer.py ({newver}) installed into local tree")
 
 
-def main():
+def main() -> NoReturn:
     usage = "Usage: versioneer install [--vendor|--no-vendor]"
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print(usage)
