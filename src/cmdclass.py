@@ -1,10 +1,11 @@
 import os, sys # --STRIP DURING BUILD
+from typing import Any, Dict, List, Optional, Tuple # --STRIP DURING BUILD
 from .header import LONG_VERSION_PY, get_root, get_config_from_root # --STRIP DURING BUILD
 from .get_versions import get_versions # --STRIP DURING BUILD
 from .from_file import write_to_version_file # --STRIP DURING BUILD
 
 
-def get_cmdclass(cmdclass=None):
+def get_cmdclass(cmdclass: Optional[Dict[str, Any]] = None):
     """Get the custom setuptools subclasses used by Versioneer.
 
     If the package uses a different cmdclass (e.g. one from numpy), it
@@ -32,16 +33,16 @@ def get_cmdclass(cmdclass=None):
 
     class cmd_version(Command):
         description = "report generated version string"
-        user_options = []
-        boolean_options = []
+        user_options: List[Tuple[str, str, str]] = []
+        boolean_options: List[str] = []
 
-        def initialize_options(self):
+        def initialize_options(self) -> None:
             pass
 
-        def finalize_options(self):
+        def finalize_options(self) -> None:
             pass
 
-        def run(self):
+        def run(self) -> None:
             vers = get_versions(verbose=True)
             print("Version: %s" % vers["version"])
             print(" full-revisionid: %s" % vers.get("full-revisionid"))
@@ -71,12 +72,12 @@ def get_cmdclass(cmdclass=None):
 
     # we override different "build_py" commands for both environments
     if 'build_py' in cmds:
-        _build_py = cmds['build_py']
+        _build_py: Any = cmds['build_py']
     else:
         from setuptools.command.build_py import build_py as _build_py
 
     class cmd_build_py(_build_py):
-        def run(self):
+        def run(self) -> None:
             root = get_root()
             cfg = get_config_from_root(root)
             versions = get_versions()
@@ -95,12 +96,12 @@ def get_cmdclass(cmdclass=None):
     cmds["build_py"] = cmd_build_py
 
     if 'build_ext' in cmds:
-        _build_ext = cmds['build_ext']
+        _build_ext: Any = cmds['build_ext']
     else:
         from setuptools.command.build_ext import build_ext as _build_ext
 
     class cmd_build_ext(_build_ext):
-        def run(self):
+        def run(self) -> None:
             root = get_root()
             cfg = get_config_from_root(root)
             versions = get_versions()
@@ -136,7 +137,7 @@ def get_cmdclass(cmdclass=None):
         #   ...
 
         class cmd_build_exe(_build_exe):
-            def run(self):
+            def run(self) -> None:
                 root = get_root()
                 cfg = get_config_from_root(root)
                 versions = get_versions()
@@ -165,7 +166,7 @@ def get_cmdclass(cmdclass=None):
             from py2exe.distutils_buildexe import py2exe as _py2exe  # type: ignore
 
         class cmd_py2exe(_py2exe):
-            def run(self):
+            def run(self) -> None:
                 root = get_root()
                 cfg = get_config_from_root(root)
                 versions = get_versions()
@@ -188,12 +189,12 @@ def get_cmdclass(cmdclass=None):
 
     # sdist farms its file list building out to egg_info
     if 'egg_info' in cmds:
-        _egg_info = cmds['egg_info']
+        _egg_info: Any = cmds['egg_info']
     else:
         from setuptools.command.egg_info import egg_info as _egg_info
 
     class cmd_egg_info(_egg_info):
-        def find_sources(self):
+        def find_sources(self) -> None:
             # egg_info.find_sources builds the manifest list and writes it
             # in one shot
             super().find_sources()
@@ -225,12 +226,12 @@ def get_cmdclass(cmdclass=None):
 
     # we override different "sdist" commands for both environments
     if 'sdist' in cmds:
-        _sdist = cmds['sdist']
+        _sdist: Any = cmds['sdist']
     else:
         from setuptools.command.sdist import sdist as _sdist
 
     class cmd_sdist(_sdist):
-        def run(self):
+        def run(self) -> None:
             versions = get_versions()
             self._versioneer_generated_versions = versions
             # unless we update this, the command will keep using the old
@@ -238,7 +239,7 @@ def get_cmdclass(cmdclass=None):
             self.distribution.metadata.version = versions["version"]
             return _sdist.run(self)
 
-        def make_release_tree(self, base_dir, files):
+        def make_release_tree(self, base_dir: str, files: List[str]) -> None:
             root = get_root()
             cfg = get_config_from_root(root)
             _sdist.make_release_tree(self, base_dir, files)
