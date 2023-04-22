@@ -20,6 +20,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Union
+from typing import NoReturn
 import functools
 
 have_tomllib = True
