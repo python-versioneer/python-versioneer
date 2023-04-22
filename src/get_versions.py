@@ -1,4 +1,5 @@
 import os, sys # --STRIP DURING BUILD
+from typing import Any, Dict # --STRIP DURING BUILD
 from .header import HANDLERS, get_root, get_config_from_root # --STRIP DURING BUILD
 from .header import NotThisMethod # --STRIP DURING BUILD
 from .from_file import versions_from_file # --STRIP DURING BUILD
@@ -9,7 +10,7 @@ class VersioneerBadRootError(Exception):
     """The project root directory is unknown or missing key files."""
 
 
-def get_versions(verbose=False):
+def get_versions(verbose: bool = False) -> Dict[str, Any]:
     """Get the project version from whatever source is available.
 
     Returns dict with two keys: 'version' and 'full'.
@@ -24,7 +25,7 @@ def get_versions(verbose=False):
     assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
     handlers = HANDLERS.get(cfg.VCS)
     assert handlers, "unrecognized VCS '%s'" % cfg.VCS
-    verbose = verbose or cfg.verbose
+    verbose = verbose or bool(cfg.verbose)  # `bool()` used to avoid `None`
     assert cfg.versionfile_source is not None, \
         "please set versioneer.versionfile_source"
     assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
@@ -85,6 +86,6 @@ def get_versions(verbose=False):
             "date": None}
 
 
-def get_version():
+def get_version() -> str:
     """Get the short version string for this project."""
     return get_versions()["version"]
