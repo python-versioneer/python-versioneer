@@ -1,6 +1,7 @@
 
 import configparser # --STRIP DURING BUILD
 import os, sys  # --STRIP DURING BUILD
+from typing import NoReturn, Optional  # --STRIP DURING BUILD
 from .header import get_config_from_root, get_root # --STRIP DURING BUILD
 from .header import LONG_VERSION_PY # --STRIP DURING BUILD
 from .git.install import do_vcs_install # --STRIP DURING BUILD
@@ -54,7 +55,7 @@ __version__ = {0}.get_versions()['version']
 """
 
 
-def do_setup():
+def do_setup() -> int:
     """Do main VCS-independent setup function for installing Versioneer."""
     root = get_root()
     try:
@@ -81,6 +82,7 @@ def do_setup():
 
     ipy = os.path.join(os.path.dirname(cfg.versionfile_source),
                        "__init__.py")
+    maybe_ipy: Optional[str] = ipy
     if os.path.exists(ipy):
         try:
             with open(ipy, "r") as f:
@@ -101,16 +103,16 @@ def do_setup():
             print(" %s unmodified" % ipy)
     else:
         print(" %s doesn't exist, ok" % ipy)
-        ipy = None
+        maybe_ipy = None
 
     # Make VCS-specific changes. For git, this means creating/changing
     # .gitattributes to mark _version.py for export-subst keyword
     # substitution.
-    do_vcs_install(cfg.versionfile_source, ipy)
+    do_vcs_install(cfg.versionfile_source, maybe_ipy)
     return 0
 
 
-def scan_setup_py():
+def scan_setup_py() -> int:
     """Validate the contents of setup.py against Versioneer's expectations."""
     found = set()
     setters = False
@@ -147,7 +149,7 @@ def scan_setup_py():
     return errors
 
 
-def setup_command():
+def setup_command() -> NoReturn:
     """Set up Versioneer and exit with appropriate error code."""
     errors = do_setup()
     errors += scan_setup_py()
