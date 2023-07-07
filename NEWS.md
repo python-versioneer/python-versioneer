@@ -1,3 +1,22 @@
+## Release 0.29 (7-Jul-2023)
+
+This release allows for `pyproject.toml`-only build systems to allow versioneer to find
+the project root, despite an absense of a `setup.py`. Provides some error message support
+when the pyproject.toml is malformed. Finally we added basic type-hinting to the project,
+which should help users of type-checking systems ensure correct code when vendoring.
+
+With thanks to Dimitri Papadopoulos Orfanos, Mike Taves, '@gamecss' and '@GCS-ZHN' for contributions.
+
+* FIX: Add error output when `pyproject.toml` is malformed. by @GCS-ZHN (#361)
+* FIX: Add name to `setup.py` to work around a github dependency graph bug. by @mwtwoes. (#360)
+* ENH: Add basic type information throughout project. by @Callek (#365 and #367)
+* ENH: Detect `pyproject.toml` as project root (to support `PDM`). by @gamecss (#371)
+* MNT: Overwrite version file instead of delete/unlink. by @DimitriPapadopoulos (#353)
+* MNT: Use `https` for the unlicense url. by @DimitriPapadopoulos (#356)
+* MNT: Removal of CJM as maintainer. by @effigies (#359)
+* MNT: Prepare release 0.29. by @Callek (#373)
+* CI: Use 3.11 release (not rc). by @DimitriPapadopoulos (#355)
+
 ## Release 0.28 (27-Oct-2022)
 
 This release adds official support for Python 3.11, including using the built-in tomllib

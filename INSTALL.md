@@ -104,7 +104,7 @@ To versioneer-enable your project:
 
   ```toml
   [build-system]
-  requires = ["setuptools", "versioneer[toml]==0.26"]
+  requires = ["setuptools", "versioneer[toml]==0.29"]
   build-backend = "setuptools.build_meta"
   ```
 
