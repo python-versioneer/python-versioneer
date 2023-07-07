@@ -5,6 +5,10 @@ must be configured. This document contains a list of releases where,
 when upgrading from an older release, you must make changes in your
 project.
 
+## Upgrading to 0.27 through 0.29
+
+Nothing special.
+
 ## Upgrading to 0.26
 
 Versioneer now supports configuration through `pyproject.toml` using a
