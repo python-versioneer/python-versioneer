@@ -1,1 +1,17 @@
 read me
+
+== Updating Extension ==
+
+In order to update this extension for testing you'll need a clean venv with `Cython` and
+then run the `cython` command to update the .c.
+
+```
+python -m venv /tmp/cython
+. /tmp/cython/bin/activate
+pip install "cython<3.0"
+
+cd <repo_root>/test/demoappext-setuptools/demo
+cython -3 -w . ext.pyx
+```
+
+After those commands are run you can inspect the difference if you like.
