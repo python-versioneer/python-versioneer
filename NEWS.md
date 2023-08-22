@@ -1,3 +1,10 @@
+## Release 0.30 (??-???-2023)
+
+This release adds formal support for Python 3.12.
+
+* MNT: Update `Cython` generated `.c` in `demoappext-setuptools` test project. by @Callek (#376)
+* CI: Add Python 3.12 to CI (initially at it's rc1 version). by @Callek (#376)
+
 ## Release 0.29 (7-Jul-2023)
 
 This release allows for `pyproject.toml`-only build systems to allow versioneer to find
