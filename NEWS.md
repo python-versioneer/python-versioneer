@@ -2,8 +2,9 @@
 
 This release adds formal support for Python 3.12.
 
-* BREAKING: Drops formal support for Python 3.7.
+* BREAKING: Drops formal support for Python 3.7. by @Callek
 * MNT: Update `Cython` generated `.c` in `demoappext-setuptools` test project. by @Callek (#376)
+* CI: Run mypy only with lowest and highest supported Cpython. by @Callek 
 * CI: Add Python 3.12 to CI (initially at it's rc1 version). by @Callek (#376)
 * CI: End testing on the end-of-life Python 3.7. by @effigies (#378)
 
