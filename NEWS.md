@@ -1,8 +1,10 @@
 ## Release 0.30 (??-???-2023)
 
-This release adds formal support for Python 3.12.
+This release adds formal support for Python 3.12, and Pypy 3.10.
+Also Removes supports for Python 3.7.
 
 * BREAKING: Drops formal support for Python 3.7. by @Callek
+* FIX: Add Pypy 3.10 support. by @Callek
 * MNT: Update `Cython` generated `.c` in `demoappext-setuptools` test project. by @Callek (#376)
 * CI: Run mypy only with lowest and highest supported Cpython. by @Callek 
 * CI: Add Python 3.12 to CI (initially at it's rc1 version). by @Callek (#376)
