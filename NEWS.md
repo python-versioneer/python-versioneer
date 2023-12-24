@@ -5,8 +5,10 @@ Also Removes supports for Python 3.7.
 
 * BREAKING: Drops formal support for Python 3.7. by @Callek
 * FIX: Add Pypy 3.10 support. by @Callek
+* MNT: Add cpython and pypy classifiers. by @Callek
 * MNT: Update `Cython` generated `.c` in `demoappext-setuptools` test project. by @Callek (#376)
-* CI: Run mypy only with lowest and highest supported Cpython. by @Callek 
+* CI: Run mypy only with lowest and highest supported Cpython. by @Callek
+* CI: Set required Git configurations in tox.ini rather than rely on system. by @Callek
 * CI: Add Python 3.12 to CI (initially at it's rc1 version). by @Callek (#376)
 * CI: End testing on the end-of-life Python 3.7. by @effigies (#378)
 
