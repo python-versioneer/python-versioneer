@@ -4,6 +4,7 @@ This release adds formal support for Python 3.12, and PyPy 3.10.
 Also removes supports for Python 3.7.
 
 * BREAKING CHANGE: Drop formal support for Python 3.7. by @Callek (#385)
+* FIX: Support cx_Freeze >= 6.11. by @spaam and @Callek. (#349 and #386)
 * FIX: Add PyPy 3.10 support. by @Callek (#385)
 * MNT: Add CPython and PyPy classifiers. by @Callek (#385)
 * MNT: Update `Cython` generated `.c` in `demoappext-setuptools` test project. by @Callek (#376)
