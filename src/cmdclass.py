@@ -128,7 +128,10 @@ def get_cmdclass(cmdclass: Optional[Dict[str, Any]] = None):
     cmds["build_ext"] = cmd_build_ext
 
     if "cx_Freeze" in sys.modules:  # cx_freeze enabled?
-        from cx_Freeze.command.build_exe import BuildEXE as _build_exe
+        try:
+            from cx_Freeze.command.build_exe import BuildEXE as _build_exe  # type: ignore
+        except ImportError:  # cx_Freeze < 6.11
+            from cx_Freeze.dist import build_exe as _build_exe  # type: ignore
         # nczeczulin reports that py2exe won't like the pep440-style string
         # as FILEVERSION, but it can be used for PRODUCTVERSION, e.g.
         # setup(console=[{
