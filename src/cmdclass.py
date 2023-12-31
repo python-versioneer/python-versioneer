@@ -129,7 +129,9 @@ def get_cmdclass(cmdclass: Optional[Dict[str, Any]] = None):
 
     if "cx_Freeze" in sys.modules:  # cx_freeze enabled?
         try:
-            from cx_Freeze.command.build_exe import BuildEXE as _build_exe  # type: ignore
+            from cx_Freeze.command.build_exe import (  # type: ignore
+                BuildEXE as _build_exe
+            )
         except ImportError:  # cx_Freeze < 6.11
             from cx_Freeze.dist import build_exe as _build_exe  # type: ignore
         # nczeczulin reports that py2exe won't like the pep440-style string
