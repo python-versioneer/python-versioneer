@@ -89,7 +89,8 @@ def get_root() -> str:
         vsr_dir = os.path.normcase(os.path.splitext(versioneer_py)[0])
         if me_dir != vsr_dir and "VERSIONEER_PEP518" not in globals():
             print("Warning: build in %s is using versioneer.py from %s"
-                  % (os.path.dirname(my_path), versioneer_py))
+                  % (os.path.dirname(my_path), versioneer_py),
+                  file=sys.stderr)
     except NameError:
         pass
     return root
@@ -111,8 +112,8 @@ def get_config_from_root(root: str) -> VersioneerConfig:
                 pp = tomllib.load(fobj)
             section = pp['tool']['versioneer']
         except (tomllib.TOMLDecodeError, KeyError) as e:
-            print(f"Failed to load config from {pyproject_toml}: {e}")
-            print("Try to load it from setup.cfg")
+            print(f"Failed to load config from {pyproject_toml}: {e}", file=sys.stderr)
+            print("Try to load it from setup.cfg", file=sys.stderr)
     if not section:
         parser = configparser.ConfigParser()
         with open(setup_cfg) as cfg_file:
