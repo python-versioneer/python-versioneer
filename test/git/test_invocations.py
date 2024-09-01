@@ -1,6 +1,13 @@
 import os, sys, shutil, unittest, tempfile, tarfile, warnings
-from wheel.bdist_wheel import get_abi_tag, get_platform
 from packaging.tags import interpreter_name, interpreter_version
+
+try:
+    # As of `setuptools`` 70.1.0
+    from setuptools.command.bdist_wheel import get_abi_tag, get_platform
+except ImportError:
+    # Deprecated starting from `wheel` 0.44.0
+    from wheel.bdist_wheel import get_abi_tag, get_platform
+
 
 sys.path.insert(0, "src")
 import common
