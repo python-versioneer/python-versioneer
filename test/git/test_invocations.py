@@ -109,7 +109,7 @@ class _Invocations(common.Common):
     def make_demolib_sdist(self):
         # create an sdist of demolib-1.0 . for the *lib*, we only use the
         # tarball, never the repo.
-        demolib_sdist = self.subpath("cache", "demolib-1.0.tar")
+        demolib_sdist = self.subpath("cache", "demolib-1.0.tar.gz")
         if os.path.exists(demolib_sdist):
             return demolib_sdist
         libdir = self.subpath("build-demolib")
@@ -120,8 +120,8 @@ class _Invocations(common.Common):
         self.git("add", "--all", workdir=libdir)
         self.git("commit", "-m", "comment", workdir=libdir)
         self.git("tag", "demolib-1.0", workdir=libdir)
-        self.python("setup.py", "sdist", "--format=tar", workdir=libdir)
-        created = os.path.join(libdir, "dist", "demolib-1.0.tar")
+        self.python("setup.py", "sdist", "--format=gztar", workdir=libdir)
+        created = os.path.join(libdir, "dist", "demolib-1.0.tar.gz")
         self.assertTrue(os.path.exists(created))
         shutil.copyfile(created, demolib_sdist)
         return demolib_sdist
@@ -163,7 +163,7 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        with tarfile.TarFile(sdist) as t:
+        with tarfile.open(sdist, "r:gz") as t:
             t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoappext-2.0")
         self.assertTrue(os.path.exists(unpacked))
@@ -172,12 +172,12 @@ class _Invocations(common.Common):
     def make_setuptools_extension_sdist(self):
         # create an sdist tarball of demoappext-setuptools at 2.0
         demoappext_setuptools_sdist = self.subpath("cache", "setuptools",
-                                                   "demoappext-2.0.tar")
+                                                   "demoappext-2.0.tar.gz")
         if os.path.exists(demoappext_setuptools_sdist):
             return demoappext_setuptools_sdist
         repodir = self.make_setuptools_extension_repo()
-        self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
-        created = os.path.join(repodir, "dist", "demoappext-2.0.tar")
+        self.python("setup.py", "sdist", "--format=gztar", workdir=repodir)
+        created = os.path.join(repodir, "dist", "demoappext-2.0.tar.gz")
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoappext_setuptools_sdist)
         return demoappext_setuptools_sdist
@@ -215,24 +215,24 @@ class _Invocations(common.Common):
     def make_setuptools_sdist(self):
         # create an sdist tarball of demoapp2-setuptools at 2.0
         demoapp2_setuptools_sdist = self.subpath("cache", "setuptools",
-                                                 "demoapp2-2.0.tar")
+                                                 "demoapp2-2.0.tar.gz")
         if os.path.exists(demoapp2_setuptools_sdist):
             return demoapp2_setuptools_sdist
         repodir = self.make_setuptools_repo()
-        self.python("setup.py", "sdist", "--format=tar", workdir=repodir)
-        created = os.path.join(repodir, "dist", "demoapp2-2.0.tar")
+        self.python("setup.py", "sdist", "--format=gztar", workdir=repodir)
+        created = os.path.join(repodir, "dist", "demoapp2-2.0.tar.gz")
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_sdist)
         return demoapp2_setuptools_sdist
 
     def make_setuptools_sdist_subproject(self):
         demoapp2_setuptools_sdist = self.subpath("cache", "setuptools",
-                                                 "demoapp2-subproject-2.0.tar")
+                                                 "demoapp2-subproject-2.0.tar.gz")
         if os.path.exists(demoapp2_setuptools_sdist):
             return demoapp2_setuptools_sdist
         projectdir = self.make_setuptools_repo_subproject()
-        self.python("setup.py", "sdist", "--format=tar", workdir=projectdir)
-        created = os.path.join(projectdir, "dist", "demoapp2-2.0.tar")
+        self.python("setup.py", "sdist", "--format=gztar", workdir=projectdir)
+        created = os.path.join(projectdir, "dist", "demoapp2-2.0.tar.gz")
         self.assertTrue(os.path.exists(created), created)
         shutil.copyfile(created, demoapp2_setuptools_sdist)
         return demoapp2_setuptools_sdist
@@ -243,7 +243,7 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        with tarfile.TarFile(sdist) as t:
+        with tarfile.open(sdist, "r:gz") as t:
             t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoapp2-2.0")
         self.assertTrue(os.path.exists(unpacked))
@@ -255,7 +255,7 @@ class _Invocations(common.Common):
         if os.path.exists(unpack_into):
             shutil.rmtree(unpack_into)
         os.mkdir(unpack_into)
-        with tarfile.TarFile(sdist) as t:
+        with tarfile.open(sdist, "r:gz") as t:
             t.extractall(path=unpack_into)
         unpacked = os.path.join(unpack_into, "demoapp2-2.0")
         self.assertTrue(os.path.exists(unpacked))
@@ -379,13 +379,13 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
     def test_sdist(self):
         sdist = self.make_setuptools_sdist() # asserts version as a side-effect
         # make sure we used setuptools/sdist, not distutils/sdist
-        with tarfile.TarFile(sdist) as t:
+        with tarfile.open(sdist, "r:gz") as t:
             self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO", t.getnames())
 
     def test_sdist_subproject(self):
         sdist = self.make_setuptools_sdist_subproject()
         # make sure we used setuptools/sdist, not distutils/sdist
-        with tarfile.TarFile(sdist) as t:
+        with tarfile.open(sdist, "r:gz") as t:
             self.assertIn("demoapp2-2.0/src/demoapp2.egg-info/PKG-INFO", t.getnames())
 
     def test_pip_install(self):
