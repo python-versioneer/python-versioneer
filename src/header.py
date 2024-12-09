@@ -106,14 +106,27 @@ def get_config_from_root(root: str) -> VersioneerConfig:
     pyproject_toml = root_pth / "pyproject.toml"
     setup_cfg = root_pth / "setup.cfg"
     section: Union[Dict[str, Any], configparser.SectionProxy, None] = None
-    if pyproject_toml.exists() and have_tomllib:
-        try:
-            with open(pyproject_toml, 'rb') as fobj:
-                pp = tomllib.load(fobj)
-            section = pp['tool']['versioneer']
-        except (tomllib.TOMLDecodeError, KeyError) as e:
-            print(f"Failed to load config from {pyproject_toml}: {e}", file=sys.stderr)
-            print("Try to load it from setup.cfg", file=sys.stderr)
+    if pyproject_toml.exists():
+        if not have_tomllib:
+            if 'tool.versioneer' in pyproject_toml.read_text():
+                raise RuntimeError(
+                    f"Found tool.versioneer in {pyproject_toml} "
+                    "but the required dependency 'tomli' to read that file is "
+                    "not installed")
+            else:
+                print(
+                    "No section tool.versioneer found in {pyproject_toml} "
+                    "thus we will not try to load it",
+                    file=sys.stderr)
+        else:
+            try:
+                with open(pyproject_toml, 'rb') as fobj:
+                    pp = tomllib.load(fobj)
+                section = pp['tool']['versioneer']
+            except (tomllib.TOMLDecodeError, KeyError) as e:
+                print(f"Failed to load config from {pyproject_toml}: {e}",
+                      file=sys.stderr)
+                print("Try to load it from setup.cfg", file=sys.stderr)
     if not section:
         parser = configparser.ConfigParser()
         with open(setup_cfg) as cfg_file:
