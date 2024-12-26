@@ -67,12 +67,12 @@ is intended to allow you to skip this step and simplify the process of upgrading
 
   [tool.hatch.version]
   source = "code"
-  path = "src/my_project/_version.py"
+  path = "src/myproject/_version.py"
   expression = "get_versions()['version']"
 
   [tool.hatch.build.hooks.versioneer]
   ```
-* run `versioneer install --no-vendor` in your source tree, but remove setup.py
+* run `versioneer install --no-vendor` in your source tree, but remove setup.py and setup.cfg
 
 
 
