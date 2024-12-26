@@ -43,3 +43,7 @@ VCS = "git"
 style = "pep440"
 versionfile_source = "_version.py"
 parentdir_prefix = ""
+
+# Register hatch plugin
+[project.entry-points.hatch]
+versioneer = "versioneer.hatchling"

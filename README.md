@@ -35,7 +35,7 @@ is intended to allow you to skip this step and simplify the process of upgrading
 * run `versioneer install --vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
 
-### Build-time dependency mode
+### Build-time dependency mode (setuptools)
 
 * `pip install versioneer` to somewhere in your $PATH
    * A [conda-forge recipe](https://github.com/conda-forge/versioneer-feedstock) is
@@ -51,6 +51,30 @@ is intended to allow you to skip this step and simplify the process of upgrading
   ```
 * run `versioneer install --no-vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
+
+### Build-time dependency mode (hatchling)
+
+* `pip install versioneer` to somewhere in your $PATH
+   * A [conda-forge recipe](https://github.com/conda-forge/versioneer-feedstock) is
+     available, so you can also use `conda install -c conda-forge versioneer`
+* add a `[tool.versioneer]` section to your `pyproject.toml` or a
+  `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
+* configure hatchling build-system, version source, and build hook plugin in `pyproject.toml`:
+  ```toml
+  [build-system]
+  requires = ["hatchling", "versioneer[toml]"]
+  build-backend = "hatchling.build"
+
+  [tool.hatch.version]
+  source = "code"
+  path = "src/my_project/_version.py"
+  expression = "get_versions()['version']"
+
+  [tool.hatch.build.hooks.versioneer]
+  ```
+* run `versioneer install --no-vendor` in your source tree, but remove setup.py
+
+
 
 ## Version Identifiers
 
@@ -281,6 +305,8 @@ number of intermediate scripts.
   dependency
 * [minver](https://github.com/jbweston/miniver) - a lightweight reimplementation of
   versioneer
+* [version-pioneer](https://github.com/kiyoon/version-pioneer) - a modernized fork of
+  versioneer with feature-rich CLI and API for extensibility.
 * [versioningit](https://github.com/jwodder/versioningit) - a PEP 518-based setuptools
   plugin
 
