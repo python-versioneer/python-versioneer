@@ -97,8 +97,8 @@ def run_command(
         popen_kwargs["startupinfo"] = startupinfo
 
     for command in commands:
+        dispcmd = str([command] + args)
         try:
-            dispcmd = str([command] + args)
             # remember shell=False, so use git.cmd on windows, not just git
             process = subprocess.Popen([command] + args, cwd=cwd, env=env,
                                        stdout=subprocess.PIPE,
