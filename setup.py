@@ -3,7 +3,7 @@
 import os, base64, tempfile, io
 from importlib import util as ilu
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, ClassVar
 from setuptools import setup, Command
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop as _develop
@@ -85,7 +85,7 @@ def generate_versioneer_py() -> bytes:
 
 class make_versioneer(Command):
     description = "create standalone versioneer.py"
-    user_options: List[Tuple[str, str, str]] = []
+    user_options: ClassVar[List[Tuple[str, str, str]]] = []
     boolean_options: List[str] = []
     def initialize_options(self) -> None:
         pass
@@ -97,7 +97,7 @@ class make_versioneer(Command):
 
 class make_long_version_py_git(Command):
     description = "create standalone _version.py (for git)"
-    user_options: List[Tuple[str, str, str]] = []
+    user_options: ClassVar[List[Tuple[str, str, str]]] = []
     boolean_options: List[str] = []
     def initialize_options(self) -> None:
         pass
