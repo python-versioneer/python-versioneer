@@ -19,7 +19,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Callable, cast, Dict, List, Optional, Tuple, Union
 from typing import NoReturn
 import functools
 

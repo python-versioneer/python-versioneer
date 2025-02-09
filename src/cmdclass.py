@@ -1,5 +1,5 @@
 import os, sys # --STRIP DURING BUILD
-from typing import Any, Dict, List, Optional, Tuple # --STRIP DURING BUILD
+from typing import Any, ClassVar, Dict, List, Optional, Tuple # --STRIP DURING BUILD
 from .header import LONG_VERSION_PY, get_root, get_config_from_root # --STRIP DURING BUILD
 from .get_versions import get_versions # --STRIP DURING BUILD
 from .from_file import write_to_version_file # --STRIP DURING BUILD
@@ -33,7 +33,7 @@ def get_cmdclass(cmdclass: Optional[Dict[str, Any]] = None):
 
     class cmd_version(Command):
         description = "report generated version string"
-        user_options: List[Tuple[str, str, str]] = []
+        user_options: ClassVar[List[Tuple[str, str, str]]] = []
         boolean_options: List[str] = []
 
         def initialize_options(self) -> None:
