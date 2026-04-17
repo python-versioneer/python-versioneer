@@ -284,6 +284,7 @@ def git_pieces_from_vcs(
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = runner(GITS, [
         "describe", "--tags", "--dirty", "--always", "--long",
+        "--abbrev=8",
         "--match", f"{tag_prefix}[[:digit:]]*"
     ], cwd=root)
     # --long was added in git-1.5.5
