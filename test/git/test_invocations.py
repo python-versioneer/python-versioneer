@@ -70,7 +70,12 @@ class _Invocations(common.Common):
             # See PEP-632
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
-                             'setuptools')
+                             'setuptools<80')
+        # Constrain setuptools for all test virtualenvs to keep legacy
+        # setup.py develop --find-links behavior stable.
+        self.run_in_venv(venv_dir, venv_dir,
+                         'pip', 'install',
+                         'setuptools<80')
         return venv_dir
 
     def get_venv_bin(self, venv, command):
@@ -85,7 +90,12 @@ class _Invocations(common.Common):
 
         if command == "pip":
             bin_args = [pybin, "-m", "pip"]
-            args = ["--isolated", "--no-cache-dir"] + list(args)
+            pip_args = ["--isolated", "--no-cache-dir"]
+            cmd_args = list(args)
+            if "--no-index" in cmd_args and cmd_args and cmd_args[0] in {
+                    "install", "wheel"}:
+                cmd_args = [cmd_args[0], "--no-build-isolation"] + cmd_args[1:]
+            args = pip_args + cmd_args
         elif command == "rundemo" and use_python:
             bin_args = [pybin] + bin_args
 
