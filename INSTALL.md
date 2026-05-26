@@ -99,6 +99,16 @@ To versioneer-enable your project:
   parentdir_prefix = myproject-
   ```
 
+  If your project uses setuptools metadata in `pyproject.toml`, declare the
+  version field as dynamic so setuptools knows Versioneer supplies it:
+
+  ```toml
+  [project]
+  dynamic = ["version"]
+  ```
+
+  Do not also set a fixed `version` value in `[project]`.
+
 * 3: If using the EXPERIMENTAL non-vendored mode, add `versioneer` to your
   `pyproject.toml`:
 
