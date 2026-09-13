@@ -7,6 +7,9 @@ extension = Extension('demo.ext',
                       sources=['demo/ext.c'],
 )
 
+import wheel, setuptools
+print(f"{wheel.__version__=}, {setuptools.__version__=}", flush=True)
+
 setup(name="demoappext",
       version=versioneer.get_version(),
       description="Demo",
