@@ -10,7 +10,10 @@ import re
 from unittest import mock
 from pathlib import Path
 
-from pkg_resources import parse_version
+try:
+    from pkg_resources import parse_version
+except ImportError:
+    from packaging.version import parse as parse_version
 
 sys.path.insert(0, "src")
 import common
@@ -419,6 +422,12 @@ class Repo(common.Common, unittest.TestCase):
         self.run_test("test/demoapp", False, ".", False, tag_prefix="")
 
     def test_pyproject(self):
+        try:
+            import setuptools
+        except Exception:
+            self.skipTest("requires setuptools>=61.0 to validate pyproject metadata")
+        if parse_version(setuptools.__version__) < parse_version("61.0"):
+            self.skipTest("requires setuptools>=61.0 to validate pyproject metadata")
         self.run_test("test/demoapp-pyproject", False, ".", True)
 
     def run_test(self, demoapp_dir, script_only, project_sub_dir, pep518, tag_prefix=None):

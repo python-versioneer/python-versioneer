@@ -55,6 +55,56 @@ jobs:
         env:
           PLATFORM: ${{ matrix.os }}
 
+  test-variants:
+    # The pip/setuptools variant envs in envlist carry no linux/windows factor,
+    # so tox-gh-actions never selects them for the `test` job above. Passing the
+    # env explicitly with `-e` makes tox-gh-actions step aside and run it as-is.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        variant:
+          - 'pip2023-setuptools50'
+          - 'piplatest-setuptoolslt80'
+          - 'piplatest-setuptools84'
+        # exclude:
+        #   # pip 21.3.1 vendors a pkg_resources that calls pkgutil.ImpImporter,
+        #   # which was removed in Python 3.12, so this combination cannot even
+        #   # install its dependencies.
+        #   - python-version: '3.12'
+        #     variant: 'pip2023-setuptools50'
+        #   - python-version: '3.13'
+        #     variant: 'pip2023-setuptools50'
+        include:
+          # Keep a Windows sample of the newest setuptools, mirroring the
+          # Windows coverage of the `test` job.
+          - os: 'windows-latest'
+            python-version: '3.10'
+            variant: 'piplatest-setuptools84'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install Tox
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox tox-gh-actions
+      - name: Test
+        run: tox -e "py${PYTHON_VERSION//./}-${VARIANT}"
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+          VARIANT: ${{ matrix.variant }}
+
   bootstrap:
     # Couldn't figure out how to do this in tox
     # Need to make sure that versioneer can build itself from source without fetching

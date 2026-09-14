@@ -42,6 +42,10 @@ class _Invocations(common.Common):
         self.projdir = None
 
     def make_venv(self, mode):
+        pip_spec = os.environ.get("VERSIONEER_TEST_PIP_SPEC", "pip")
+        setuptools_spec = os.environ.get(
+            "VERSIONEER_TEST_SETUPTOOLS_SPEC", "setuptools<80"
+        )
         if not os.path.exists(self.subpath("venvs")):
             os.mkdir(self.subpath("venvs"))
         venv_dir = self.subpath(os.path.join("venvs", mode))
@@ -64,18 +68,18 @@ class _Invocations(common.Common):
             self.python('-m', 'virtualenv', venv_dir, workdir=self.testdir)
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
-                             'pip', 'wheel', 'packaging')
+                             pip_spec, 'wheel', 'packaging')
         if sys.version_info.major == 3 and sys.version_info.minor >= 12:
             # Py 3.12 no longer default-installs setuptools in environments
             # See PEP-632
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
-                             'setuptools<80')
+                             setuptools_spec)
         # Constrain setuptools for all test virtualenvs to keep legacy
         # setup.py develop --find-links behavior stable.
         self.run_in_venv(venv_dir, venv_dir,
                          'pip', 'install',
-                         'setuptools<80')
+                         setuptools_spec)
         return venv_dir
 
     def get_venv_bin(self, venv, command):
@@ -110,6 +114,19 @@ class _Invocations(common.Common):
     def check_in_venv_withlib(self, venv):
         v = self.check_in_venv(venv)
         self.assertEqual(v["demolib"], "1.0")
+
+    def develop_supports_find_links(self, venv):
+        # setuptools 80 reduced "setup.py develop" to a thin wrapper around
+        # "pip install -e ." and dropped its dependency-resolution options.
+        # Probe for the option itself rather than a version number so this
+        # tracks the actual behavior change.
+        out = self.run_in_venv(
+            venv, venv, "python", "-c",
+            "from setuptools.command.develop import develop;"
+            "print(any(o[0] == 'find-links=' for o in develop.user_options))",
+        )
+        lines = out.strip().splitlines()
+        return bool(lines) and lines[-1].strip() == "True"
 
     # "demolib" has a version of 1.0 and is built with setuptools
     # "demoapp2-setuptools" is v2.0, uses setuptools, and depends on demolib
@@ -328,10 +345,13 @@ class _Invocations(common.Common):
         shutil.copyfile(created, demoapp2_setuptools_wheel)
         return demoapp2_setuptools_wheel
 
+    def make_binary_wheel_platform_name(self):
+        return plat.replace("-", "_").replace(".", "_")
+
     def make_binary_wheelname(self, app):
         return "%s-2.0-%s-%s-%s.whl" % (app,
             "".join([impl, impl_ver]), abi,
-            plat.replace("-", "_").replace(".", "_")
+            self.make_binary_wheel_platform_name()
             )
 
 
@@ -361,12 +381,20 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         indexdir = self.make_empty_indexdir()
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("setuptools-repo-develop")
-        # "setup.py develop" takes --find-links and --index-url but not
-        # --no-index
-        self.run_in_venv(venv, repodir,
-                         "python", "setup.py", "develop",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         )
+        if self.develop_supports_find_links(venv):
+            # "setup.py develop" takes --find-links and --index-url but not
+            # --no-index
+            self.run_in_venv(venv, repodir,
+                             "python", "setup.py", "develop",
+                             "--index-url", indexdir, "--find-links", linkdir,
+                             )
+        else:
+            # setuptools >= 80 delegates "develop" to "pip install -e .", so
+            # drive pip directly to keep resolving demolib from linkdir. The
+            # editable install still builds through the setuptools backend.
+            self.run_in_venv(venv, repodir,
+                             "pip", "install", "--editable", ".",
+                             "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
     def test_develop_subproject(self):
@@ -374,12 +402,20 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         indexdir = self.make_empty_indexdir()
         projectdir = self.make_setuptools_repo_subproject()
         venv = self.make_venv("setuptools-repo-develop-subproject")
-        # "setup.py develop" takes --find-links and --index-url but not
-        # --no-index
-        self.run_in_venv(venv, projectdir,
-                         "python", "setup.py", "develop",
-                         "--index-url", indexdir, "--find-links", linkdir,
-                         )
+        if self.develop_supports_find_links(venv):
+            # "setup.py develop" takes --find-links and --index-url but not
+            # --no-index
+            self.run_in_venv(venv, projectdir,
+                             "python", "setup.py", "develop",
+                             "--index-url", indexdir, "--find-links", linkdir,
+                             )
+        else:
+            # setuptools >= 80 delegates "develop" to "pip install -e .", so
+            # drive pip directly to keep resolving demolib from linkdir. The
+            # editable install still builds through the setuptools backend.
+            self.run_in_venv(venv, projectdir,
+                             "pip", "install", "--editable", ".",
+                             "--no-index", "--find-links", linkdir)
         self.check_in_venv_withlib(venv)
 
     def test_egg(self):
@@ -561,7 +597,12 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
             # both, so don't actually cache the results
             os.unlink(demoappext_setuptools_wheel)
         repodir = self.make_setuptools_extension_repo()
-        self.python("setup.py", "bdist_wheel", workdir=repodir)
+        self.python(
+            "setup.py", "bdist_wheel",
+            # --plat-name necessary to ensure the platform name is stable for this test
+            "--plat-name", self.make_binary_wheel_platform_name(),
+            workdir=repodir
+        )
         created = os.path.join(repodir, "dist", wheelname)
         self.assertTrue(os.path.exists(created), created)
 
@@ -569,8 +610,10 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         # build extensions in place. No wheel package
         unpacked = self.make_setuptools_extension_unpacked()
         venv = self.make_venv("setuptools-unpacked-pip-wheel-extension")
+        # --plat-name necessary to ensure the platform name is stable for this test
         self.run_in_venv(venv, unpacked,
-                         "python", "setup.py", "build_ext", "-i")
+                         "python", "setup.py", "build_ext", "-i"
+                         )
         # No wheel package is created, _version.py should exist in
         # module dir only
         version_file = os.path.join(unpacked, "demo", "_version.py")
@@ -588,10 +631,17 @@ class SetuptoolsUnpacked(_Invocations, unittest.TestCase):
         unpacked = self.make_setuptools_extension_unpacked()
         linkdir = self.make_linkdir()
         venv = self.make_venv("setuptools-unpacked-pip-wheel-extension")
-        self.run_in_venv(venv, unpacked,
-                         "pip", "wheel", "--wheel-dir", "wheelhouse",
-                         "--no-index", "--find-links", linkdir,
-                         ".")
+        # XXX pip 22.1 introduced --config-settings (for pep 517 backends)
+        # XXX pip 25.3 removed --build-option
+        # --plat-name necessary to ensure the platform name is stable for this test
+        config_setting_name = "--config-settings=--build-option" if os.environ.get("VERSIONEER_TEST_PIP_SPEC", "pip>=20") == "pip>=20" else "--build-option"
+        self.run_in_venv(
+            venv, unpacked,
+            "pip", "wheel", "--wheel-dir", "wheelhouse",
+            "--no-index", "--find-links", linkdir,
+            f"{config_setting_name}=--plat-name={self.make_binary_wheel_platform_name()}",
+            "."
+        )
         created = os.path.join(unpacked, "wheelhouse", wheelname)
         self.assertTrue(os.path.exists(created), created)
 
