@@ -34,7 +34,10 @@ def versions_from_file(filename: str) -> Dict[str, Any]:
                        contents, re.M | re.S)
     if not mo:
         raise NotThisMethod("no version_json in _version.py")
-    return json.loads(mo.group(1))
+    try:
+        return json.loads(mo.group(1))
+    except json.JSONDecodeError:
+        raise NotThisMethod("invalid version_json in _version.py")
 
 
 def write_to_version_file(filename: str, versions: Dict[str, Any]) -> None:
