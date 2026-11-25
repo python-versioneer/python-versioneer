@@ -77,17 +77,10 @@ class _Invocations(common.Common):
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
                              'pip', 'wheel', 'packaging')
-        if sys.version_info.major == 3 and sys.version_info.minor >= 12:
-            # Py 3.12 no longer default-installs setuptools in environments
-            # See PEP-632
-            self.run_in_venv(venv_dir, venv_dir,
-                             'pip', 'install', '-U',
-                             'setuptools<80')
-        # Constrain setuptools for all test virtualenvs to keep legacy
-        # setup.py develop --find-links behavior stable.
+        # Py 3.12+ no longer default-installs setuptools in environments (see
+        # PEP-632); on older Pythons, upgrade the copy virtualenv seeded.
         self.run_in_venv(venv_dir, venv_dir,
-                         'pip', 'install',
-                         'setuptools<80')
+                         'pip', 'install', '-U', 'setuptools')
         return venv_dir
 
     def get_venv_bin(self, venv, command):
