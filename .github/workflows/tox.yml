@@ -8,9 +8,7 @@ on:
     tags:
       - '*'
   pull_request:
-    branches:
-      - master
-      - maint/*
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * MON'
 
