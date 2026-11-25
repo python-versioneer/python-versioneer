@@ -8,10 +8,14 @@ then run the `cython` command to update the .c.
 ```
 python -m venv /tmp/cython
 . /tmp/cython/bin/activate
-pip install "cython<3.0"
+pip install "cython==3.0.12"
 
-cd <repo_root>/test/demoappext-setuptools/demo
-cython -3 -w . ext.pyx
+cd <repo_root>/test/demoappext-setuptools
+cython --3str demo/ext.pyx
 ```
+
+Run it from this directory so Cython sees `demo/__init__.py` and names the module
+`demo.ext`. Use Cython 3.0.12 or newer: older output includes CPython's internal
+`pycore_frame.h` header on PyPy 3.11, which fails to build there.
 
 After those commands are run you can inspect the difference if you like.
