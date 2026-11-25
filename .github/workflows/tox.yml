@@ -8,9 +8,7 @@ on:
     tags:
       - '*'
   pull_request:
-    branches:
-      - master
-      - maint/*
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * MON'
 
@@ -21,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest']
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', 'pypy3.9', 'pypy3.10']
+        python-version: ['3.10', '3.11', '3.12', '3.13', 'pypy3.10']
         shell: ['bash']
         include:
           - os: 'windows-latest'
@@ -107,7 +105,9 @@ jobs:
         run: tar xfvz dist/versioneer-*.tar.gz
       - uses: actions/setup-python@v5
         with:
-          python-version: 3
+          # Must match a tox env; a bare "3" silently skips every env once a
+          # new CPython is released before tox.ini knows about it.
+          python-version: '3.13'
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
       - name: Install Tox
