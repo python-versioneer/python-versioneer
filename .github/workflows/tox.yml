@@ -105,7 +105,9 @@ jobs:
         run: tar xfvz dist/versioneer-*.tar.gz
       - uses: actions/setup-python@v5
         with:
-          python-version: 3
+          # Must match a tox env; a bare "3" silently skips every env once a
+          # new CPython is released before tox.ini knows about it.
+          python-version: '3.13'
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
       - name: Install Tox
