@@ -31,6 +31,9 @@ is intended to allow you to skip this step and simplify the process of upgrading
   `[versioneer]` section to your `setup.cfg` (see [Install](INSTALL.md))
    * Note that you will need to add `tomli; python_version < "3.11"` to your
      build-time dependencies if you use `pyproject.toml`
+   * If your setuptools metadata is in `pyproject.toml`, set
+     `dynamic = ["version"]` in the `[project]` table instead of providing a
+     fixed `version`.
 * run `versioneer install --vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
 
@@ -48,6 +51,9 @@ is intended to allow you to skip this step and simplify the process of upgrading
   requires = ["setuptools", "versioneer[toml]"]
   build-backend = "setuptools.build_meta"
   ```
+* if your setuptools metadata is in `pyproject.toml`, set
+  `dynamic = ["version"]` in the `[project]` table instead of providing a fixed
+  `version`.
 * run `versioneer install --no-vendor` in your source tree, commit the results
 * verify version information with `python setup.py version`
 
