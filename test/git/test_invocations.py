@@ -26,6 +26,18 @@ except TypeError:  # wheel < 0.34
     plat = get_platform()
 
 
+# setuptools 80 reduced "setup.py develop" to a thin "pip install -e" shim
+# that no longer accepts --find-links, so probe for that capability.
+DEVELOP_FIND_LINKS_PROBE = """\
+try:
+    from setuptools.command.develop import develop
+except ImportError:
+    print(False)
+else:
+    print(any(opt[0] == "find-links=" for opt in develop.user_options))
+"""
+
+
 class _Invocations(common.Common):
     def setUp(self):
         if False:
@@ -64,18 +76,7 @@ class _Invocations(common.Common):
             self.python('-m', 'virtualenv', venv_dir, workdir=self.testdir)
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
-                             'pip', 'wheel', 'packaging')
-        if sys.version_info.major == 3 and sys.version_info.minor >= 12:
-            # Py 3.12 no longer default-installs setuptools in environments
-            # See PEP-632
-            self.run_in_venv(venv_dir, venv_dir,
-                             'pip', 'install', '-U',
-                             'setuptools<80')
-        # Constrain setuptools for all test virtualenvs to keep legacy
-        # setup.py develop --find-links behavior stable.
-        self.run_in_venv(venv_dir, venv_dir,
-                         'pip', 'install',
-                         'setuptools<80')
+                             'pip', 'wheel', 'packaging', 'setuptools')
         return venv_dir
 
     def get_venv_bin(self, venv, command):
@@ -100,6 +101,21 @@ class _Invocations(common.Common):
             bin_args = [pybin] + bin_args
 
         return self.command(*bin_args, *args, workdir=workdir)
+
+    def skip_unless_develop_takes_find_links(self, venv):
+        # Coverage gap: where this skips, the "setup.py develop" entry point
+        # is no longer exercised. Editable installs of the project (with
+        # demolib from a local link dir) stay covered by
+        # test_pip_install_editable and test_pip_install_editable_subproject.
+        out = self.run_in_venv(venv, venv, "python", "-c",
+                               DEVELOP_FIND_LINKS_PROBE)
+        if out.strip() != "True":
+            self.skipTest(
+                "setuptools in this venv has no 'setup.py develop "
+                "--find-links' (setuptools>=80 made develop a 'pip install -e' "
+                "shim), so 'setup.py develop' is not tested; editable installs "
+                "remain covered by test_pip_install_editable and "
+                "test_pip_install_editable_subproject")
 
     def check_in_venv(self, venv, use_python=False):
         out = self.run_in_venv(venv, venv, "rundemo", use_python=use_python)
@@ -361,6 +377,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         indexdir = self.make_empty_indexdir()
         repodir = self.make_setuptools_repo()
         venv = self.make_venv("setuptools-repo-develop")
+        self.skip_unless_develop_takes_find_links(venv)
         # "setup.py develop" takes --find-links and --index-url but not
         # --no-index
         self.run_in_venv(venv, repodir,
@@ -374,6 +391,7 @@ class SetuptoolsRepo(_Invocations, unittest.TestCase):
         indexdir = self.make_empty_indexdir()
         projectdir = self.make_setuptools_repo_subproject()
         venv = self.make_venv("setuptools-repo-develop-subproject")
+        self.skip_unless_develop_takes_find_links(venv)
         # "setup.py develop" takes --find-links and --index-url but not
         # --no-index
         self.run_in_venv(venv, projectdir,
