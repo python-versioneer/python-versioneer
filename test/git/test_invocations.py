@@ -76,11 +76,7 @@ class _Invocations(common.Common):
             self.python('-m', 'virtualenv', venv_dir, workdir=self.testdir)
             self.run_in_venv(venv_dir, venv_dir,
                              'pip', 'install', '-U',
-                             'pip', 'wheel', 'packaging')
-        # Py 3.12+ no longer default-installs setuptools in environments (see
-        # PEP-632); on older Pythons, upgrade the copy virtualenv seeded.
-        self.run_in_venv(venv_dir, venv_dir,
-                         'pip', 'install', '-U', 'setuptools')
+                             'pip', 'wheel', 'packaging', 'setuptools')
         return venv_dir
 
     def get_venv_bin(self, venv, command):
