@@ -1,9 +1,5 @@
 [build-system]
-requires = [
-  "setuptools",
-  # Untested configuration: Python < 3.11 is outside requires-python and CI.
-  "tomli; python_version < '3.11'",
-]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -40,8 +36,7 @@ dynamic = ["version"]
 "versioneer" = "versioneer:main"
 
 [project.optional-dependencies]
-# Untested configuration: Python < 3.11 is outside requires-python and CI.
-toml = ["tomli; python_version < '3.11'"]
+toml = []
 
 [tool.versioneer]
 VCS = "git"

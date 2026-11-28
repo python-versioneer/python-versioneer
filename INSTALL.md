@@ -104,12 +104,13 @@ To versioneer-enable your project:
 
   ```toml
   [build-system]
-  requires = ["setuptools", "versioneer[toml]==0.29"]
+  requires = ["setuptools", "versioneer"]
   build-backend = "setuptools.build_meta"
   ```
 
   It is recommended to pin the version of Versioneer you installed with.
-  The `[toml]` extra is required if your configuration is also `pyproject.toml`.
+  The `[toml]` extra is no longer needed. If you pin an older release,
+  follow that release's instructions (for example, `versioneer[toml]==0.29`).
 
 * 4: Run `versioneer install --vendor` OR `versioneer install --no-vendor`.
   This will do the following:
